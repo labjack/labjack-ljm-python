@@ -1,12 +1,12 @@
 """
-Multip-Platform Python wrapper for the LJModbus driver.
+Python wrapper for the LJM driver.
 
 """
 import ctypes
 import os
 import struct
 
-PYTHON_VERSION = 0.01
+__version__ = "0.1.0"
 
 ## LJM Exception
 class LJMError(Exception):
@@ -21,9 +21,7 @@ class LJMError(Exception):
             try:
                 self._error_string = LJM_ErrorToString(error_code)
             except:
-                self._error_string = error_code #str(self.error_code)
-        #self.message = self.__str__()
-        #Exception(self._get_message())
+                self._error_string = str(error_code)
 
     @property
     def error_code(self):
@@ -49,17 +47,17 @@ class LJMError(Exception):
         return fr_str + err_str
 ## LJM Exception end
 
-### Load LJModbus library
+### Load LJM library
 def _load_library():
     """
-    _ljm_load_library()
-    Returns a ctypes dll pointer to the library.
+    _load_library()
+    Returns a ctypes pointer to the library.
     """
     try:
         if(os.name == "posix"):
             try:
                 #Linux
-                return ctypes.CDLL("LabJackM.so")
+                return ctypes.CDLL("libLabJackM.so")
             except OSError, e:
                 pass # May be on Mac.
             except Exception, e:
@@ -75,11 +73,7 @@ def _load_library():
             #Windows
             try:
                 #Win
-                #return ctypes.WinDLL("LabJackM.dll")
                 return ctypes.CDLL("LabJackM.dll")
-                #[Error 22] This application has failed to start because the application configuration is incorrect. Reinstalling the application may fix this problem
-                #return ctypes.windll.LoadLibrary("LJModbus")
-                #return ctypes.CDLL("LJModbus.dll")
             except Exception, e:
                 raise LJMError(error_string = ("Cannot load LJM driver.  " + str(e)))
     except LJMError, e:
@@ -87,25 +81,9 @@ def _load_library():
         return None
 
 static_lib = _load_library()
-### Load LJModbus library end
+### Load LJM library end
 
 ### Classes
-
-
-
-## Device Types
-class DeviceType:
-    UE9 = 9
-    U3 = 3
-    U6 = 6
-## Device Types end
-
-## Connection Types
-class ConnectionType:
-    USB = 1
-    ETHERNET = 2
-    ETHERNET_MB = 3
-## Connection Types end
 
 ## Device
 class Device(object):
@@ -114,147 +92,27 @@ class Device(object):
         self.handle = None
         if autoOpen:
             self.open(**kargs)
-        
-        '''
-        if device != None:
-            self.handle = device.handle
-            self.device_type = device.deviceType
-            self.connection_type = device.connectionType
-        else:
-            self.handle = handle
-            self.device_type = deviceType
-            self.connection_type = connectionType
-        '''
     
-    '''
     def __del__(self):
-        if handle != None:
-            #Close the existing handle
-            LJM_Close(handle)
-    '''
-    
-    '''    
-    def OpenFirstFound(self, deviceType, connectionType):
-        error, self.handle = LJM_OpenFirstFound(deviceType, connectionType)
-        self._handle_ljm_error(error)
-        self.device_type = deviceType
-        self.connection_type = connectionType
-    '''
+        self.close()
+
     def open(self, device_type=None, connection_type=None, identifier=None):
-        '''
-        if device_type is None:
-            if connection_type is not None:
-                if type(connection_type) is None
-
-            else:
-                device_type = 0
-                connection_type = 0
-        
-        
-        if connection_type is None:
-            if device_type is None:
-                device_type = 0
-            
-                connection_type = 0
-                
-        if identifier is None:
-            identifier = "0"
-        identifier = str(identifier)
-
-        if device_type
-        self.handle = LJM_OpenS(device_type, connection_type, identifier)
-        '''
-        return 1
+        pass
     
     
-    #LJM_Close
+    def close():
+        pass        
     
-    """
-    def open(self, deviceType, connectionType, firstFound=True, serialNumber=None, ipAddress=None, name=None, port=52360):
-        if self.handle != None:
-            #Close the existing handle
-            LJM_Close(self.handle)
-            self.handle = None
-        
-        error = 0
-        if firstFound:
-            error, self.handle = LJM_OpenFirstFound(deviceType, connectionType)
-            #print "here"
-        elif serialNumber != None:
-            if isinstance(serialNumber, str):
-                error, self.handle = LJM_OpenByStringSN(serialNumber, deviceType, connectionType, port)
-            else:
-                error, self.handle = LJM_OpenByLongSN(serialNumber, deviceType, connectionType, port)
-        elif ipAddress != None:
-            if isinstance(ipAddress, str):
-                error, self.handle = LJM_OpenByStringIP(ipAddress, deviceType, connectionType, port)
-            else:
-                error, self.handle = LJM_OpenByLongIP(ipAddress, deviceType, connectionType, port)
-        elif name != None:
-            error, self.handle = LJM_OpenByName(name, deviceType, connectionType, port)
-        else:
-            error = 1007 #No device was specified LJE_LABJACK_NOT_FOUND
-
-        self._handle_ljm_error(error)
-        self.device_type = deviceType
-        self.connection_type = connectionType
-        
-    def feedback(self, unitID, numCommands, write, regAddress, numRegs, data):
-        error, data_r, error_frame = LJM_Feedback(self.handle, unitID, numCommands, write, regAddress, numRegs, data)
-        self._handle_ljm_error(error)
-        return data_r, error_frame
-
-    def readMultipleBytes(self, unitID, regAddress, numRegs):
-        error, data = LJM_ReadMultipleBytes(self.handle, unitID, regAddress, numRegs)
-        self._handle_ljm_error(error)
-        return data
-
-    def writeMultipleBytes(self, unitID, regAddress, numRegs, data):
-        #LJM_WriteMultipleBytes(self.handle, unit_id, reg_address, num_regs, data_list)
-        error = LJM_WriteMultipleBytes(self.handle, unitID, regAddress, numRegs, data)
-        self._handle_ljm_error(error)
-    """
 ## Device end
 
 ### Classes end
 
-### Helper functions - take out if finalized driver provides these
-'''
-def convert_list_to_float(list, endian='>'):
-    #args: endian = The endian of the list.  '>' = big, '<' = little.
-    return convert_list_to_value(list, 'f', 4, endian)
-
-def convert_float_to_list(value, endian='>'):
-    return convert_value_to_list(float(value), 'f', 4, endian)
-
-def convert_list_to_uint32(list, endian='>'):
-    return convert_list_to_value(list, 'I', 4, endian)
-
-def convert_uint32_to_list(value, endian='>'):
-    return convert_value_to_list(value, 'I', 4, endian)
-
-def convert_list_to_uint16(list, endian='>'):
-    return convert_list_to_value(list, 'H', 2, endian)
-
-def convert_uint16_to_list(value, endian='>'):
-    return convert_value_to_list(value, 'H', 2, endian)
-
-def convert_list_to_value(list, format, size, endian):
-    return struct.unpack(endian + format, struct.pack(endian + 'B'*size, *(list[:size])))[0]
-
-def convert_value_to_list(value, format, size, endian):
-    return list(struct.unpack(endian + 'B'*size, struct.pack(endian + format, value))[:size])
-'''
-### Helper functions end
-
 ## Private Helper functions
 
 def _convert_list_to_ctype_list(li, c_type):
-    ctypes.memmove
     c_list = (c_type*len(li))(0)
     for i in range(len(li)):
         c_list[i] = c_type(li[i])
-        #print str(list[i]) + ", " + str(c_list[i])
     return c_list
 
 def _convert_string_list_to_ctype_list(li):
@@ -264,126 +122,15 @@ def _convert_string_list_to_ctype_list(li):
     for i in range(len(li)):
         c_list[i].value = li[i]
     return c_list
-        #for j in range(len(li[i])):
-        #    c_list[i][j] = ctypes.c_char(li[i][j])
-    '''
-    c_list = (ctypes.c_char_p * len(li))()
-    c_list[:] = ctypes.create_string_buffer(li, size2)
-    return c_list
-    '''
 
 def _convert_ctype_list_to_list(list_ctype):
-    #print list_cbyte
-    #for i in list_cbyte:
-    #    print i
     return [i for i in list_ctype]
-
-'''
-def _convert_list_ctype_to_list(list_c_type):
-    return [i.value for i in list_cubyte]
-
-def _convert_list_to_list_cubyte(list):
-    c_list = (ctypes.c_ubyte*len(list))()
-    for i in range(0, len(list), 1):
-        c_list[i] = ctypes.c_ubyte(list[i])
-        #print str(list[i]) + ", " + str(c_list[i])
-    return c_list
-
-def _convert_list_to_list_clong(list):
-    c_list = (ctypes.c_long*len(list))()
-    for i in range(0, len(list), 1):
-        c_list[i] = ctypes.c_long(list[i])
-        #print str(list[i]) + ", " + str(c_list[i])
-    return c_list
-
-
-def _convert_cubyte_list_to_list(list_cubyte):
-    #print list_cbyte
-    #for i in list_cbyte:
-    #    print i
-    return [(i & 0xFF) for i in list_cubyte]
-'''
 
 ## Private Helper functions end
 
-### Wrapper for LJModbus library
+### Wrapper for LJM library
 
 ## Functions
-"""
-def LJM_OpenFirstFound(deviceType, connectionType):
-    c_handle = ctypes.c_long()
-    error = static_lib.LJM_OpenFirstFound(deviceType, connectionType, ctypes.byref(c_handle))
-    return error, c_handle
-
-def LJM_OpenByLongSN(serialNumber, deviceType, connectionType, port):
-    #Not tested
-    #long _stdcall LJM_OpenByLongSN(long serialNumber, long deviceType, long connectionType, long port, long * handle)
-    c_handle = ctypes.c_long()
-    error = static_lib.LJM_OpenByLongSN(serialNumber, deviceType, connectionType, port, ctypes.byref(handle))
-    return error, c_handle
-
-def LJM_OpenByStringSN(serialNumber, deviceType, connectionType, port):
-    #Not tested
-    #long _stdcall LJM_OpenByStringSN(const char * serialNumber, long deviceType, long connectionType, long port, long * handle)
-    c_handle = ctypes.c_long()
-    error = static_lib.LJM_OpenByStringSN(serialNumber, deviceType, connectionType, port, ctypes.byref(handle))
-
-def LJM_OpenByLongIP(ipAddress, deviceType, connectionType, port):
-    #not tested
-    #long _stdcall LJM_OpenByLongIP(long ipAddress, long deviceType, long connectionType, long port, long * handle)
-    c_handle = ctypes.c_long()
-    error = static_lib.LJM_OpenByLongIP(ipAddress, deviceType, connectionType, port, ctypes.byref(handle))
-    return error, c_handle
-
-def LJM_OpenByStringIP(ipAddress, deviceType, connectionType, port):
-    #not tested
-    #long _stdcall LJM_OpenByStringIP(const char * ipAddress, long deviceType, long connectionType, long port, long * handle)
-    c_handle = ctypes.c_long()
-    error = static_lib.LJM_OpenByStringIP(ipAddress, deviceType, connectionType, port, ctypes.byref(handle))
-    return error, c_handle
-
-def LJM_OpenByName(name, deviceType, connectionType, port):
-    #not tested
-    #long _stdcall LJM_OpenByName(const char * name, long deviceType, long connectionType, long port, long * handle)
-    c_handle = ctypes.c_long()
-    static_lib.LJM_OpenByName(name, deviceType, connectionType, port, ctypes.byref(handle))
-    return error, c_handle
-
-'''
-long _stdcall LJM_GetSerialNumber(long handle, long * serial)
-
-long _stdcall LJM_GetName(long handle, char * name)
-
-long _stdcall LJM_GetIPAddress(long handle, char * ipAddress)
-
-long _stdcall LJM_GetDeviceType(long handle, long * type)
-'''
-
-#def LJM_Close(handle):
-#    return static_lib.LJM_Close(handle)
-
-def LJM_Feedback(handle, unitID, numCommands, aWrite, aRegAddress, aNumRegs, aData):
-    #LJM_Feedback (long handle, long UnitID, long NumCommands, long *aReadOrWrite, long *aRegAddress, long *aNumReg, unsigned char *aData, long *ErrorFrame)
-    c_write = _convert_list_to_list_clong(aWrite)
-    c_reg_addr = _convert_list_to_list_clong(aRegAddress)
-    c_num_reg = _convert_list_to_list_clong(aNumRegs)
-    c_data = _convert_list_to_list_cbyte(aData)
-    c_error_frame = ctypes.c_long()
-    error = static_lib.LJM_Feedback(handle, unitID, numCommands, ctypes.byref(c_write), ctypes.byref(c_reg_addr), ctypes.byref(c_num_reg), ctypes.byref(c_data), ctypes.byref(c_error_frame))
-    return error, _convert_list_cbyte_to_list(c_data), c_error_frame.value
-
-def LJM_ReadMultipleBytes(handle, unitID, regAddress, numRegs):
-    c_data = (ctypes.c_byte*(numRegs*2))(0)
-    error = static_lib.LJM_ReadMultipleBytes(handle, unitID, regAddress, numRegs, ctypes.byref(c_data))
-    return error, _convert_list_cbyte_to_list(c_data) #c_data _cbyte_list_to_list(c_data, numRegs*2)
-
-def LJM_WriteMultipleBytes(handle, unitID, regAddress, numRegs, aData):
-    c_data = _convert_list_to_list_cbyte(aData)
-    error = static_lib.LJM_WriteMultipleBytes(handle, unitID, regAddress, numRegs, ctypes.byref(c_data))
-    return error
-"""
-
-########
 
 #LJM_ERROR_RETURN LJM_AddressesToMBFB(int MaxBytesPerMBFB, int * aAddresses, int * aTypes, int * aWrites, int * aNumValues, double * aValues, int * NumFrames, unsigned char * aMBFBCommand);
 def LJM_AddressesToMBFB(MaxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, NumFrames):
@@ -420,7 +167,6 @@ def LJM_NameToAddress(NameIn):
 
 #parameter will change location
 ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
-
 
 #test
 #LJM_ERROR_RETURN LJM_MBFBComm(int Handle, unsigned char UnitID, unsigned char * aMBFB, int * errorFrame);
@@ -610,21 +356,7 @@ def LJM_eNames(Handle, NumFrames, Names, aWrites, aNumValues, aValues):
         raise LJMError(error, c_err_f.value)
     return _convert_ctype_list_to_list(c_vals)
     
-''' #removed?
-#LJM_ERROR_RETURN LJM_WriteMultipleRegisters(int Handle, int RegAddress, int NumRegs, unsigned char * Data);
-def LJM_WriteMultipleRegisters(Handle, RegAddress, NumRegs, Data):
-    c_data = _convert_list_to_ctype_list(Data, ctypes.c_ubyte)
-    error = static_lib.LJM_WriteMultipleRegisters(Handle, RegAddress, NumRegs, ctypes.byref(c_data))
-    return error
-
-#LJM_ERROR_RETURN LJM_ReadMultipleRegisters(int Handle, int RegAddress, int NumRegs, unsigned char * Data);
-def LJM_ReadMultipleRegisters(Handle, RegAddress, NumRegs):
-    c_data = (ctypes.c_ubyte*(NumRegs*2))(0)
-    error = static_lib.LJM_ReadMultipleRegisters(Handle, RegAddress, NumRegs, ctypes.byref(c_data))
-    return error, _convert_ctype_list_to_list(c_data)
-'''
-
-# Type conversion *
+# Type conversion
 
 #LJM_VOID_RETURN LJM_FLOAT32ToByteArray(const float * aFLOAT32, int RegisterOffset, int NumFLOAT32, unsigned char * aBytes);
 def LJM_FLOAT32ToByteArray(aFLOAT32, RegisterOffset, NumFLOAT32, aBytes):
@@ -690,57 +422,6 @@ def LJM_GetDriverVersion():
 ## Functions end
 
 ## Constants
-'''
-# Device Types:
-LJ_dtUE9 = 9
-LJ_dtU3 = 3
-LJ_dtU6 = 6
-LJ_dtSMB = 1000
-
-# Connection Types:
-LJ_ctUSB = 1 # UE9 + U3 + U6
-LJ_ctETHERNET = 2 # UE9 only
-LJ_ctETHERNET_MB = 3 # Modbus over Ethernet, UE9 only.
-LJ_ctETHERNET_DATA_ONLY = 4 # Opens data port but not stream port, UE9 only
-
-LJ_ecDISCONNECT = 1
-LJ_ecRECONNECT = 2 
-
-# Raw connection types are used to open a device but not communicate with it
-# should only be used if the normal connection types fail and for testing.
-# If a device is opened with the raw connection types, only LJ_ioRAW_OUT
-# and LJ_ioRAW_IN io types should be used
-LJ_ctUSB_RAW = 101 # UE9 + U3 + U6
-LJ_ctETHERNET_RAW = 102 # UE9 only
-
-# Errorcodes:
-LJE_NOERROR = 0
-
-LJE_UNKNOWN_ERROR = 1001 # occurs when an unknown error occurs that is caught, but still unknown.
-LJE_INVALID_HANDLE = 1003 # occurs when invalid handle used
-LJE_LABJACK_NOT_FOUND = 1007 # occurs when the LabJack is not found at the given id or address
-LJE_COMM_FAILURE = 1008 # occurs when unable to send or receive the correct # of bytes
-LJE_DEVICE_ALREADY_OPEN = 1010 # occurs when LabJack is already open via USB in another program or process
-LJE_USB_DRIVER_NOT_FOUND = 1012
-
-# Modbus
-DIRECTION_READ = 1
-DIRECTION_WRITE = 2
-DIRECTION_BI = 3
-MAX_TRANSACTION_ID = 65535
-MAX_REGISTER = 4294967295
-BYTES_PER_REGISTER = 2
-
-NUM_READ_COMMAND_BYTES = 14
-NUM_BASE_WRITE_COMMAND_BYTES = 15
-NUM_BASE_READ_RESPONSE_BYTES = 9
-NUM_WRITE_RESPONSE_BYTES = 12
-NUM_REPORTED_READ_COMMAND_BYTES = 6
-NUM_BASE_REPORTED_READ_COMMAND_BYTES = 7
-NUM_BASE_REPORTED_READ_RESPONSE_BYTES = 3
-NUM_REPORTED_WRITE_RESPONSE_BYTES = 6
-NUM_BASE_ERROR_RESPONSE_SIZE = 8
-'''
 
 # Read/Write direction constants:
 LJM_READ = 0
@@ -914,4 +595,4 @@ LJME_OVERSPECIFIED_IDENTIFIER = 1295
 LJME_OVERSPECIFIED_PORT = 1296
 ## Constants end
 
-### Wrapper functions for LJModbus library end
+### Wrapper functions for LJM library end

@@ -1,0 +1,29 @@
+LJMPython: Python wrapper module for the LJM driver
+10/23/2012
+support@labjack.com
+
+This package contains the LJMPython wrapper module and examples for the LJM
+driver.  The LJM driver is a cross-platform Modbus driver for LabJack devices.
+
+Requirements:
+
+* Windows, Mac OS X, Linux
+* LJM driver
+* Python 2.5 or above.  Python 3.x currently not supported.
+
+Installation:
+
+To install LJMPython, in a terminal go to this package's root directory and run
+the following command (Leave off the sudo on Windows):
+
+    $ sudo python setup.py install
+
+Examples:
+
+    TODO:  Add examples information and some quick examples here.
+
+License:
+
+All LJMPython module and examples are licensed under MIT X11.  The license can
+be found in the LICENSE file.
+
