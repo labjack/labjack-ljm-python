@@ -13,44 +13,44 @@ class LJMError(Exception):
     """
     Custom Exception meant for dealing with LJM specific errors
     """
-    def __init__(self, error_code = None, error_frame = None, error_string = ""):
-        self._error_code = error_code
-        self._error_frame = error_frame
-        self._error_string = error_string
-        if not self._error_string:
+    def __init__(self, errorCode = None, errorFrame = None, errorString = ""):
+        self._errorCode = errorCode
+        self._errorFrame = errorFrame
+        self._errorString = errorString
+        if not self._errorString:
             try:
-                self._error_string = LJM_ErrorToString(error_code)
+                self._errorString = LJM_ErrorToString(errorCode)
             except:
-                self._error_string = str(error_code)
+                self._errorString = str(errorCode)
 
     @property
-    def error_code(self):
-        return self._error_code
+    def errorCode(self):
+        return self._errorCode
 
     @property
-    def error_frame(self):
-        return self._error_frame
+    def errorFrame(self):
+        return self._errorFrame
 
     @property
-    def error_string(self):
-        return self._error_string
+    def errorString(self):
+        return self._errorString
     
     def __str__(self):
-        if self._error_frame is None:
-            fr_str = ""
+        if self._errorFrame is None:
+            frameStr = ""
         else:
-            fr_str = "Frame " + str(self._error_frame) + ", "
-        if self._error_string.find("The error constants file") != -1 and self._error_string.find("could not be opened") != -1:
-            err_str = "Error " + str(self._error_code)
+            frameStr = "Frame " + str(self._errorFrame) + ", "
+        if self._errorString.find("The error constants file") != -1 and self._errorString.find("could not be opened") != -1:
+            errorStr = "Error " + str(self._errorCode)
         else:
-            err_str = str(self._error_string)
-        return fr_str + err_str
+            errorStr = str(self._errorString)
+        return frameStr + errorStr
 ## LJM Exception end
 
 ### Load LJM library
-def _load_library():
+def _loadLibrary():
     """
-    _load_library()
+    _loadLibrary()
     Returns a ctypes pointer to the library.
     """
     try:
@@ -61,26 +61,26 @@ def _load_library():
             except OSError, e:
                 pass # May be on Mac.
             except Exception, e:
-                raise LJMError(error_string = ("Cannot load the LJM Linux SO.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM Linux SO.  " + str(e)))
             
             try:
                 return ctypes.CDLL("libLabJackM.dylib")
             except OSError, e:
-                raise LJMError(error_string = ("Cannot load the LJM driver.  Check that the driver is installed.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM driver.  Check that the driver is installed.  " + str(e)))
             except Exception, e:
-                raise LJMError(error_string = ("Cannot load the LJM Mac OS X Dylib.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM Mac OS X Dylib.  " + str(e)))
         if(os.name == "nt"):
             #Windows
             try:
                 #Win
                 return ctypes.CDLL("LabJackM.dll")
             except Exception, e:
-                raise LJMError(error_string = ("Cannot load LJM driver.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load LJM driver.  " + str(e)))
     except LJMError, e:
         print str(type(e)) + ": " + str(e)
         return None
 
-static_lib = _load_library()
+_staticLib = _loadLibrary()
 ### Load LJM library end
 
 ### Classes
@@ -88,43 +88,155 @@ static_lib = _load_library()
 ## Device
 class Device(object):
 
-    def __init__(self, device_type=None, connection_type=None, identifier=None, debug=False, autoOpen=True): #handle=None, deviceType=None, connectionType=None, device=None):
-        self.handle = None
+    def __init__(self, deviceType=0, connectionType=0, identifier="0", debug=False, autoOpen=True): #handle=None, deviceType=None, connectionType=None, device=None):
+        self._handle = None
+        self.deviceType = None
+        self.connectionType = None
+        self.serialNumber = None
+        self.ipAddress = None
+        self.port = None
+        self.maxBytesPerMB = None
         if autoOpen:
-            self.open(**kargs)
-    
+            if isinstance(deviceType, str) and isinstance(connectionType):
+                self.open(deviceType, connectionType, str(identifier))
+            elif str(deviceType).isdigit() and str(connectionType).isdigit():
+                self.open(int(deviceType), int(connectionType), str(identifier))
+            else:
+                raise LJMError(errorString = "deviceType and connectionType are not both strings or integers")
+        deviceInfo = self.getHandleInfo()
+        
     def __del__(self):
         self.close()
 
-    def open(self, device_type=None, connection_type=None, identifier=None):
-        pass
+    def openS(self, deviceType, connectionType, identifier):
+        self._handle = openS(self, deviceType, connectionType, identifier)
+
+    def open(self, deviceType, connectionType, identifier):
+        self._handle = open(deviceType, connectionType, identifier)[2]
+
+    def close(self):
+        return close(self._handle)
+
+    def addressesToMBFB(self, maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames):
+        return addressesToMBFB(maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames)
+
+    def namesToAddresses(self, numFrames, namesIn):
+        return namesToAddresses(numFrames, namesIn)
+
+    def nameToAddress(self, nameIn):
+        return nameToAddress(nameIn)
+
+    #parameter will change location
+    ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
     
+    def MBFBComm(self, unitID, aMBFB):
+        return MBFBComm(self._handle, unitID, aMBFB)
     
-    def close():
-        pass        
+    #LJM_ERROR_RETURN LJM_OpenFirstFound(int * DeviceType, int * ConnectionType, int * Handle);
+    ''' deprecated ?
+    def LJM_OpenFirstFound():
+        cDev = ctypes.c_int32()
+        cConn = ctypes.c_int32()
+        cHandle = ctypes.c_int32()
+        error = _staticLib.LJM_OpenFirstFound(ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cHandle))
+        return error, cDev.value, cConn.value, cHandle.value
+    '''
+
+    def getHandleInfo(self):
+        info = getHandleInfo(self._handle)
+        self.deviceType = info[0]
+        self.connectionType = info[1]
+        self.serialNumber = info[2]
+        self.ipAddress = info[3]
+        self.port = info[4]
+        self.maxBytesPerMB = info[5]
+        return info
+
+    def errorToString(self, errorCode):
+        return errorToString(errorCode)
+   
+    def writeRaw(self, data, numBytes):
+        return writeRaw(self._handle, data, numBytes)
+
+    def readRaw(self, numBytes):
+        return readRaw(self._handle, numBytes)
+
+    def eWriteAddress(self, address, type, value):
+        return eWriteAddress(self._handle, address, type, value)
+
+    def eReadAddress(self, address, type):
+        return eReadAddress(self._handle, address, type)
+
+    def eWriteName(self, name, value):
+        return eWriteName(self._handle, name, value)
+
+    def eReadName(self, name):
+        return eReadName(self._handle, name)
+
+    def eReadAddresses(self, numFrames, aAddresses, aTypes):
+        return eReadAddresses(self._handle, numFrames, aAddresses, aTypes)
+
+    def eWriteAddresses(self, numFrames, aAddresses, aTypes, aValues):
+        return eWriteAddresses(self._handle, numFrames, aAddresses, aTypes, aValues)
+
+    def eReadNames(self, numFrames, names):
+        return eReadNames(self._handle, numFrames, names)
+
+    def eWriteNames(self, numFrames, names, aValues):
+        return eWriteNames(self._handle, numFrames, names, aValues)
+
+    def eAddresses(self, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues):
+        return eAddresses(self._handle, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues)
+
+    def eNames(self, numFrames, names, aWrites, aNumValues, aValues):
+        return eNames(self._handle, numFrames, names, aWrites, aNumValues, aValues)
+
+    def FLOAT32ToByteArray(self, aFLOAT32, registerOffset, numFLOAT32, aBytes):
+        return FLOAT32ToByteArray(aFLOAT32, registerOffset, numFLOAT32, aBytes)
+
+    def byteArrayToFLOAT32(self, aBytes, registerOffset, numFLOAT32, aFLOAT32):
+        return byteArrayToFLOAT32(aBytes, registerOffset, numFLOAT32, aFLOAT32)
+
+    def UINT16ToByteArray(self, aUINT16, registerOffset, numUINT16, aBytes):
+        return UINT16ToByteArray(aUINT16, registerOffset, numUINT16, aBytes)
+
+    def byteArrayToUINT16(self, aBytes, registerOffset, numUINT16, aUINT16):
+        return byteArrayToUINT16(aBytes, registerOffset, numUINT16, aUINT16)
+
+    def UINT32ToByteArray(self, aUINT32, registerOffset, numUINT32, aBytes):
+        return UINT32ToByteArray(aUINT32, registerOffset, numUINT32, aBytes)
+
+    def byteArrayToUINT32(self, aBytes, registerOffset, numUINT32, aUINT32):
+        return byteArrayToUINT32(aBytes, registerOffset, numUINT32, aUINT32)
+
+    def INT32ToByteArray(self, aINT32, registerOffset, numINT32, aBytes):
+        return INT32ToByteArray(aINT32, registerOffset, numINT32, aBytes)
+
+    def byteArrayToINT32(self, aBytes, registerOffset, numINT32, aINT32):
+        return byteArrayToINT32(aBytes, registerOffset, numINT32, aINT32)
     
 ## Device end
 
 ### Classes end
 
-## Private Helper functions
+## Helper functions
 
-def _convert_list_to_ctype_list(li, c_type):
-    c_list = (c_type*len(li))(0)
+def _convertListToCtypeList(li, cType):
+    cList = (cType*len(li))(0)
     for i in range(len(li)):
-        c_list[i] = c_type(li[i])
-    return c_list
+        cList[i] = cType(li[i])
+    return cList
 
-def _convert_string_list_to_ctype_list(li):
+def _convertStringListToCtypeList(li):
     #figure out the 2D size
     size2 = max(len(x) for x in li) + 1
-    c_list = (ctypes.c_char*size2*len(li))()
+    cList = (ctypes.c_char*size2*len(li))()
     for i in range(len(li)):
-        c_list[i].value = li[i]
-    return c_list
+        cList[i].value = li[i]
+    return cList
 
-def _convert_ctype_list_to_list(list_ctype):
-    return [i for i in list_ctype]
+def _convertCtypeListToList(listCtype):
+    return [i for i in listCtype]
 
 ## Private Helper functions end
 
@@ -133,291 +245,310 @@ def _convert_ctype_list_to_list(list_ctype):
 ## Functions
 
 #LJM_ERROR_RETURN LJM_AddressesToMBFB(int MaxBytesPerMBFB, int * aAddresses, int * aTypes, int * aWrites, int * aNumValues, double * aValues, int * NumFrames, unsigned char * aMBFBCommand);
-def LJM_AddressesToMBFB(MaxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, NumFrames):
-    c_addrs = _convert_list_to_ctype_list(aAddresses, ctypes.c_int)
-    c_types = _convert_list_to_ctype_list(aTypes, ctypes.c_int)
-    c_writes = _convert_list_to_ctype_list(aWrites, ctypes.c_int)
-    c_num_vals = _convert_list_to_ctype_list(aNumValues, ctypes.c_int)
-    c_vals = _convert_list_to_ctype_list(aValues, ctypes.c_double)
-    c_num_frames = ctypes.c_int(NumFrames)
-    c_comm = (ctypes.c_ubyte*MaxBytesPerMBFB)(0)
-    error = static_lib.LJM_AddressesToMBFB(MaxBytesPerMBFB, ctypes.byref(c_addrs), ctypes.byref(c_types), ctypes.byref(c_writes), ctypes.byref(c_num_vals), ctypes.byref(c_vals), ctypes.byref(c_num_frames), ctypes.byref(c_comm))
+def addressesToMBFB(maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames):
+    cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
+    cVals = _convertListToCtypeList(aValues, ctypes.c_double)
+    cNumFrames = ctypes.c_int32(numFrames)
+    cComm = (ctypes.c_ubyte*maxBytesPerMBFB)(0)
+    error = _staticLib.LJM_AddressesToMBFB(maxBytesPerMBFB, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cNumFrames), ctypes.byref(cComm))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [c_num_frames.value, _convert_ctype_list_to_list(c_comm)]
+    return [cNumFrames.value, _convertCtypeListToList(cComm)]
     
 #LJM_ERROR_RETURN LJM_NamesToAddresses(int NumFrames, const char ** NamesIn, int * aAddressesOut, int * aTypesOut);
-def LJM_NamesToAddresses(NumFrames, NamesIn):
-    c_names_in = _convert_string_list_to_ctype_list(NamesIn)
-    c_addrs_out = (ctypes.c_int*NumFrames)(0)
-    c_types_out = (ctypes.c_int*NumFrames)(0)
-    error = static_lib.LJM_NamesToAddresses(NumFrames, ctypes.byref(c_names_in), ctypes.byref(c_addrs_out), ctypes.byref(c_types_out))
+def namesToAddresses(numFrames, namesIn):
+    cNamesIn = _convertStringListToCtypeList(namesIn)
+    cAddrsOut = (ctypes.c_int32*numFrames)(0)
+    cTypesOut = (ctypes.c_int32*numFrames)(0)
+    error = _staticLib.LJM_NamesToAddresses(numFrames, ctypes.byref(cNamesIn), ctypes.byref(cAddrsOut), ctypes.byref(cTypesOut))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [c_addrs_out.value, c_types_out.value]
+    return [cAddrsOut.value, cTypesOut.value]
 
 #LJM_ERROR_RETURN LJM_NameToAddress(const char * NameIn, int * AddressOut, int * TypeOut);
-def LJM_NameToAddress(NameIn):
-    c_addr_out = ctypes.c_int(0)
-    c_type_out = ctypes.c_int(0)
-    error = static_lib.LJM_NameToAddress(NameIn, ctypes.byref(c_addr_out), ctypes.byref(c_type_out))
+def nameToAddress(nameIn):
+    cAddrOut = ctypes.c_int32(0)
+    cTypeOut = ctypes.c_int32(0)
+    error = _staticLib.LJM_NameToAddress(nameIn, ctypes.byref(cAddrOut), ctypes.byref(cTypeOut))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [c_addr_out.value, c_type_out]
+    return [cAddrOut.value, cTypeOut]
 
 #parameter will change location
 ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
 
 #test
 #LJM_ERROR_RETURN LJM_MBFBComm(int Handle, unsigned char UnitID, unsigned char * aMBFB, int * errorFrame);
-def LJM_MBFBComm(Handle, UnitID, aMBFB):
-    c_mbfb = _convert_list_to_ctype_list(aMBFB, ctypes.c_ubyte)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_MBFBComm(Handle, UnitID, ctypes.byref(c_mbfb), ctypes.byref(c_err_f))
+def MBFBComm(handle, unitID, aMBFB):
+    cMBFB = _convertListToCtypeList(aMBFB, ctypes.c_ubyte)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_MBFBComm(handle, unitID, ctypes.byref(cMBFB), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
-    return _convert_ctype_list_to_list(c_mbfb)
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cMBFB)
 
 #LJM_VOID_RETURN LJM_SetSendReceiveTimeout(unsigned int TimeoutMS);
-def LJM_SetSendReceiveTimeout(TimeoutMS):
-    static_lib.LJM_SetSendReceiveTimeout(TimeoutMS)
+def setSendReceiveTimeout(timeoutMS):
+    _staticLib.LJM_SetSendReceiveTimeout(timeoutMS)
 
 #LJM_VOID_RETURN LJM_SetOpenTCPDeviceTimeout(unsigned int TimeoutSec, unsigned int TimeoutUSec);
-def LJM_SetOpenTCPDeviceTimeout(TimeoutSec, TimeoutUSec):
-    static_lib.LJM_SetOpenTCPDeviceTimeout(TimeoutSec, TimeoutUSec)
+def setOpenTCPDeviceTimeout(timeoutSec, timeoutUSec):
+    _staticLib.LJM_SetOpenTCPDeviceTimeout(timeoutSec, timeoutUSec)
 
 #LJM_ERROR_RETURN LJM_OpenFirstFound(int * DeviceType, int * ConnectionType, int * Handle);
 ''' deprecated ?
 def LJM_OpenFirstFound():
-    c_dev = ctypes.c_int()
-    c_conn = ctypes.c_int()
-    c_handle = ctypes.c_int()
-    error = static_lib.LJM_OpenFirstFound(ctypes.byref(c_dev), ctypes.byref(c_conn), ctypes.byref(c_handle))
-    return error, c_dev.value, c_conn.value, c_handle.value
+    cDev = ctypes.c_int32()
+    cConn = ctypes.c_int32()
+    cHandle = ctypes.c_int32()
+    error = _staticLib.LJM_OpenFirstFound(ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cHandle))
+    return error, cDev.value, cConn.value, cHandle.value
 '''
 
-#LJM_ERROR_RETURN LJM_OpenS(const char * DeviceType, const char * ConnectionType, const char * Identifier, int * Handle);
-def LJM_OpenS(DeviceType, ConnectionType, Identifier):
-    c_handle = ctypes.c_int(0)
-    #test if need byref (not sure if a output string is returned) 
-    error = static_lib.LJM_OpenS(DeviceType, ConnectionType, Identifier, ctypes.byref(c_handle))
+#LJM_ERROR_RETURN LJM_ListAll(int DeviceType, int ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
+def listAll(deviceType, connectionType):
+    cNumFound = ctypes.c_int32(0)
+    cSerNums = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
+    cIPAddrs = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
+    error = _staticLib.LJM_ListAll(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return c_handle.value
+    return [cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])]
+
+#LJM_ERROR_RETURN LJM_ListAllS(const char * DeviceType, const char * ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
+def listAllS(deviceType, connectionType):
+    cNumFound = ctypes.c_int32(0)
+    cSerNums = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
+    cIPAddrs = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
+    error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    return [cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])]
+
+#LJM_ERROR_RETURN LJM_OpenS(const char * DeviceType, const char * ConnectionType, const char * Identifier, int * Handle);
+def openS(deviceType, connectionType, identifier):
+    cHandle = ctypes.c_int32(0)
+    error = _staticLib.LJM_OpenS(deviceType, connectionType, identifier, ctypes.byref(cHandle))
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    return cHandle.value
 
 #def LJM_ERROR_RETURN LJM_Open(int * DeviceType, int * ConnectionType, const char * Identifier, int * Handle);
-def LJM_Open(DeviceType, ConnectionType, Identifier):
-    c_dev = ctypes.c_int(DeviceType)
-    c_conn = ctypes.c_int(ConnectionType)
-    c_handle = ctypes.c_int(0)
-    error = static_lib.LJM_Open(ctypes.byref(c_dev), ctypes.byref(c_conn), Identifier, ctypes.byref(c_handle))
+def open(deviceType, connectionType, identifier):
+    cDev = ctypes.c_int32(deviceType)
+    cConn = ctypes.c_int32(connectionType)
+    cHandle = ctypes.c_int32(0)
+    error = _staticLib.LJM_Open(ctypes.byref(cDev), ctypes.byref(cConn), identifier, ctypes.byref(cHandle))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [c_dev.value, c_conn.value, c_handle.value]
+    return [cDev.value, cConn.value, cHandle.value]
 
 #LJM_ERROR_RETURN LJM_GetHandleInfo(int Handle, int * DeviceType, int * ConnectionType, int * SerialNumber, int * IPAddress, int * Port, int * PacketMaxBytes);
-def LJM_GetHandleInfo(Handle):
-    c_dev = ctypes.c_int(0)
-    c_conn = ctypes.c_int(0)
-    c_ser = ctypes.c_int(0)
-    c_ip_addr = ctypes.c_int(0)
-    c_port = ctypes.c_int(0)
-    c_pkt_max = ctypes.c_int(0)
-    error = static_lib.LJM_GetHandleInfo(Handle, ctypes.byref(c_dev), ctypes.byref(c_conn), ctypes.byref(c_ser), ctypes.byref(c_ip_addr), ctypes.byref(c_port), ctypes.byref(c_pkt_max))
+def getHandleInfo(handle):
+    cDev = ctypes.c_int32(0)
+    cConn = ctypes.c_int32(0)
+    cSer = ctypes.c_int32(0)
+    cIPAddr = ctypes.c_int32(0)
+    cPort = ctypes.c_int32(0)
+    cPktMax = ctypes.c_int32(0)
+    error = _staticLib.LJM_GetHandleInfo(handle, ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cSer), ctypes.byref(cIPAddr), ctypes.byref(cPort), ctypes.byref(cPktMax))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [c_dev.value, c_conn.value, c_ser.value, c_ip_addr.value, c_port.value, c_pkt_max.value]
+    return [cDev.value, cConn.value, cSer.value, cIPAddr.value, cPort.value, cPktMax.value]
 
 #LJM_ERROR_STRING LJM_ErrorToString(int ErrorCode);
-def LJM_ErrorToString(ErrorCode):
-    return ctypes.c_char_p(static_lib.LJM_ErrorToString(ErrorCode)).value
+def errorToString(errorCode):
+    return ctypes.c_char_p(_staticLib.LJM_ErrorToString(errorCode)).value
 
 #LJM_VOID_RETURN LJM_LoadConstants();
-def LJM_LoadConstants():
-    static_lib.LJM_LoadConstants()
+def loadConstants():
+    _staticLib.LJM_LoadConstants()
 
 #LJM_ERROR_RETURN LJM_Close(int Handle)
-def LJM_Close(Handle):
-    error = static_lib.LJM_Close(Handle)
+def close(handle):
+    error = _staticLib.LJM_Close(handle)
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_CloseAll();
-def LJM_CloseAll():
-    error = static_lib.LJM_CloseAll()
+def closeAll():
+    error = _staticLib.LJM_CloseAll()
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_WriteRaw(int Handle, unsigned char * Data, int NumBytes);
-def LJM_WriteRaw(Handle, Data, NumBytes):
-    c_data = _convert_list_to_ctype_list(Data, ctypes.c_ubyte)
-    error = static_lib.LJM_WriteRaw(Handle, ctypes.byref(c_data), NumBytes)
+def writeRaw(handle, data, numBytes):
+    cData = _convertListToCtypeList(data, ctypes.c_ubyte)
+    error = _staticLib.LJM_WriteRaw(handle, ctypes.byref(cData), numBytes)
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_ReadRaw(int Handle, unsigned char * Data, int NumBytes);
-def LJM_ReadRaw(Handle, NumBytes):
-    c_data = (ctypes.c_ubyte*NumBytes)(0)
-    error = static_lib.LJM_ReadRaw(Handle, ctypes.byref(c_data), NumBytes)
+def readRaw(handle, numBytes):
+    cData = (ctypes.c_ubyte*numBytes)(0)
+    error = _staticLib.LJM_ReadRaw(handle, ctypes.byref(cData), numBytes)
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return _convert_ctype_list_to_list(c_data)
+    return _convertCtypeListToList(cData)
 
 #LJM_ERROR_RETURN LJM_eWriteAddress(int Handle, int Address, int Type, double Value);
-def LJM_eWriteAddress(Handle, Address, Type, Value):
-    error = static_lib.LJM_eWriteAddress(Handle, Address, Type, ctypes.c_double(Value))
+def eWriteAddress(handle, address, type, value):
+    error = _staticLib.LJM_eWriteAddress(handle, address, type, ctypes.c_double(value))
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_eReadAddress(int Handle, int Address, int Type, double * Value);
-def LJM_eReadAddress(Handle, Address, Type):
-    c_val = ctypes.c_double(0)
-    error = static_lib.LJM_eReadAddress(Handle, Address, Type, ctypes.byref(c_val))
+def eReadAddress(handle, address, type):
+    cVal = ctypes.c_double(0)
+    error = _staticLib.LJM_eReadAddress(handle, address, type, ctypes.byref(cVal))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return c_val.value
+    return cVal.value
 
 #LJM_ERROR_RETURN LJM_eWriteName(int Handle, const char * Name, double Value);
-def LJM_eWriteName(Handle, Name, Value):
-    error = static_lib.LJM_eWriteName(Handle, Name, ctypes.c_double(Value))
+def eWriteName(handle, name, value):
+    error = _staticLib.LJM_eWriteName(handle, name, ctypes.c_double(value))
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_eReadName(int Handle, const char * Name, double * Value);
-def LJM_eReadName(Handle, Name):
-    c_val = ctypes.c_double(0)
-    error = static_lib.LJM_eReadName(Handle, Name, ctypes.byref(c_val))
+def eReadName(handle, name):
+    cVal = ctypes.c_double(0)
+    error = _staticLib.LJM_eReadName(handle, name, ctypes.byref(cVal))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return c_val.value
+    return cVal.value
 
 #LJM_ERROR_RETURN LJM_eReadAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, double * aValues, int * ErrorFrame);
-def LJM_eReadAddresses(Handle, NumFrames, aAddresses, aTypes):
-    c_addrs = _convert_list_to_ctype_list(aAddresses, ctypes.c_int)
-    c_types = _convert_list_to_ctype_list(aTypes, ctypes.c_int)
-    c_vals = (ctypes.c_double*NumFrames)(0)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eReadAddresses(Handle, NumFrames, ctypes.byref(c_addrs), ctypes.byref(c_types), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eReadAddresses(handle, numFrames, aAddresses, aTypes):
+    cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cVals = (ctypes.c_double*numFrames)(0)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eReadAddresses(handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
-    return _convert_ctype_list_to_list(c_vals)
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cVals)
 
 #LJM_ERROR_RETURN LJM_eWriteAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, double * aValues, int * ErrorFrame);
-def LJM_eWriteAddresses(Handle, NumFrames, aAddresses, aTypes, aValues):
-    c_addrs = _convert_list_to_ctype_list(aAddresses, ctypes.c_int)
-    c_types = _convert_list_to_ctype_list(aTypes, ctypes.c_int)
-    c_vals =  _convert_list_to_ctype_list(aValues, ctypes.c_double)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eWriteAddresses(Handle, NumFrames, ctypes.byref(c_addrs), ctypes.byref(c_types), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eWriteAddresses(handle, numFrames, aAddresses, aTypes, aValues):
+    cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eWriteAddresses(handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
+        raise LJMError(error, cErrorFrame.value)
 
 #LJM_ERROR_RETURN LJM_eReadNames(int Handle, int NumFrames, const char ** Names, double * aValues, int * ErrorFrame);
-def LJM_eReadNames(Handle, NumFrames, Names):
-    c_names = _convert_string_list_to_ctype_list(Names)
-    c_vals =  (ctypes.c_double*NumFrames)(0)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eReadNames(Handle, NumFrames, ctypes.byref(c_names), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eReadNames(handle, numFrames, names):
+    cNames = _convertStringListToCtypeList(names)
+    cVals =  (ctypes.c_double*numFrames)(0)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eReadNames(handle, numFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
-    return _convert_ctype_list_to_list(c_vals)
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cVals)
 
 #LJM_ERROR_RETURN LJM_eWriteNames(int Handle, int NumFrames, const char ** Names, double * aValues, int * ErrorFrame);
-def LJM_eWriteNames(Handle, NumFrames, Names, aValues):
-    c_names = _convert_string_list_to_ctype_list(Names)
-    c_vals =  _convert_list_to_ctype_list(aValues, ctypes.c_double)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eWriteNames(Handle, NumFrames, ctypes.byref(c_names), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eWriteNames(handle, numFrames, names, aValues):
+    cNames = _convertStringListToCtypeList(names)
+    cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eWriteNames(handle, numFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
+        raise LJMError(error, cErrorFrame.value)
 
 #LJM_ERROR_RETURN LJM_eAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, int * aWrites, int * aNumValues, double * aValues, int * ErrorFrame);
-def LJM_eAddresses(Handle, NumFrames, aAddresses, aTypes, aWrites, aNumValues, aValues):
-    c_addrs = _convert_list_to_ctype_list(aAddresses, ctypes.c_int)
-    c_types = _convert_list_to_ctype_list(aTypes, ctypes.c_int)
-    c_writes = _convert_list_to_ctype_list(aWrites, ctypes.c_int)
-    c_num_vals = _convert_list_to_ctype_list(aNumValues, ctypes.c_int)
-    c_vals =  _convert_list_to_ctype_list(aValues, ctypes.c_double)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eAddresses(Handle, NumFrames, ctypes.byref(c_addrs), ctypes.byref(c_types), ctypes.byref(c_writes), ctypes.byref(c_num_vals), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eAddresses(handle, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues):
+    cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
+    cVals = _convertListToCtypeList(aValues, ctypes.c_double)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eAddresses(handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
-    return _convert_ctype_list_to_list(c_vals)
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cVals)
     
 #LJM_ERROR_RETURN LJM_eNames(int Handle, int NumFrames, const char ** Names, int * aWrites, int * aNumValues, double * aValues, int * ErrorFrame);
-def LJM_eNames(Handle, NumFrames, Names, aWrites, aNumValues, aValues):
-    c_names = _convert_string_list_to_ctype_list(Names)
-    c_writes = _convert_list_to_ctype_list(aWrites, ctypes.c_int)
-    c_num_vals = _convert_list_to_ctype_list(aNumValues, ctypes.c_int)
-    c_vals =  _convert_list_to_ctype_list(aValues, ctypes.c_double)
-    c_err_f = ctypes.c_int(0)
-    error = static_lib.LJM_eNames(Handle, NumFrames, ctypes.byref(c_names), ctypes.byref(c_writes), ctypes.byref(c_num_vals), ctypes.byref(c_vals), ctypes.byref(c_err_f))
+def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
+    cNames = _convertStringListToCtypeList(names)
+    cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
+    cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_eNames(handle, numFrames, ctypes.byref(cNames), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
-        raise LJMError(error, c_err_f.value)
-    return _convert_ctype_list_to_list(c_vals)
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cVals)
     
 # Type conversion
 
 #LJM_VOID_RETURN LJM_FLOAT32ToByteArray(const float * aFLOAT32, int RegisterOffset, int NumFLOAT32, unsigned char * aBytes);
-def LJM_FLOAT32ToByteArray(aFLOAT32, RegisterOffset, NumFLOAT32, aBytes):
-    c_floats = _convert_list_to_ctype_list(aFLOAT32, ctypes.c_float)
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    static_lib.LJM_FLOAT32ToByteArray(ctypes.byref(c_floats), RegisterOffset, NumFLOAT32, ctypes.byref(c_ubytes))
-    return _convert_ctype_list_to_list(c_ubytes)
+def FLOAT32ToByteArray(aFLOAT32, registerOffset, numFLOAT32, aBytes):
+    cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    _staticLib.LJM_FLOAT32ToByteArray(ctypes.byref(cFloats), registerOffset, numFLOAT32, ctypes.byref(cUbytes))
+    return _convertCtypeListToList(cUbytes)
     
 #LJM_VOID_RETURN LJM_ByteArrayToFLOAT32(const unsigned char * aBytes, int RegisterOffset, int NumFLOAT32, float * aFLOAT32);
-def LJM_ByteArrayToFLOAT32(aBytes, RegisterOffset, NumFLOAT32, aFLOAT32):
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    c_floats = _convert_list_to_ctype_list(aFLOAT32, ctypes.c_float)
-    static_lib.LJM_ByteArrayToFLOAT32(ctypes.byref(c_ubytes), RegisterOffset, NumFLOAT32, ctypes.byref(c_floats))
-    return _convert_ctype_list_to_list(c_floats)
+def byteArrayToFLOAT32(aBytes, registerOffset, numFLOAT32, aFLOAT32):
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
+    _staticLib.LJM_ByteArrayToFLOAT32(ctypes.byref(cUbytes), registerOffset, numFLOAT32, ctypes.byref(cFloats))
+    return _convertCtypeListToList(cFloats)
  
 #LJM_VOID_RETURN LJM_UINT16ToByteArray(const unsigned short * aUINT16, int RegisterOffset, int NumUINT16, unsigned char * aBytes);
-def LJM_UINT16ToByteArray(aUINT16, RegisterOffset, NumUINT16, aBytes):
-    c_uint16 = _convert_list_to_ctype_list(aUINT16, ctypes.c_uint16)
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    static_lib.LJM_UINT16ToByteArray(ctypes.byref(c_uint16), RegisterOffset, NumUINT16, ctypes.byref(c_ubytes))
-    return _convert_ctype_list_to_list(c_ubytes)
+def UINT16ToByteArray(aUINT16, registerOffset, numUINT16, aBytes):
+    cUint16 = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    _staticLib.LJM_UINT16ToByteArray(ctypes.byref(cUint16), registerOffset, numUINT16, ctypes.byref(cUbytes))
+    return _convertCtypeListToList(cUbytes)
  
 #LJM_VOID_RETURN LJM_ByteArrayToUINT16(const unsigned char * aBytes, int RegisterOffset, int NumUINT16, unsigned short * aUINT16);
-def LJM_ByteArrayToUINT16(aBytes, RegisterOffset, NumUINT16, aUINT16):
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    c_uint16 = _convert_list_to_ctype_list(aUINT16, ctypes.c_uint16)
-    static_lib.LJM_ByteArrayToUINT16(ctypes.byref(c_ubytes), RegisterOffset, NumUINT16, ctypes.byref(c_uint16))
-    return _convert_ctype_list_to_list(c_uint16)
+def byteArrayToUINT16(aBytes, registerOffset, numUINT16, aUINT16):
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    cUint16 = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
+    _staticLib.LJM_ByteArrayToUINT16(ctypes.byref(cUbytes), registerOffset, numUINT16, ctypes.byref(cUint16))
+    return _convertCtypeListToList(cUint16)
 
 #LJM_VOID_RETURN LJM_UINT32ToByteArray(const unsigned int * aUINT32, int RegisterOffset, int NumUINT32, unsigned char * aBytes);
-def LJM_UINT32ToByteArray(aUINT32, RegisterOffset, NumUINT32, aBytes):
-    c_uint32 = _convert_list_to_ctype_list(aUINT32, ctypes.c_uint32)
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    static_lib.LJM_UINT32ToByteArray(ctypes.byref(c_uint32), RegisterOffset, NumUINT32, ctypes.byref(c_ubytes))
-    return _convert_ctype_list_to_list(c_ubytes)
+def UINT32ToByteArray(aUINT32, registerOffset, numUINT32, aBytes):
+    cUint32 = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cUint32), registerOffset, numUINT32, ctypes.byref(cUbytes))
+    return _convertCtypeListToList(cUbytes)
     
 #LJM_VOID_RETURN LJM_ByteArrayToUINT32(const unsigned char * aBytes, int RegisterOffset, int NumUINT32, unsigned int * aUINT32);
-def LJM_ByteArrayToUINT32(aBytes, RegisterOffset, NumUINT32, aUINT32):
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    c_uint32 = _convert_list_to_ctype_list(aUINT32, ctypes.c_uint32)
-    static_lib.LJM_UINT32ToByteArray(ctypes.byref(c_ubytes), RegisterOffset, NumUINT32, ctypes.byref(c_uint32))
-    return _convert_ctype_list_to_list(c_uint32)
+def byteArrayToUINT32(aBytes, registerOffset, numUINT32, aUINT32):
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    cUint32 = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
+    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cUbytes), registerOffset, numUINT32, ctypes.byref(cUint32))
+    return _convertCtypeListToList(cUint32)
 
 #LJM_VOID_RETURN LJM_INT32ToByteArray(const int * aINT32, int RegisterOffset, int NumINT32, unsigned char * aBytes);
-def LJM_INT32ToByteArray(aINT32, RegisterOffset, NumINT32, aBytes):
-    c_int32 = _convert_list_to_ctype_list(aINT32, ctypes.c_int32)
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    static_lib.LJM_UINT32ToByteArray(ctypes.byref(c_int32), RegisterOffset, NumINT32, ctypes.byref(c_ubytes))
-    return _convert_ctype_list_to_list(c_ubytes)
+def INT32ToByteArray(aINT32, registerOffset, numINT32, aBytes):
+    cInt32 = _convertListToCtypeList(aINT32, ctypes.c_int32)
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cInt32), registerOffset, numINT32, ctypes.byref(cUbytes))
+    return _convertCtypeListToList(cUbytes)
 
 #LJM_VOID_RETURN LJM_ByteArrayToINT32(const unsigned char * aBytes, int RegisterOffset, int NumINT32, int * aINT32);
-def LJM_ByteArrayToINT32(aBytes, RegisterOffset, NumINT32, aINT32):
-    c_ubytes = _convert_list_to_ctype_list(aBytes, ctypes.c_ubyte)
-    c_int32 = _convert_list_to_ctype_list(aINT32, ctypes.c_int32)
-    static_lib.LJM_UINT32ToByteArray(ctypes.byref(c_ubytes), RegisterOffset, NumINT32, ctypes.byref(c_int32))
-    return _convert_ctype_list_to_list(c_int32)
+def byteArrayToINT32(aBytes, registerOffset, numINT32, aINT32):
+    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    cInt32 = _convertListToCtypeList(aINT32, ctypes.c_int32)
+    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cUbytes), registerOffset, numINT32, ctypes.byref(cInt32))
+    return _convertCtypeListToList(cInt32)
 
 #LJM_DOUBLE_RETURN LJM_GetDriverVersion();
-def LJM_GetDriverVersion():
-    static_lib.LJM_GetDriverVersion.restype = ctypes.c_double
-    return static_lib.LJM_GetDriverVersion()
+def getDriverVersion():
+    _staticLib.LJM_GetDriverVersion.restype = ctypes.c_double
+    return _staticLib.LJM_GetDriverVersion()
 
 ## Functions end
 
@@ -472,6 +603,9 @@ LJM_idANY = 0
 # LJM_AddressesToMBFB Constants
 LJM_DEFAULT_FEEDBACK_ALLOCATION_SIZE = 62
 LJM_USE_DEFAULT_MAXBYTESPERMBFB = 0
+
+# LJM_ListAll Constants
+LJM_LIST_ALL_SIZE = 128
 
 # Please note that some devices must append 2 bytes to certain packets. Please check the docs
 # for the device you are using.
@@ -593,6 +727,7 @@ LJME_INVALID_MODBUS_CONSTANTS_FILE = 1293
 LJME_INVALID_NAME_LIST = 1294
 LJME_OVERSPECIFIED_IDENTIFIER = 1295
 LJME_OVERSPECIFIED_PORT = 1296
+LJME_INTENT_NOT_READY = 1297
 ## Constants end
 
 ### Wrapper functions for LJM library end
