@@ -88,7 +88,7 @@ _staticLib = _loadLibrary()
 ## Device
 class Device(object):
 
-    def __init__(self, deviceType=0, connectionType=0, identifier="0", debug=False, autoOpen=True): #handle=None, deviceType=None, connectionType=None, device=None):
+    def __init__(self, deviceType=0, connectionType=0, identifier="0", debug=False, autoOpen=True):
         self._handle = None
         self.deviceType = None
         self.connectionType = None
@@ -117,8 +117,8 @@ class Device(object):
     def close(self):
         return close(self._handle)
 
-    def addressesToMBFB(self, maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames):
-        return addressesToMBFB(maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames)
+    def addressesToMBFB(self, maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames):
+        return addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames)
 
     def namesToAddresses(self, numFrames, namesIn):
         return namesToAddresses(numFrames, namesIn)
@@ -132,16 +132,6 @@ class Device(object):
     def MBFBComm(self, unitID, aMBFB):
         return MBFBComm(self._handle, unitID, aMBFB)
     
-    #LJM_ERROR_RETURN LJM_OpenFirstFound(int * DeviceType, int * ConnectionType, int * Handle);
-    ''' deprecated ?
-    def LJM_OpenFirstFound():
-        cDev = ctypes.c_int32()
-        cConn = ctypes.c_int32()
-        cHandle = ctypes.c_int32()
-        error = _staticLib.LJM_OpenFirstFound(ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cHandle))
-        return error, cDev.value, cConn.value, cHandle.value
-    '''
-
     def getHandleInfo(self):
         info = getHandleInfo(self._handle)
         self.deviceType = info[0]
@@ -161,11 +151,11 @@ class Device(object):
     def readRaw(self, numBytes):
         return readRaw(self._handle, numBytes)
 
-    def eWriteAddress(self, address, type, value):
-        return eWriteAddress(self._handle, address, type, value)
+    def eWriteAddress(self, address, dataType, value):
+        return eWriteAddress(self._handle, address, dataType, value)
 
-    def eReadAddress(self, address, type):
-        return eReadAddress(self._handle, address, type)
+    def eReadAddress(self, address, dataType):
+        return eReadAddress(self._handle, address, dataType)
 
     def eWriteName(self, name, value):
         return eWriteName(self._handle, name, value)
@@ -173,11 +163,11 @@ class Device(object):
     def eReadName(self, name):
         return eReadName(self._handle, name)
 
-    def eReadAddresses(self, numFrames, aAddresses, aTypes):
-        return eReadAddresses(self._handle, numFrames, aAddresses, aTypes)
+    def eReadAddresses(self, numFrames, aAddresses, aDataTypes):
+        return eReadAddresses(self._handle, numFrames, aAddresses, aDataTypes)
 
-    def eWriteAddresses(self, numFrames, aAddresses, aTypes, aValues):
-        return eWriteAddresses(self._handle, numFrames, aAddresses, aTypes, aValues)
+    def eWriteAddresses(self, numFrames, aAddresses, aDataTypes, aValues):
+        return eWriteAddresses(self._handle, numFrames, aAddresses, aDataTypes, aValues)
 
     def eReadNames(self, numFrames, names):
         return eReadNames(self._handle, numFrames, names)
@@ -185,8 +175,8 @@ class Device(object):
     def eWriteNames(self, numFrames, names, aValues):
         return eWriteNames(self._handle, numFrames, names, aValues)
 
-    def eAddresses(self, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues):
-        return eAddresses(self._handle, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues)
+    def eAddresses(self, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
+        return eAddresses(self._handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues)
 
     def eNames(self, numFrames, names, aWrites, aNumValues, aValues):
         return eNames(self._handle, numFrames, names, aWrites, aNumValues, aValues)
@@ -245,9 +235,9 @@ def _convertCtypeListToList(listCtype):
 ## Functions
 
 #LJM_ERROR_RETURN LJM_AddressesToMBFB(int MaxBytesPerMBFB, int * aAddresses, int * aTypes, int * aWrites, int * aNumValues, double * aValues, int * NumFrames, unsigned char * aMBFBCommand);
-def addressesToMBFB(maxBytesPerMBFB, aAddresses, aTypes, aWrites, aNumValues, aValues, numFrames):
+def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames):
     cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aDataTypes, ctypes.c_int32)
     cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeList(aValues, ctypes.c_double)
@@ -395,15 +385,15 @@ def readRaw(handle, numBytes):
     return _convertCtypeListToList(cData)
 
 #LJM_ERROR_RETURN LJM_eWriteAddress(int Handle, int Address, int Type, double Value);
-def eWriteAddress(handle, address, type, value):
-    error = _staticLib.LJM_eWriteAddress(handle, address, type, ctypes.c_double(value))
+def eWriteAddress(handle, address, dataType, value):
+    error = _staticLib.LJM_eWriteAddress(handle, address, dataType, ctypes.c_double(value))
     if error != LJME_NOERROR:
         raise LJMError(error)
 
 #LJM_ERROR_RETURN LJM_eReadAddress(int Handle, int Address, int Type, double * Value);
-def eReadAddress(handle, address, type):
+def eReadAddress(handle, address, dataType):
     cVal = ctypes.c_double(0)
-    error = _staticLib.LJM_eReadAddress(handle, address, type, ctypes.byref(cVal))
+    error = _staticLib.LJM_eReadAddress(handle, address, dataType, ctypes.byref(cVal))
     if error != LJME_NOERROR:
         raise LJMError(error)
     return cVal.value
@@ -423,9 +413,9 @@ def eReadName(handle, name):
     return cVal.value
 
 #LJM_ERROR_RETURN LJM_eReadAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, double * aValues, int * ErrorFrame);
-def eReadAddresses(handle, numFrames, aAddresses, aTypes):
+def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aDataTypes, ctypes.c_int32)
     cVals = (ctypes.c_double*numFrames)(0)
     cErrorFrame = ctypes.c_int32(0)
     error = _staticLib.LJM_eReadAddresses(handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
@@ -434,9 +424,9 @@ def eReadAddresses(handle, numFrames, aAddresses, aTypes):
     return _convertCtypeListToList(cVals)
 
 #LJM_ERROR_RETURN LJM_eWriteAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, double * aValues, int * ErrorFrame);
-def eWriteAddresses(handle, numFrames, aAddresses, aTypes, aValues):
+def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
     cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aDataTypes, ctypes.c_int32)
     cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
     cErrorFrame = ctypes.c_int32(0)
     error = _staticLib.LJM_eWriteAddresses(handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
@@ -463,9 +453,9 @@ def eWriteNames(handle, numFrames, names, aValues):
         raise LJMError(error, cErrorFrame.value)
 
 #LJM_ERROR_RETURN LJM_eAddresses(int Handle, int NumFrames, int * aAddresses, int * aTypes, int * aWrites, int * aNumValues, double * aValues, int * ErrorFrame);
-def eAddresses(handle, numFrames, aAddresses, aTypes, aWrites, aNumValues, aValues):
+def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
     cAddrs = _convertListToCtypeList(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeList(aTypes, ctypes.c_int32)
+    cTypes = _convertListToCtypeList(aDataTypes, ctypes.c_int32)
     cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeList(aValues, ctypes.c_double)
