@@ -246,8 +246,8 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
     error = _staticLib.LJM_AddressesToMBFB(maxBytesPerMBFB, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cNumFrames), ctypes.byref(cComm))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cNumFrames.value, _convertCtypeListToList(cComm)]
-    
+    return cNumFrames.value, _convertCtypeListToList(cComm)
+
 #LJM_ERROR_RETURN LJM_NamesToAddresses(int NumFrames, const char ** NamesIn, int * aAddressesOut, int * aTypesOut);
 def namesToAddresses(numFrames, namesIn):
     cNamesIn = _convertStringListToCtypeList(namesIn)
@@ -256,7 +256,7 @@ def namesToAddresses(numFrames, namesIn):
     error = _staticLib.LJM_NamesToAddresses(numFrames, ctypes.byref(cNamesIn), ctypes.byref(cAddrsOut), ctypes.byref(cTypesOut))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cAddrsOut.value, cTypesOut.value]
+    return cAddrsOut.value, cTypesOut.value
 
 #LJM_ERROR_RETURN LJM_NameToAddress(const char * NameIn, int * AddressOut, int * TypeOut);
 def nameToAddress(nameIn):
@@ -265,7 +265,7 @@ def nameToAddress(nameIn):
     error = _staticLib.LJM_NameToAddress(nameIn, ctypes.byref(cAddrOut), ctypes.byref(cTypeOut))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cAddrOut.value, cTypeOut]
+    return cAddrOut.value, cTypeOut
 
 #parameter will change location
 ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
@@ -306,7 +306,7 @@ def listAll(deviceType, connectionType):
     error = _staticLib.LJM_ListAll(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])]
+    return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])
 
 #LJM_ERROR_RETURN LJM_ListAllS(const char * DeviceType, const char * ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
 def listAllS(deviceType, connectionType):
@@ -316,7 +316,7 @@ def listAllS(deviceType, connectionType):
     error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])]
+    return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])
 
 #LJM_ERROR_RETURN LJM_OpenS(const char * DeviceType, const char * ConnectionType, const char * Identifier, int * Handle);
 def openS(deviceType, connectionType, identifier):
@@ -334,7 +334,7 @@ def open(deviceType, connectionType, identifier):
     error = _staticLib.LJM_Open(ctypes.byref(cDev), ctypes.byref(cConn), identifier, ctypes.byref(cHandle))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cDev.value, cConn.value, cHandle.value]
+    return cDev.value, cConn.value, cHandle.value
 
 #LJM_ERROR_RETURN LJM_GetHandleInfo(int Handle, int * DeviceType, int * ConnectionType, int * SerialNumber, int * IPAddress, int * Port, int * PacketMaxBytes);
 def getHandleInfo(handle):
@@ -347,7 +347,7 @@ def getHandleInfo(handle):
     error = _staticLib.LJM_GetHandleInfo(handle, ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cSer), ctypes.byref(cIPAddr), ctypes.byref(cPort), ctypes.byref(cPktMax))
     if error != LJME_NOERROR:
         raise LJMError(error)
-    return [cDev.value, cConn.value, cSer.value, cIPAddr.value, cPort.value, cPktMax.value]
+    return cDev.value, cConn.value, cSer.value, cIPAddr.value, cPort.value, cPktMax.value
 
 #LJM_ERROR_STRING LJM_ErrorToString(int ErrorCode);
 def errorToString(errorCode):
