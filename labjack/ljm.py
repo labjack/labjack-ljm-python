@@ -550,17 +550,17 @@ LJM_WRITE = 1
 
 # Data types:
 # Automatic endian conversion, if needed by the processor
-LJM_UINT16 = 0 # C type of unsigned short
-LJM_UINT32 = 1 # C type of unsigned int
-LJM_INT32 = 2 # C type of int
-LJM_FLOAT32 = 3 # C type of float
+LJM_UINT16 = 0
+LJM_UINT32 = 1
+LJM_INT32 = 2
+LJM_FLOAT32 = 3
 
 # Advanced users data type:
 # Does not do any endianness conversion
-LJM_BYTE = 99 # C type of unsigned char
+LJM_BYTE = 99
 
-# LJM_NamesToAddresses sets this when a register name is not found
-LJM_INVALID_NAME_ADDRESS = -1 # 0xFFFFFFFF or 4294967295
+# namesToAddresses sets this when a register name is not found
+LJM_INVALID_NAME_ADDRESS = -1
 LJM_MAX_NAME_SIZE = 256
 
 LJM_NOT_ENOUGH_DATA_SPACE = 9999.99
@@ -576,32 +576,29 @@ LJM_dtDIGIT = 200
 
 # Connection types:
 LJM_ctANY = 0
-LJM_ctUSB = 1 # UE9 + U3
-LJM_ctTCP = 2 # UE9 only
+LJM_ctUSB = 1
+LJM_ctTCP = 2
 
 # TCP/Ethernet constants:
 LJM_NO_IP_ADDRESS = 0
 LJM_NO_PORT = 0
 LJM_DEFAULT_PORT = 502
-# This becomes 255.255.255.255 when passed to inet_ntoa():
 LJM_UNKNOWN_IP_ADDRESS = -1
 
 # Identifier types:
-LJM_DEMO_MODE = "-1"
+LJM_DEMO_MODE = '-1'
 LJM_idANY = 0
 
-# LJM_AddressesToMBFB Constants
+# addressesToMBFB Constants
 LJM_DEFAULT_FEEDBACK_ALLOCATION_SIZE = 62
 LJM_USE_DEFAULT_MAXBYTESPERMBFB = 0
 
-# LJM_ListAll Constants
+# listAll Constants
 LJM_LIST_ALL_SIZE = 128
 
-# Please note that some devices must append 2 bytes to certain packets. Please check the docs
-# for the device you are using.
 LJM_MAX_USB_PACKET_NUM_BYTES = 64
-LJM_MAX_TCP_PACKET_NUM_BYTES_T7 = 1400 # Note that this will probably change
-LJM_MAX_TCP_PACKETS_NUM_BYTES_NON_T7 = 64 # This may change
+LJM_MAX_TCP_PACKET_NUM_BYTES_T7 = 1400
+LJM_MAX_TCP_PACKETS_NUM_BYTES_NON_T7 = 64
 
 # Timeout Constants
 LJM_NO_TIMEOUT = 0
@@ -718,6 +715,7 @@ LJME_INVALID_NAME_LIST = 1294
 LJME_OVERSPECIFIED_IDENTIFIER = 1295
 LJME_OVERSPECIFIED_PORT = 1296
 LJME_INTENT_NOT_READY = 1297
+
 ## Constants end
 
 ### Wrapper functions for LJM library end
