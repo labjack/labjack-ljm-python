@@ -19,10 +19,10 @@ class LJMError(Exception):
         self._errorString = errorString
         if not self._errorString:
             try:
-                self._errorString = LJM_ErrorToString(errorCode)
+                self._errorString = errorToString(errorCode)  
             except:
-                self._errorString = str(errorCode)
-
+                self._errorString = "" #str(errorCode)
+        
     @property
     def errorCode(self):
         return self._errorCode
@@ -40,7 +40,7 @@ class LJMError(Exception):
             frameStr = ""
         else:
             frameStr = "Frame " + str(self._errorFrame) + ", "
-        if self._errorString.find("The error constants file") != -1 and self._errorString.find("could not be opened") != -1:
+        if self._errorString.find("The error constants file") != -1 and self._errorString.find("could not be opened") != -1 or len(self._errorString) == 0:
             errorStr = "Error " + str(self._errorCode)
         else:
             errorStr = str(self._errorString)
@@ -88,6 +88,7 @@ _staticLib = _loadLibrary()
 ## Device
 class Device(object):
 
+    #may not be able to default deviceType and connectionType
     def __init__(self, deviceType=0, connectionType=0, identifier="0", debug=False, autoOpen=True):
         self._handle = None
         self.deviceType = None
@@ -103,19 +104,20 @@ class Device(object):
                 self.open(int(deviceType), int(connectionType), str(identifier))
             else:
                 raise LJMError(errorString = "deviceType and connectionType are not both strings or integers")
-        deviceInfo = self.getHandleInfo()
         
     def __del__(self):
-        self.close()
+        pass
 
-    def openS(self, deviceType, connectionType, identifier):
-        self._handle = openS(self, deviceType, connectionType, identifier)
+    def openS(self, deviceType, connectionType, identifier="0"):
+        self._handle = openS(deviceType, connectionType, identifier)
+        self.getHandleInfo()
 
-    def open(self, deviceType, connectionType, identifier):
+    def open(self, deviceType, connectionType, identifier="0"):
         self._handle = open(deviceType, connectionType, identifier)[2]
+        self.getHandleInfo()
 
     def close(self):
-        return close(self._handle)
+        close(self._handle)
 
     def addressesToMBFB(self, maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames):
         return addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames)
@@ -146,19 +148,19 @@ class Device(object):
         return errorToString(errorCode)
    
     def writeRaw(self, data, numBytes):
-        return writeRaw(self._handle, data, numBytes)
+        writeRaw(self._handle, data, numBytes)
 
     def readRaw(self, numBytes):
         return readRaw(self._handle, numBytes)
 
     def eWriteAddress(self, address, dataType, value):
-        return eWriteAddress(self._handle, address, dataType, value)
+        eWriteAddress(self._handle, address, dataType, value)
 
     def eReadAddress(self, address, dataType):
         return eReadAddress(self._handle, address, dataType)
 
     def eWriteName(self, name, value):
-        return eWriteName(self._handle, name, value)
+        eWriteName(self._handle, name, value)
 
     def eReadName(self, name):
         return eReadName(self._handle, name)
@@ -167,13 +169,13 @@ class Device(object):
         return eReadAddresses(self._handle, numFrames, aAddresses, aDataTypes)
 
     def eWriteAddresses(self, numFrames, aAddresses, aDataTypes, aValues):
-        return eWriteAddresses(self._handle, numFrames, aAddresses, aDataTypes, aValues)
+        eWriteAddresses(self._handle, numFrames, aAddresses, aDataTypes, aValues)
 
     def eReadNames(self, numFrames, names):
         return eReadNames(self._handle, numFrames, names)
 
     def eWriteNames(self, numFrames, names, aValues):
-        return eWriteNames(self._handle, numFrames, names, aValues)
+        eWriteNames(self._handle, numFrames, names, aValues)
 
     def eAddresses(self, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
         return eAddresses(self._handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues)
@@ -204,7 +206,7 @@ class Device(object):
 
     def byteArrayToINT32(self, aBytes, registerOffset, numINT32, aINT32):
         return byteArrayToINT32(aBytes, registerOffset, numINT32, aINT32)
-    
+
 ## Device end
 
 ### Classes end
@@ -270,7 +272,6 @@ def nameToAddress(nameIn):
 #parameter will change location
 ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
 
-#test
 #LJM_ERROR_RETURN LJM_MBFBComm(int Handle, unsigned char UnitID, unsigned char * aMBFB, int * errorFrame);
 def MBFBComm(handle, unitID, aMBFB):
     cMBFB = _convertListToCtypeList(aMBFB, ctypes.c_ubyte)
@@ -351,7 +352,9 @@ def getHandleInfo(handle):
 
 #LJM_ERROR_STRING LJM_ErrorToString(int ErrorCode);
 def errorToString(errorCode):
-    return ctypes.c_char_p(_staticLib.LJM_ErrorToString(errorCode)).value
+    errStr = " " * LJM_MAX_NAME_SIZE
+    _staticLib.LJM_ErrorToString(errorCode, errStr)
+    return errStr.strip()
 
 #LJM_VOID_RETURN LJM_LoadConstants();
 def loadConstants():
@@ -586,7 +589,7 @@ LJM_DEFAULT_PORT = 502
 LJM_UNKNOWN_IP_ADDRESS = -1
 
 # Identifier types:
-LJM_DEMO_MODE = '-1'
+LJM_DEMO_MODE = "-1"
 LJM_idANY = 0
 
 # addressesToMBFB Constants
