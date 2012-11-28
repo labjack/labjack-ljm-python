@@ -15,14 +15,18 @@ class LJMError(Exception):
     """
     def __init__(self, errorCode = None, errorFrame = None, errorString = ""):
         self._errorCode = errorCode
+        if errorCode is LJME_NOERROR or errorCode is None:
+            self._isWarning = False
+        else:
+            self._isWarning = _isWarningErrorCode(errorCode)
         self._errorFrame = errorFrame
-        self._errorString = errorString
+        self._errorString = str(errorString)
         if not self._errorString:
             try:
                 self._errorString = errorToString(errorCode)  
             except:
-                self._errorString = "" #str(errorCode)
-        
+                pass
+
     @property
     def errorCode(self):
         return self._errorCode
@@ -34,16 +38,23 @@ class LJMError(Exception):
     @property
     def errorString(self):
         return self._errorString
+
+    @property
+    def isWarning(self):
+        return self._isWarning
     
     def __str__(self):
-        if self._errorFrame is None:
-            frameStr = ""
+        frameStr = ""
+        errorCodeStr = ""
+        errorStr = ""
+        if self._errorFrame is not None:
+            frameStr = "Frame " + str(self._errorFrame) + " "
+        if self._errorCode is not None:
+            errorCodeStr = " (" + str(self._errorCode) + ")"
+        if self._isWarning:
+            errorStr = "Warning" + errorCodeStr + " "
         else:
-            frameStr = "Frame " + str(self._errorFrame) + ", "
-        if self._errorString.find("The error constants file") != -1 and self._errorString.find("could not be opened") != -1 or len(self._errorString) == 0:
-            errorStr = "Error " + str(self._errorCode)
-        else:
-            errorStr = str(self._errorString)
+            errorStr = "Error" + errorCodeStr + " "  + self._errorString
         return frameStr + errorStr
 ## LJM Exception end
 
@@ -89,7 +100,7 @@ _staticLib = _loadLibrary()
 class Device(object):
 
     #may not be able to default deviceType and connectionType
-    def __init__(self, deviceType=0, connectionType=0, identifier="0", debug=False, autoOpen=True):
+    def __init__(self, deviceType=0, connectionType=0, identifier="LJM_idANY", debug=False, autoOpen=True):
         self._handle = None
         self.deviceType = None
         self.connectionType = None
@@ -98,21 +109,24 @@ class Device(object):
         self.port = None
         self.maxBytesPerMB = None
         if autoOpen:
-            if isinstance(deviceType, str) and isinstance(connectionType):
-                self.open(deviceType, connectionType, str(identifier))
+            if isinstance(deviceType, str) and isinstance(connectionType, str):
+                self.openS(deviceType, connectionType, str(identifier))
             elif str(deviceType).isdigit() and str(connectionType).isdigit():
                 self.open(int(deviceType), int(connectionType), str(identifier))
             else:
-                raise LJMError(errorString = "deviceType and connectionType are not both strings or integers")
-        
+                raise LJMError(errorString = "device and connection types are not both strings or integers")
+    
     def __del__(self):
         pass
 
-    def openS(self, deviceType, connectionType, identifier="0"):
+    def openS(self, deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_idANY"):
         self._handle = openS(deviceType, connectionType, identifier)
+        if len(self._handle) > 1:
+            #There was a warning
+            self._handle = self._handle[0]
         self.getHandleInfo()
 
-    def open(self, deviceType, connectionType, identifier="0"):
+    def open(self, deviceType=0, connectionType=0, identifier="LJM_idANY"):
         self._handle = open(deviceType, connectionType, identifier)[2]
         self.getHandleInfo()
 
@@ -122,18 +136,18 @@ class Device(object):
     def addressesToMBFB(self, maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames):
         return addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames)
 
+    def MBFBComm(self, unitID, aMBFB):
+        return MBFBComm(self._handle, unitID, aMBFB)
+    
+    def updateValues(self, aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames):
+        return updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames)
+
     def namesToAddresses(self, numFrames, namesIn):
         return namesToAddresses(numFrames, namesIn)
 
     def nameToAddress(self, nameIn):
         return nameToAddress(nameIn)
 
-    #parameter will change location
-    ##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
-    
-    def MBFBComm(self, unitID, aMBFB):
-        return MBFBComm(self._handle, unitID, aMBFB)
-    
     def getHandleInfo(self):
         info = getHandleInfo(self._handle)
         self.deviceType = info[0]
@@ -219,17 +233,14 @@ def _convertListToCtypeList(li, cType):
         cList[i] = cType(li[i])
     return cList
 
-def _convertStringListToCtypeList(li):
-    #figure out the 2D size
-    size2 = max(len(x) for x in li) + 1
-    cList = (ctypes.c_char*size2*len(li))()
-    for i in range(len(li)):
-        cList[i].value = li[i]
-    return cList
-
 def _convertCtypeListToList(listCtype):
     return [i for i in listCtype]
 
+def _isWarningErrorCode(errorCode):
+    if errorCode >= LJME_WARNINGS_BEGIN and errorCode <= LJME_WARNINGS_END:
+        return True
+    else:
+        return False
 ## Private Helper functions end
 
 ### Wrapper for LJM library
@@ -247,8 +258,33 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
     cComm = (ctypes.c_ubyte*maxBytesPerMBFB)(0)
     error = _staticLib.LJM_AddressesToMBFB(maxBytesPerMBFB, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cNumFrames), ctypes.byref(cComm))
     if error != LJME_NOERROR:
-        raise LJMError(error)
+        if _isWarningErrorCode(error):
+            return cNumFrames.value, _convertCtypeListToList(cComm), error
+        else:
+            raise LJMError(error)
     return cNumFrames.value, _convertCtypeListToList(cComm)
+
+#LJM_ERROR_RETURN LJM_MBFBComm(int Handle, unsigned char UnitID, unsigned char * aMBFB, int * errorFrame);
+def MBFBComm(handle, unitID, aMBFB):
+    cMBFB = _convertListToCtypeList(aMBFB, ctypes.c_ubyte)
+    cErrorFrame = ctypes.c_int32(0)
+    error = _staticLib.LJM_MBFBComm(handle, unitID, ctypes.byref(cMBFB), ctypes.byref(cErrorFrame))
+    if error != LJME_NOERROR:
+        raise LJMError(error, cErrorFrame.value)
+    return _convertCtypeListToList(cMBFB)
+
+#parameter will change location
+#LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
+def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames):
+    cMBFB = _convertListToCtypeList(aMBFBResponse, ctypes.c_ubyte)
+    cTypes = _convertListToCtypeList(aDataTypes, ctypes.c_int32)
+    cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
+    cVals = ctypes.c_double(0)*numFrames
+    error = _staticLib.LJM_UpdateValues(ctypes.byref(cMBFB), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), numFrames, ctypes.byref(cVals))
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    return _convertCtypeListToList(cVals)
 
 #LJM_ERROR_RETURN LJM_NamesToAddresses(int NumFrames, const char ** NamesIn, int * aAddressesOut, int * aTypesOut);
 def namesToAddresses(numFrames, namesIn):
@@ -269,18 +305,6 @@ def nameToAddress(nameIn):
         raise LJMError(error)
     return cAddrOut.value, cTypeOut
 
-#parameter will change location
-##LJM_ERROR_RETURN LJM_UpdateValues(unsigned char * aMBFBResponse, int * aTypes, int * aWrites, int * aNumValues, int NumFrames, double * aValues);
-
-#LJM_ERROR_RETURN LJM_MBFBComm(int Handle, unsigned char UnitID, unsigned char * aMBFB, int * errorFrame);
-def MBFBComm(handle, unitID, aMBFB):
-    cMBFB = _convertListToCtypeList(aMBFB, ctypes.c_ubyte)
-    cErrorFrame = ctypes.c_int32(0)
-    error = _staticLib.LJM_MBFBComm(handle, unitID, ctypes.byref(cMBFB), ctypes.byref(cErrorFrame))
-    if error != LJME_NOERROR:
-        raise LJMError(error, cErrorFrame.value)
-    return _convertCtypeListToList(cMBFB)
-
 #LJM_VOID_RETURN LJM_SetSendReceiveTimeout(unsigned int TimeoutMS);
 def setSendReceiveTimeout(timeoutMS):
     _staticLib.LJM_SetSendReceiveTimeout(timeoutMS)
@@ -289,16 +313,6 @@ def setSendReceiveTimeout(timeoutMS):
 def setOpenTCPDeviceTimeout(timeoutSec, timeoutUSec):
     _staticLib.LJM_SetOpenTCPDeviceTimeout(timeoutSec, timeoutUSec)
 
-#LJM_ERROR_RETURN LJM_OpenFirstFound(int * DeviceType, int * ConnectionType, int * Handle);
-''' deprecated ?
-def LJM_OpenFirstFound():
-    cDev = ctypes.c_int32()
-    cConn = ctypes.c_int32()
-    cHandle = ctypes.c_int32()
-    error = _staticLib.LJM_OpenFirstFound(ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cHandle))
-    return error, cDev.value, cConn.value, cHandle.value
-'''
-
 #LJM_ERROR_RETURN LJM_ListAll(int DeviceType, int ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
 def listAll(deviceType, connectionType):
     cNumFound = ctypes.c_int32(0)
@@ -306,7 +320,10 @@ def listAll(deviceType, connectionType):
     cIPAddrs = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
     error = _staticLib.LJM_ListAll(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != LJME_NOERROR:
-        raise LJMError(error)
+        if _isWarningErrorCode(error):
+            return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value]), error
+        else:
+            raise LJMError(error)
     return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])
 
 #LJM_ERROR_RETURN LJM_ListAllS(const char * DeviceType, const char * ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
@@ -316,7 +333,10 @@ def listAllS(deviceType, connectionType):
     cIPAddrs = (ctypes.c_int32*LJM_LIST_ALL_SIZE)(0)
     error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != LJME_NOERROR:
-        raise LJMError(error)
+        if _isWarningErrorCode(error):
+            return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value]), error
+        else:
+            raise LJMError(error)
     return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])
 
 #LJM_ERROR_RETURN LJM_OpenS(const char * DeviceType, const char * ConnectionType, const char * Identifier, int * Handle);
@@ -324,7 +344,10 @@ def openS(deviceType, connectionType, identifier):
     cHandle = ctypes.c_int32(0)
     error = _staticLib.LJM_OpenS(deviceType, connectionType, identifier, ctypes.byref(cHandle))
     if error != LJME_NOERROR:
-        raise LJMError(error)
+        if _isWarningErrorCode(error):
+            return cHandle.value, error
+        else:
+            raise LJMError(error)
     return cHandle.value
 
 #def LJM_ERROR_RETURN LJM_Open(int * DeviceType, int * ConnectionType, const char * Identifier, int * Handle);
@@ -334,7 +357,10 @@ def open(deviceType, connectionType, identifier):
     cHandle = ctypes.c_int32(0)
     error = _staticLib.LJM_Open(ctypes.byref(cDev), ctypes.byref(cConn), identifier, ctypes.byref(cHandle))
     if error != LJME_NOERROR:
-        raise LJMError(error)
+        if _isWarningErrorCode(error):
+            return cDev.value, cConn.value, cHandle.value, error
+        else:
+            raise LJMError(error)
     return cDev.value, cConn.value, cHandle.value
 
 #LJM_ERROR_RETURN LJM_GetHandleInfo(int Handle, int * DeviceType, int * ConnectionType, int * SerialNumber, int * IPAddress, int * Port, int * PacketMaxBytes);
@@ -438,17 +464,18 @@ def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
 
 #LJM_ERROR_RETURN LJM_eReadNames(int Handle, int NumFrames, const char ** Names, double * aValues, int * ErrorFrame);
 def eReadNames(handle, numFrames, names):
-    cNames = _convertStringListToCtypeList(names)
+    cNames = _convertListToCtypeList(names, ctypes.c_char_p)
     cVals =  (ctypes.c_double*numFrames)(0)
     cErrorFrame = ctypes.c_int32(0)
-    error = _staticLib.LJM_eReadNames(handle, numFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    print cNames
+    error = _staticLib.LJM_eReadNames(handle, numFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorFrame))
     if error != LJME_NOERROR:
         raise LJMError(error, cErrorFrame.value)
     return _convertCtypeListToList(cVals)
 
 #LJM_ERROR_RETURN LJM_eWriteNames(int Handle, int NumFrames, const char ** Names, double * aValues, int * ErrorFrame);
 def eWriteNames(handle, numFrames, names, aValues):
-    cNames = _convertStringListToCtypeList(names)
+    cNames = _convertListToCtypeList(names, ctypes.c_char_p)
     cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
     cErrorFrame = ctypes.c_int32(0)
     error = _staticLib.LJM_eWriteNames(handle, numFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
@@ -470,7 +497,7 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
     
 #LJM_ERROR_RETURN LJM_eNames(int Handle, int NumFrames, const char ** Names, int * aWrites, int * aNumValues, double * aValues, int * ErrorFrame);
 def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
-    cNames = _convertStringListToCtypeList(names)
+    cNames = _convertListToCtypeList(names, ctypes.c_char_p)
     cWrites = _convertListToCtypeList(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeList(aNumValues, ctypes.c_int32)
     cVals =  _convertListToCtypeList(aValues, ctypes.c_double)
@@ -561,6 +588,8 @@ LJM_FLOAT32 = 3
 # Advanced users data type:
 # Does not do any endianness conversion
 LJM_BYTE = 99
+LJM_STRING = 98
+LJM_STRING_MAX_SIZE = 49
 
 # namesToAddresses sets this when a register name is not found
 LJM_INVALID_NAME_ADDRESS = -1
@@ -616,6 +645,7 @@ LJME_NOERROR = 0
 LJME_WARNINGS_BEGIN = 200
 LJME_WARNINGS_END = 399
 LJME_FRAMES_OMITTED_DUE_TO_PACKET_SIZE = 201
+LJME_ATTRIBUTE_LOAD_FAILURE = 202
 
 # Modbus Errors:
 LJME_MODBUS_ERRORS_BEGIN = 1200
