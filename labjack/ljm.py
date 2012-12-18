@@ -15,12 +15,6 @@ class LJMError(Exception):
     """
     def __init__(self, errorCode = None, errorFrame = None, errorString = ""):
         self._errorCode = errorCode
-        '''
-        if errorCode is LJME_NOERROR or errorCode is None:
-            self._isWarning = False
-        else:
-            self._isWarning = _isWarningErrorCode(errorCode)
-        '''
         self._errorFrame = errorFrame
         self._errorString = str(errorString)
         if not self._errorString:
@@ -41,12 +35,6 @@ class LJMError(Exception):
     def errorString(self):
         return self._errorString
 
-    '''
-    @property
-    def isWarning(self):
-        return self._isWarning
-    '''
-
     def __str__(self):
         frameStr = ""
         errorCodeStr = ""
@@ -54,22 +42,8 @@ class LJMError(Exception):
         if self._errorFrame is not None:
             frameStr = "Frame " + str(self._errorFrame) + ", "
         if self._errorCode is not None:
-            errorCodeStr = "LJM error code " + str(self._errorCode) + " "
+            errorCodeStr = "LJM library error code " + str(self._errorCode) + " "
         return frameStr + errorCodeStr + self._errorString
-        '''
-        frameStr = ""
-        errorCodeStr = ""
-        errorStr = ""
-        if self._errorFrame is not None:
-            frameStr = "Frame " + str(self._errorFrame) + ", "
-        if self._errorCode is not None:
-            errorCodeStr = " Errorcode " + str(self._errorCode) + ","
-        if self._isWarning:
-            errorStr = "Warning" + errorCodeStr + " " + self._errorString
-        else:
-            errorStr = "Error" + errorCodeStr + " "  + self._errorString
-        return frameStr + errorStr
-        '''
 ## LJM Exception end
 
 ### Load LJM library
@@ -125,6 +99,13 @@ class Device(object):
         self.port = None
         self.maxBytesPerMB = None
         if autoOpen:
+            if isinstance(deviceType, str) and str(connectionType) == "0":
+                #Use string default value for connectionType
+                connectionType = "LJM_ctANY"
+            if isinstance(connectionType, str) and str(deviceType) == "0":
+                #Use string default value for deviceType
+                deviceType = "LJM_dtANY"
+
             try:
                 self.open(deviceType, connectionType, identifier)
             except LJMError, le:
@@ -424,16 +405,7 @@ class Device(object):
                 raise LJMError(errorString = "aValues needs to be a list of floats with a length of at least " + str(sum(aNumValues)) + ".")        
         numFrames = len(cAddrs)
         cErrorFrame = ctypes.c_int32(0)
-        '''
-        #Count the aNumValues and make sure aValues is large enough
-        numTotal = sum(aNumValues[0:numFrames])
-        if aValues is None:
-            aValues = [0.0]*numTotal
-        if numTotal > len(aValues):
-            aValues.append([0]*(numTotal-len(aValues)))
-        cVals = _convertListToCtypeList(aValues, ctypes.c_double)
-        cErrorFrame = ctypes.c_int32(0)
-        '''
+
         error = _staticLib.LJM_eAddresses(self._handle, numFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
         if error != LJME_NOERROR:
             raise LJMError(error, cErrorFrame.value)
@@ -554,14 +526,6 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues):
     numFrames = len(cTypes)
     cVals = (ctypes.c_double*(sum(aNumValues)))(0)
     
-    print "updateValues debug :"
-    print " MBFBRes:", aMBFBResponse
-    print " dt:", aDataTypes
-    print " wr:", aWrites
-    print " nVals: ", aNumValues
-    print " fr: ", numFrames
-    print " vals: ", cVals
-
     error = _staticLib.LJM_UpdateValues(ctypes.byref(cMBFB), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), numFrames, ctypes.byref(cVals))
     if error != LJME_NOERROR:
         raise LJMError(error)
@@ -598,16 +562,6 @@ def nameToAddress(nameIn):
         raise LJMError(error)
     
     return cAddrOut.value, cTypeOut.value
-
-''' #Looks like these are going to be removed
-#LJM_VOID_RETURN LJM_SetSendReceiveTimeout(unsigned int TimeoutMS);
-def setSendReceiveTimeout(timeoutMS):
-    _staticLib.LJM_SetSendReceiveTimeout(timeoutMS)
-
-#LJM_VOID_RETURN LJM_SetOpenTCPDeviceTimeout(unsigned int TimeoutSec, unsigned int TimeoutUSec);
-def setOpenTCPDeviceTimeout(timeoutSec, timeoutUSec):
-    _staticLib.LJM_SetOpenTCPDeviceTimeout(timeoutSec, timeoutUSec)
-'''
 
 #LJM_ERROR_RETURN LJM_ListAll(int DeviceType, int ConnectionType, int * NumFound, int * aSerialNumbers, int * aIPAddresses);
 def listAll(deviceType, connectionType):
@@ -652,7 +606,7 @@ def listAllS(deviceType, connectionType):
     
     return cNumFound.value, _convertCtypeListToList(cSerNums[0:cNumFound.value]), _convertCtypeListToList(cIPAddrs[0:cNumFound.value])
 
-#LJM_ERROR_STRING LJM_ErrorToString(int ErrorCode);
+#LJM_VOID_RETURN LJM_ErrorToString(int ErrorCode, char * pString);
 def errorToString(errorCode):
     try:
         cErr = ctypes.c_int32(errorCode)
@@ -674,97 +628,370 @@ def closeAll():
     if error != LJME_NOERROR:
         raise LJMError(error)
 
-#LJM_DOUBLE_RETURN LJM_GetDriverVersion();
-def getLibraryVersion():
-    _staticLib.LJM_GetLibraryVersion.restype = ctypes.c_double
+#LJM_ERROR_RETURN LJM_WriteLibraryConfigS(const char * Parameter, double Value);
+def writeLibraryConfigS(parameter, value):
+    if isinstance(parameter, str) is False:
+        raise LJMError(errorString = "parameter needs to be a string.")
+    try:
+        cVal = ctypes.c_double(value)
+    except:
+        raise LJMError(errorString = "value needs to be a float.")
     
-    return _staticLib.LJM_GetLibraryVersion()
+    error = _staticLib.LJM_WriteLibraryConfigS(parameter, cVal)
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+#LJM_ERROR_RETURN LJM_ReadLibraryConfigS(const char * Parameter, double * Value);
+def readLibraryConfigS(parameter):
+    if isinstance(parameter, str) is False:
+        raise LJMError(errorString = "parameter needs to be a string.")
+    cVal = ctypes.c_double(0)
 
-'''
-const char * const LJM_SEND_RECEIVE_TIMEOUT_MS = "LJM_SEND_RECEIVE_TIMEOUT_MS";
-const char * const LJM_OPEN_TCP_DEVICE_TIMEOUT_MS = "LJM_OPEN_TCP_DEVICE_TIMEOUT_MS";
-const char * const LJM_LOG_MODE = "LJM_LOG_MODE";
-const char * const LJM_LOG_LEVEL = "LJM_LOG_LEVEL";
-const char * const LJM_VERSION = "LJM_VERSION";
+    error = _staticLib.LJM_ReadLibraryConfigS(parameter, ctypes.byref(cVal))
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+    return cVal.value
 
-##LJM_ERROR_RETURN LJM_WriteLibraryConfigS(const char * Parameter, double Value);
+#LJM_ERROR_RETURN LJM_NumberToIP(unsigned int Number, char * IPv4String);
+def numberToIP(number):
+    try:
+        cNum = ctypes.c_uint32(number)
+    except:
+        raise LJMError(errorString = "number needs to be an integer.")
+    IPv4String = " "*LJM_IPv4_STRING_SIZE
 
-##LJM_ERROR_RETURN LJM_ReadLibraryConfigS(const char * Parameter, double * Value);
-'''
+    error = _staticLib.LJM_NumberToIP(cNum, IPv4String)
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+    return IPv4String.strip()
+
+#LJM_ERROR_RETURN LJM_IPToNumber(const char * IPv4String, unsigned int * Number);
+def IPToNumber(IPv4String):
+    if isinstance(IPv4String, str) is False:
+        raise LJMError(errorString = "IPv4String needs to be a string.")
+    #Make the sthe string is at least length LJM_IPv4_STRING_SIZE
+    if len(IPv4String) < LJM_IPv4_STRING_SIZE:
+        IPv4String += "\0"*(LJM_IPv4_STRING_SIZE-len(IPv4String))
+    cNum = ctypes.c_uint32(0)
+    
+    error = _staticLib.LJM_IPToNumber(IPv4String, ctypes.byref(cNum));
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+    return cNum.value
+
+#LJM_ERROR_RETURN LJM_NumberToMAC(unsigned long long Number, char * MACString);
+def numberToMAC(number):
+    try:
+        cNum = ctypes.c_uint64(number)
+    except:
+        raise LJMError(errorString = "number needs to be long integer.")
+    MACString = " "*LJM_MAC_STRING_SIZE
+
+    error = _staticLib.LJM_NumberToMAC(number, MACString)
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+    return MACString.strip()
+
+#LJM_ERROR_RETURN LJM_MACToNumber(const char * MACString, unsigned long long * Number);
+def MACToNumber(MACString):
+    if isinstance(MACString, str) is False:
+        raise LJMError(errorString = "MACString needs to be a string.")
+    #Make the sthe string is at least length LJM_MAC_STRING_SIZE
+    if len(MACString) < LJM_MAC_STRING_SIZE:
+        MACString += "\0"*(LJM_MAC_STRING_SIZE-len(MACString))
+    cNum = ctypes.c_uint32(0)
+
+    error = _staticLib.LJM_MACToNumber(MACString, ctypes.byref(cNum))
+    if error != LJME_NOERROR:
+        raise LJMError(error)
+    
+    return cNum.value
 
 # Type conversion
 
 #LJM_VOID_RETURN LJM_FLOAT32ToByteArray(const float * aFLOAT32, int RegisterOffset, int NumFLOAT32, unsigned char * aBytes);
-def FLOAT32ToByteArray(aFLOAT32, registerOffset, numFLOAT32, aBytes):
-    cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    
-    _staticLib.LJM_FLOAT32ToByteArray(ctypes.byref(cFloats), registerOffset, numFLOAT32, ctypes.byref(cUbytes))
+def FLOAT32ToByteArray(aFLOAT32, registerOffset=0, numFLOAT32=None, aBytes=[]):
+    try:
+        cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
+    except:
+        raise LJMError(errorString = "aFLOAT32 needs to be a list of floats.")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if numFLOAT32 is None:
+        numFLOAT32 = len(cFloats)
+    try:
+        cNumFloat = ctypes.c_int32(numFLOAT32)
+        if numFLOAT32 < 1 or numFLOAT32 > len(cFloats):
+            raise LJMError(numFLOAT32)
+    except:
+        raise LJMError(errorString = "numFLOAT32 needs to be a positive integer and cannot be larger than the length of the aFLOAT32 list.")
+    numBytes = numFLOAT32*4 + registerOffset*2
+    try:
+        if len(aBytes) < numBytes:
+            #Add the extra elements needed
+            aBytes.extend([0]*(numBytes - len(aBytes)))
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+        
+    _staticLib.LJM_FLOAT32ToByteArray(ctypes.byref(cFloats), cRegOffset, cNumFloat, ctypes.byref(cUbytes))
     
     return _convertCtypeListToList(cUbytes)
     
 #LJM_VOID_RETURN LJM_ByteArrayToFLOAT32(const unsigned char * aBytes, int RegisterOffset, int NumFLOAT32, float * aFLOAT32);
-def byteArrayToFLOAT32(aBytes, registerOffset, numFLOAT32, aFLOAT32):
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
-    
-    _staticLib.LJM_ByteArrayToFLOAT32(ctypes.byref(cUbytes), registerOffset, numFLOAT32, ctypes.byref(cFloats))
+def byteArrayToFLOAT32(aBytes, registerOffset=0, numFLOAT32=None, aFLOAT32=[]):
+    try:
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if registerOffset > ((len(cUbytes)-4)/2):
+        raise LJMError(errorString = "registerOffset value is too large for the aBytes list.")
+    maxNum = int((len(cUbytes)-registerOffset*2)/4)
+    if numFLOAT32 is None:
+        numFLOAT32 = maxNum
+    try:
+        cNumFloat = ctypes.c_int32(numFLOAT32)
+        if numFLOAT32 < 1:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numFLOAT32 needs to be a positive integer.")
+    if numFLOAT32 > maxNum:
+        raise LJMError(errorString = "numFLOAT32 value is too large for the aBytes list and the registerOffset value " + str(registerOffset) + ".")
+    try:
+        if len(aFLOAT32) < numFLOAT32:
+            #Add the extra elements needed
+            aFLOAT32.extend([0.0]*(numFLOAT32 - len(aFLOAT32)))
+        cFloats = _convertListToCtypeList(aFLOAT32, ctypes.c_float)
+    except:
+        raise LJMError(errorString = "aFLOAT32 needs to be a list of floats.")
+
+    _staticLib.LJM_ByteArrayToFLOAT32(ctypes.byref(cUbytes), cRegOffset, cNumFloat, ctypes.byref(cFloats))
     
     return _convertCtypeListToList(cFloats)
  
 #LJM_VOID_RETURN LJM_UINT16ToByteArray(const unsigned short * aUINT16, int RegisterOffset, int NumUINT16, unsigned char * aBytes);
-def UINT16ToByteArray(aUINT16, registerOffset, numUINT16, aBytes):
-    cUint16 = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+def UINT16ToByteArray(aUINT16, registerOffset=0, numUINT16=None, aBytes=[]):
+    try:
+        cUint16s = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
+    except:
+        raise LJMError(errorString = "aUINT16 needs to be a list of integers with values between 0 to 65535 (unsigned 16-bit).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if numUINT16 is None:
+        numUINT16 = len(cUint16s)
+    try:
+        cNumUint16 = ctypes.c_int32(numUINT16)
+        if numUINT16 < 1 or numUINT16 > len(cUint16s):
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numUINT16 needs to be a positive integer and cannot be larger than the length of the aUINT16 list.")
+    numBytes = numUINT16*2 + registerOffset*2
+    try:
+        if len(aBytes) < numBytes:
+            #Add the extra elements needed
+            aBytes.extend([0]*(numBytes - len(aBytes)))
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
     
-    _staticLib.LJM_UINT16ToByteArray(ctypes.byref(cUint16), registerOffset, numUINT16, ctypes.byref(cUbytes))
+    _staticLib.LJM_UINT16ToByteArray(ctypes.byref(cUint16s), cRegOffset, cNumUint16, ctypes.byref(cUbytes))
     
     return _convertCtypeListToList(cUbytes)
  
 #LJM_VOID_RETURN LJM_ByteArrayToUINT16(const unsigned char * aBytes, int RegisterOffset, int NumUINT16, unsigned short * aUINT16);
-def byteArrayToUINT16(aBytes, registerOffset, numUINT16, aUINT16):
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    cUint16 = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
+def byteArrayToUINT16(aBytes, registerOffset=0, numUINT16=None, aUINT16=[]):
+    try:
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if registerOffset > ((len(cUbytes)-2)/2):
+        raise LJMError(errorString = "registerOffset value is too large for the aBytes list.")
+    maxNum = int((len(cUbytes)-registerOffset*2)/2)
+    if numUINT16 is None:
+        numUINT16 = maxNum
+    try:
+        cNumUint16 = ctypes.c_int32(numUINT16)
+        if numUINT16 < 1:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numUINT16 needs to be a positive integer.")
+    if numUINT16 > maxNum:
+        raise LJMError(errorString = "numUINT16 value is too large for the aBytes list and the registerOffset value " + str(registerOffset) + ".")
+    try:
+        if len(aUINT16) < numUINT16:
+            #Add the extra elements needed
+            aUINT16.extend([0]*(numUINT16 - len(aUINT16)))
+        cUint16s = _convertListToCtypeList(aUINT16, ctypes.c_uint16)
+    except:
+        raise LJMError(errorString = "aUINT16 needs to be a list of integers with values between 0 to 65535 (unsigned 16-bit).")
     
-    _staticLib.LJM_ByteArrayToUINT16(ctypes.byref(cUbytes), registerOffset, numUINT16, ctypes.byref(cUint16))
+    _staticLib.LJM_ByteArrayToUINT16(ctypes.byref(cUbytes), cRegOffset, cNumUint16, ctypes.byref(cUint16s))
     
-    return _convertCtypeListToList(cUint16)
+    return _convertCtypeListToList(cUint16s)
 
 #LJM_VOID_RETURN LJM_UINT32ToByteArray(const unsigned int * aUINT32, int RegisterOffset, int NumUINT32, unsigned char * aBytes);
-def UINT32ToByteArray(aUINT32, registerOffset, numUINT32, aBytes):
-    cUint32 = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+def UINT32ToByteArray(aUINT32, registerOffset=0, numUINT32=None, aBytes=[]):
+    try:
+        cUint32s = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
+    except:
+        raise LJMError(errorString = "aUINT32 needs to be a list of integers (unsigned 32-bit).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if numUINT32 is None:
+        numUINT32 = len(cUint32s)
+    try:
+        cNumUint32 = ctypes.c_int32(numUINT32)
+        if numUINT32 < 1 or numUINT32 > len(cUint32s):
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numUINT32 needs to be a positive integer and cannot be larger than the length of the aUINT32 list.")
+    numBytes = numUINT32*4 + registerOffset*2
+    try:
+        if len(aBytes) < numBytes:
+            #Add the extra elements needed
+            aBytes.extend([0]*(numBytes - len(aBytes)))
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
     
-    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cUint32), registerOffset, numUINT32, ctypes.byref(cUbytes))
+    _staticLib.LJM_UINT32ToByteArray(ctypes.byref(cUint32s), cRegOffset, cNumUint32, ctypes.byref(cUbytes))
     
     return _convertCtypeListToList(cUbytes)
     
 #LJM_VOID_RETURN LJM_ByteArrayToUINT32(const unsigned char * aBytes, int RegisterOffset, int NumUINT32, unsigned int * aUINT32);
-def byteArrayToUINT32(aBytes, registerOffset, numUINT32, aUINT32):
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    cUint32 = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
+def byteArrayToUINT32(aBytes, registerOffset=0, numUINT32=None, aUINT32=[]):
+    try:
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if registerOffset > ((len(cUbytes)-4)/2):
+        raise LJMError(errorString = "registerOffset value is too large for the aBytes list.")
+    maxNum = int((len(cUbytes)-registerOffset*2)/4)
+    if numUINT32 is None:
+        numUINT32 = maxNum
+    try:
+        cNumUint32 = ctypes.c_int32(numUINT32)
+        if numUINT32 < 1:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numUINT32 needs to be a positive integer.")
+    if numUINT32 > maxNum:
+        raise LJMError(errorString = "numUINT32 value is too large for the aBytes list and the registerOffset value " + str(registerOffset) + ".")
+    try:
+        if len(aUINT32) < numUINT32:
+            #Add the extra elements needed
+            aUINT32.extend([0]*(numUINT32 - len(aUINT32)))
+        cUint32s = _convertListToCtypeList(aUINT32, ctypes.c_uint32)
+    except:
+        raise LJMError(errorString = "aUINT32 needs to be a list of integers (unsigned 32-bit).")
+
+    _staticLib.LJM_ByteArrayToUINT32(ctypes.byref(cUbytes), cRegOffset, cNumUint32, ctypes.byref(cUint32s))
     
-    _staticLib.LJM_ByteArrayToUINT32(ctypes.byref(cUbytes), registerOffset, numUINT32, ctypes.byref(cUint32))
-    
-    return _convertCtypeListToList(cUint32)
+    return _convertCtypeListToList(cUint32s)
 
 #LJM_VOID_RETURN LJM_INT32ToByteArray(const int * aINT32, int RegisterOffset, int NumINT32, unsigned char * aBytes);
-def INT32ToByteArray(aINT32, registerOffset, numINT32, aBytes):
-    cInt32 = _convertListToCtypeList(aINT32, ctypes.c_int32)
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    
-    _staticLib.LJM_INT32ToByteArray(ctypes.byref(cInt32), registerOffset, numINT32, ctypes.byref(cUbytes))
+def INT32ToByteArray(aINT32, registerOffset=0, numINT32=None, aBytes=[]):
+    try:
+        cInt32s = _convertListToCtypeList(aINT32, ctypes.c_int32)
+    except:
+        raise LJMError(errorString = "aINT32 needs to be a list of integers (signed 32-bit).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if numINT32 is None:
+        numINT32 = len(cInt32s)
+    try:
+        cNumInt32 = ctypes.c_int32(numINT32)
+        if numINT32 < 1 or numINT32 > len(cInt32s):
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numINT32 needs to be a positive integer and cannot be larger than the length of the aINT32 list.")
+    numBytes = numINT32*4 + registerOffset*2
+    try:
+        if len(aBytes) < numBytes:
+            #Add the bytes needed
+            aBytes.extend([0]*(numBytes - len(aBytes)))
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+        
+    _staticLib.LJM_INT32ToByteArray(ctypes.byref(cInt32s), cRegOffset, cNumInt32, ctypes.byref(cUbytes))
     
     return _convertCtypeListToList(cUbytes)
 
 #LJM_VOID_RETURN LJM_ByteArrayToINT32(const unsigned char * aBytes, int RegisterOffset, int NumINT32, int * aINT32);
-def byteArrayToINT32(aBytes, registerOffset, numINT32, aINT32):
-    cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
-    cInt32 = _convertListToCtypeList(aINT32, ctypes.c_int32)
+def byteArrayToINT32(aBytes, registerOffset=0, numINT32=None, aINT32=[]):
+    try:
+        cUbytes = _convertListToCtypeList(aBytes, ctypes.c_ubyte)
+    except:
+        raise LJMError(errorString = "aBytes needs to be a list of integers with values between 0 to 255 (bytes).")
+    try:
+        cRegOffset = ctypes.c_int32(registerOffset)
+        if registerOffset < 0:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "registerOffset needs to be a non-negative integer.")
+    if registerOffset > ((len(cUbytes)-4)/2):
+        raise LJMError(errorString = "registerOffset value is too large for the aBytes list.")
+    maxNum = int((len(cUbytes)-registerOffset*2)/4)
+    if numINT32 is None:
+        numINT32 = maxNum
+    try:
+        cNumInt32 = ctypes.c_int32(numINT32)
+        if numINT32 < 1:
+            raise LJMError()
+    except:
+        raise LJMError(errorString = "numINT32 needs to be a positive integer.")
+    if numINT32 > maxNum:
+        raise LJMError(errorString = "numINT32 value is too large for the aBytes list and the registerOffset value " + str(registerOffset) + ".")
+    try:
+        if len(aINT32) < numINT32:
+            #Add the extra elements needed
+            aINT32.extend([0]*(numINT32 - len(aINT32)))
+        cInt32s = _convertListToCtypeList(aINT32, ctypes.c_int32)
+    except:
+        raise LJMError(errorString = "aINT32 needs to be a list of integers (signed 32-bit).")
     
-    _staticLib.LJM_ByteArrayToINT32(ctypes.byref(cUbytes), registerOffset, numINT32, ctypes.byref(cInt32))
+    _staticLib.LJM_ByteArrayToINT32(ctypes.byref(cUbytes), cRegOffset, cNumInt32, ctypes.byref(cInt32s))
     
-    return _convertCtypeListToList(cInt32)
+    return _convertCtypeListToList(cInt32s)
 
 ## Helper functions
 
@@ -804,11 +1031,13 @@ LJM_FLOAT32 = 3
 LJM_BYTE = 99
 LJM_STRING = 98
 LJM_STRING_MAX_SIZE = 49
-LJM_NULL_TERMINATOR = 0
 
 # namesToAddresses sets this when a register name is not found
 LJM_INVALID_NAME_ADDRESS = -1
 LJM_MAX_NAME_SIZE = 256
+
+LJM_MAC_STRING_SIZE = 18
+LJM_IPv4_STRING_SIZE = 16
 
 LJM_NOT_ENOUGH_DATA_SPACE = 9999.99
 
@@ -850,6 +1079,13 @@ LJM_MAX_TCP_PACKETS_NUM_BYTES_NON_T7 = 64
 # Timeout Constants
 LJM_NO_TIMEOUT = 0
 LJM_DEFAULT_TIMEOUT = 1000
+
+# Config value names
+LJM_SEND_RECEIVE_TIMEOUT_MS = "LJM_SEND_RECEIVE_TIMEOUT_MS"
+LJM_OPEN_TCP_DEVICE_TIMEOUT_MS = "LJM_OPEN_TCP_DEVICE_TIMEOUT_MS"
+LJM_LOG_MODE = "LJM_LOG_MODE"
+LJM_LOG_LEVEL = "LJM_LOG_LEVEL"
+LJM_VERSION = "LJM_VERSION"
 
 # Errorcodes
 
