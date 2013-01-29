@@ -291,10 +291,10 @@ def nameToAddress(name):
 
     Returns:
         A tuple containing:
-        (aAddress, aDataType)
+        (address, dataType)
 
-        aAddress: Address value corresponding to the register name.
-        aDataType: Data type value corresponding to the register names.
+        address: Address value corresponding to the register name.
+        dataType: Data type value corresponding to the register names.
     
     Raises:
         TypeError: name is not a string.
