@@ -1,5 +1,5 @@
 LJMPython: Python wrapper module for the LJM library
-01/25/2013
+02/01/2013
 support@labjack.com
 
 This package contains the LJMPython wrapper module and examples for the LJM

@@ -458,8 +458,8 @@ def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
         A tuple containing:
         (deviceType, connectionType, handle)
 
-        deviceType:  The type of device opened.
-        connectionType:   The type of connected opened.
+        deviceType: The type of device opened.
+        connectionType: The type of connected opened.
         handle: The new handle that represents a device connection.
 
     Raises:
@@ -507,7 +507,7 @@ def getHandleInfo(handle):
             the pipe the device is connected on via USB.
         maxBytesPerMB: The maximum packet size in number of bytes that
             can be sent to this device. Note that this can change,
-            depending on connection and device types.
+            depending on connection and device type.
 
     Raises:
         LJMError: An error was returned from the LJM driver call.
