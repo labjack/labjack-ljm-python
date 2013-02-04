@@ -41,21 +41,21 @@ writeDigital = False
 # Analog output settings
 writeDACs = False
 
-numFrames = 0
-names = []
-aValues = []
-
-# Configure analog input settings
-for i in range(numAIN):
-    numFrames += 3
-    names.append("AIN%i_RANGE"%i)
-    aValues.append(rangeAIN)
-    names.append("AIN%i_RES"%i)
-    aValues.append(resolutionAIN)
-    names.append("AIN%i_SET"%i)
-    aValues.append(settlingIndexAIN)
-
-ljm.eWriteNames(handle, numFrames, names, aValues)
+if numAIN > 0:
+    # Configure analog input settings
+    numFrames = 0
+    names = []
+    aValues = []
+    for i in range(numAIN):
+        numFrames += 3
+        names.append("AIN%i_RANGE"%i)
+        aValues.append(rangeAIN)
+        names.append("AIN%i_RESOLUTION"%i)
+        aValues.append(resolutionAIN)
+        names.append("AIN%i_SETTLING"%i)
+        aValues.append(settlingIndexAIN)
+    
+    ljm.eWriteNames(handle, numFrames, names, aValues)
 
 # Initialize and configure eNames parameters for loop's eNames call
 numFrames = 0
@@ -75,7 +75,7 @@ for i in range(numAIN):
 if readDigital is True:
     # Add digital read
     numFrames += 1
-    names.append("DIO_ALL_STATE")
+    names.append("DIO_STATE")
     aWrites.append(ljm.constants.READ)
     aNumValues.append(1)
     aValues.append(0)
@@ -83,7 +83,7 @@ if readDigital is True:
 if writeDigital is True:
     # Add digital write 
     numFrames += 1
-    names.append("DIO_ALL_STATE")
+    names.append("DIO_STATE")
     aWrites.append(ljm.constants.WRITE)
     aNumValues.append(1)
     aValues.append(0) #output-low
