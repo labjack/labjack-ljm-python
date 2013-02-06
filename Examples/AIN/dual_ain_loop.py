@@ -1,5 +1,5 @@
 """
-Demonstrates reading 2 analog inputs (AINs) in a loop.
+Demonstrates reading 2 analog inputs (AINs) in a loop from a LabJack.
 
 """
 
@@ -23,6 +23,10 @@ aValues = [199, 10, 0, 0,
            199, 10, 0, 0]
 ljm.eWriteNames(handle, numFrames, names, aValues)
 
+print "\nSet configuration:"
+for i in range(numFrames):
+    print "    %s : %f" % (names[i], aValues[i])
+
 # Setup and call eReadNames to read AINs from the LabJack.
 numFrames = 2
 names = ["AIN0", "AIN1"]
@@ -32,7 +36,7 @@ delay = 1 #delay between readings (in sec)
 while True:
     try:
         results = ljm.eReadNames(handle, numFrames, names)
-        print "\nAIN0: %f V, AIN1: %f V" %(results[0], results[1])
+        print "\nAIN0 : %f V, AIN1 : %f V" % (results[0], results[1])
         time.sleep(delay)
     except KeyboardInterrupt:
         break

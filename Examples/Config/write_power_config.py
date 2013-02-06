@@ -1,9 +1,10 @@
 """
-Demonstrates reading a single analog input (AIN) from a LabJack.
+Demonstrates how to configure default power settings on a LabJack.
 
 """
 
 from labjack import ljm
+
 
 # Open first found LabJack
 handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[2]
@@ -14,11 +15,18 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
-# Setup and call eReadName to read from a AIN on the LabJack.
-name = "AIN0"
-result = ljm.eReadName(handle, name)
+# Setup and call eWriteNames to write config. values to the LabJack.
+numFrames = 4
+names = ["POWER_ETHERNET_DEFAULT", "POWER_WIFI_DEFAULT", "POWER_AIN_DEFAULT",
+         "POWER_LED_DEFAULT"]
+aValues = [1, 0, 1,
+           1]
+ljm.eWriteNames(handle, numFrames, names, aValues)
 
-print "\n%s reading : %f V" % (name, result)
+print "\nSet configuration settings:"
+
+for i in range(numFrames):
+    print "    %s : %f" % (names[i], aValues[i])
 
 # Close handle
 ljm.close(handle)

@@ -1,5 +1,5 @@
 """
-Demonstrates configuring and reading a single analog input (AIN).
+Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
 
 """
 
@@ -20,12 +20,15 @@ names = ["AIN0_NEGATIVE", "AIN0_RANGE", "AIN0_RESOLUTION", "AIN0_SETTLING"]
 aValues = [199, 10, 0, 0]
 ljm.eWriteNames(handle, numFrames, names, aValues)
 
+print "\nSet configuration:"
+for i in range(numFrames):
+    print "    %s : %f" % (names[i], aValues[i])
+
 # Setup and call eReadName to read an AIN from the LabJack.
 name = "AIN0"
 result = ljm.eReadName(handle, name)
 
-print "\nResult: "
-print "    %s value: %f V" % (name, result)
+print "\n%s reading : %f V" % (name, result)
 
 # Close handle
 ljm.close(handle)
