@@ -3,14 +3,12 @@ Multi-platform Python wrapper for the LJM library.
 
 """
 
+from labjack.ljm import constants
+from labjack.ljm import errorcodes
 import ctypes
-import os
-import struct
-import constants
-import errorcodes
 
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 
 
 class LJMError(Exception):
@@ -53,6 +51,8 @@ class LJMError(Exception):
 
 def _loadLibrary():
     """Returns a ctypes pointer to the library."""
+    import os
+
     try:
         if(os.name == "posix"):
             try:
@@ -61,21 +61,21 @@ def _loadLibrary():
             except OSError, e:
                 pass # May be on Mac.
             except Exception, e:
-                raise LJMError(errorString = ("Cannot load the LJM Linux SO.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM Linux SO. " + str(e)))
 
             try:
                 return ctypes.CDLL("libLabJackM.dylib")
             except OSError, e:
-                raise LJMError(errorString = ("Cannot load the LJM driver.  Check that the driver is installed.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM driver. Check that the driver is installed. " + str(e)))
             except Exception, e:
-                raise LJMError(errorString = ("Cannot load the LJM Mac OS X Dylib.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load the LJM Mac OS X Dylib. " + str(e)))
         if(os.name == "nt"):
             #Windows
             try:
                 #Win
                 return ctypes.CDLL("LabJackM.dll")
             except Exception, e:
-                raise LJMError(errorString = ("Cannot load LJM driver.  " + str(e)))
+                raise LJMError(errorString = ("Cannot load LJM driver. " + str(e)))
     except LJMError, e:
         print str(type(e)) + ": " + str(e)
         return None

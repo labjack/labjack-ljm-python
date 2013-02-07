@@ -25,10 +25,10 @@ ljm.eWriteNames(handle, numFrames, names, values)
 print "\nSet ethernet configuration: "
 for i in range(numFrames):
     if names[i] == "ETHERNET_DHCP_DEFAULT":
-        print "    %s : %i" % (names[i], int(values[i]))
+        print "    %s : %.0f" % (names[i], values[i])
     else:
-        print "    %s : %s  (%i)" % \
-            (names[i], ljm.numberToIP(int(values[i])), int(values[i]))
+        print "    %s : %.0f - %s" % \
+            (names[i], values[i], ljm.numberToIP(int(values[i])))
         
 # Close handle
 ljm.close(handle)

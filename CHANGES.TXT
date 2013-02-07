@@ -1,5 +1,8 @@
 Version History
 ---------------
 
+0.8.1 (02/06/2013)
+ - Import changes in __init__.py.
+
 0.8.0 (01/25/2013)
  - Initial release.

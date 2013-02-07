@@ -1,5 +1,5 @@
 """
-Demonstrates how to read the ethernet MAC from a LabJack.
+Demonstrates how to read the WiFi MAC from a LabJack.
 
 """
 
@@ -15,15 +15,15 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
-# Call eAddresses to read the ethernet MAC from the LabJack. Note that we are
+# Call eAddresses to read the WiFi MAC from the LabJack. Note that we are
 # reading a byte array which is the big endian binary representation of the
 # 64-bit MAC.
-macBytes = ljm.eAddresses(handle, 1, [60020], [ljm.constants.BYTE],
+macBytes = ljm.eAddresses(handle, 1, [60024], [ljm.constants.BYTE],
                           [ljm.constants.READ], [8], [0]*8)
 # Convert big endian byte array to a 64-bit unsigned integer value
 mac, = struct.unpack(">Q", struct.pack("B"*8, *macBytes))
 
-print "\nEthernet MAC : %i - %s" % (mac, ljm.numberToMAC(mac))
+print "\nWiFi MAC : %i - %s" % (mac, ljm.numberToMAC(mac))
 
 # Close handle
 ljm.close(handle)
