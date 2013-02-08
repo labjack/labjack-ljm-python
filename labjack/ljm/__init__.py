@@ -412,7 +412,7 @@ def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_id
             desired ("LJM_ctUSB", "LJM_ctTCP", "LJM_ctANY", etc.).
         Identifier: A string identifying the device to connect to or
             "LJM_idANY". This can be a serial number, IP address, or
-            device name.
+            device name. Device names may not contain periods.
 
     Returns:
         The new handle that represents a device connection.
@@ -452,7 +452,7 @@ def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
             etc.).
         Identifier: A string identifying the device to connect to or
             "LJM_idANY". This can be a serial number, IP address, or
-            device name.
+            device name. Device names may not contain periods.
 
     Returns:
         A tuple containing:
@@ -506,8 +506,8 @@ def getHandleInfo(handle):
         port: The port the device is connected on via Ethernet/TCP, or
             the pipe the device is connected on via USB.
         maxBytesPerMB: The maximum packet size in number of bytes that
-            can be sent to this device. Note that this can change,
-            depending on connection and device type.
+            can be sent or received from this device. Note that this
+            can change, depending on connection and device type.
 
     Raises:
         LJMError: An error was returned from the LJM driver call.
