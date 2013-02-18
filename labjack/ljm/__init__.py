@@ -8,7 +8,7 @@ from labjack.ljm import errorcodes
 import ctypes
 
 
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 
 
 class LJMError(Exception):
@@ -1521,6 +1521,44 @@ def macToNumber(macString):
         raise LJMError(error)
 
     return cNum.value
+
+
+def log(level, string):
+    """Outputs a message to the log file at the specified level.
+    
+    Args:
+        level: The log level to output the message at.
+            TODO: Define log levels
+        string: The message string to be written to the log file.
+
+    Raises:
+        TypeError: string parameter is not a string.
+        LJMError: An error was returned from the LJM driver call.
+
+    Note: This function may be temporary.
+
+    """
+    cLev = ctypes.c_int32(level)
+    if not isinstance(string, str):
+        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
+
+    error = _staticLib.LJM_Log(cLev, string)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def resetLog():
+    """Clears the log file.
+
+    Raises:
+        LJMError: An error was returned from the LJM driver call.
+    
+    Note: This function may be temporary.
+
+    """
+    error = _staticLib.LJM_ResetLog()
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
 
 
 def _convertListToCtypeArray(li, cType):

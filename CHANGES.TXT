@@ -1,6 +1,10 @@
 Version History
 ---------------
 
+0.8.2
+ - Updated to LJM v0.2.23 (new functions and errorcode changes).
+   ^ New functions may be temprorary
+
 0.8.1 (02/06/2013)
  - Import changes in __init__.py.
 
