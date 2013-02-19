@@ -41,4 +41,4 @@ Documentation:
 License:
 
 All LJMPython packages, modules and examples are licensed under MIT X11. The
-license can be found in the LICENSE.txt file.
+license can be found in the LICENSE.TXT file.
