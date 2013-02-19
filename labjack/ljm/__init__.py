@@ -1,5 +1,5 @@
 """
-Multi-platform Python wrapper for the LJM library.
+Cross-platform Python wrapper for the LJM library.
 
 """
 
