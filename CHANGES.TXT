@@ -2,8 +2,9 @@ Version History
 ---------------
 
 0.8.2
- - Updated functions, constants and errorcodes to LJM v0.2.24.
+ - Updated functions, constants and errorcodes to LJM v0.2.25.
    ^ New functions may be temprorary
+ - Changed errorFrame to errorAddress.
 
 0.8.1 (02/06/2013)
  - Import changes in __init__.py.

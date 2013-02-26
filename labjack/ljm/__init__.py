@@ -13,9 +13,9 @@ __version__ = "0.8.2"
 
 class LJMError(Exception):
     """Custom exception class for LJM specific errors."""
-    def __init__(self, errorCode=None, errorFrame=None, errorString=None):
+    def __init__(self, errorCode=None, errorAddress=None, errorString=None):
         self._errorCode = errorCode
-        self._errorFrame = errorFrame
+        self._errorAddress = errorAddress
         if errorString is None:
             self._errorString = ""
             try:
@@ -31,22 +31,21 @@ class LJMError(Exception):
         return self._errorCode
 
     @property
-    def errorFrame(self):
-        return self._errorFrame
+    def errorAddress(self):
+        return self._errorAddress
 
     @property
     def errorString(self):
         return self._errorString
 
     def __str__(self):
-        frameStr = ""
+        addrStr = ""
         errorCodeStr = ""
-        #errorStr = ""
-        if self._errorFrame is not None:
-            frameStr = "Frame " + str(self._errorFrame) + ", "
+        if self._errorAddress is not None:
+            addrStr = "Address " + str(self._errorAddress) + ", "
         if self._errorCode is not None:
             errorCodeStr = "LJM library error code " + str(self._errorCode) + " "
-        return frameStr + errorCodeStr + self._errorString
+        return addrStr + errorCodeStr + self._errorString
 
 
 def _loadLibrary():
@@ -180,11 +179,14 @@ def mbfbComm(handle, unitID, aMBFB):
     """
     cUnitID = ctypes.c_ubyte(unitID)
     cMBFB = _convertListToCtypeArray(aMBFB, ctypes.c_ubyte)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_MBFBComm(handle, unitID, ctypes.byref(cMBFB), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_MBFBComm(handle, unitID, ctypes.byref(cMBFB), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
     return _convertCtypeArrayToList(cMBFB)
 
@@ -784,11 +786,14 @@ def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
     cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
     cVals = (ctypes.c_double*numFrames)(0)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eReadAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eReadAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
     return _convertCtypeArrayToList(cVals)
 
@@ -816,11 +821,14 @@ def eReadNames(handle, numFrames, names):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
     cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
     cVals =  (ctypes.c_double*numFrames)(0)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
     return _convertCtypeArrayToList(cVals)
 
@@ -846,11 +854,14 @@ def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
     cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
     numFrames = len(cAddrs)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eWriteAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eWriteAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
 
 def eWriteNames(handle, numFrames, names, aValues):
@@ -874,11 +885,14 @@ def eWriteNames(handle, numFrames, names, aValues):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
     cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eWriteNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eWriteNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
 
 def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
@@ -926,11 +940,14 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
     cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
     return _convertCtypeArrayToList(cVals)
 
@@ -980,11 +997,11 @@ def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
     cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorFrame = ctypes.c_int32(0)
+    cErrorAddr = ctypes.c_int32(-1)
 
-    error = _staticLib.LJM_eNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorFrame))
+    error = _staticLib.LJM_eNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
     if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorFrame.value)
+        raise LJMError(error, cErrorAddr.value)
 
     return _convertCtypeArrayToList(cVals)
 
