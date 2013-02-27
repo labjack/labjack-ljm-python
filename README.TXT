@@ -1,5 +1,5 @@
 LJMPython
-02/01/2013
+02/26/2013
 support@labjack.com
 
 The Python wrapper package, modules and examples for the cross-platform LJM

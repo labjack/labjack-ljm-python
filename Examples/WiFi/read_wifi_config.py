@@ -6,7 +6,7 @@ Demonstrates how to read the Wifi configuration from a LabJack.
 from labjack import ljm
 
 # Open first found LabJack
-handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[2]
+handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[0]
 #handle = ljm.openS("LJM_dtANY", "LJM_ctANY", "LJM_idANY")
 
 info = ljm.getHandleInfo(handle)
