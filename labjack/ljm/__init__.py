@@ -236,7 +236,8 @@ def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
     containing the corresponding addresses and data types.
     
     Args:
-        numFrames: The number of names to get addresses and data types for.
+        numFrames: The number of names to get addresses and data types
+            for.
         names: List of register name string.
         aAddresses: List of addresses to pass. This should be at least
             the size numFrames. Default is None, which creates this list
@@ -313,6 +314,57 @@ def nameToAddress(name):
         raise LJMError(error)
 
     return cAddr.value, cType.value
+
+
+def addressesToTypes(numAddresses, aAddresses):
+    """Takes a list of Modbus register addresses and returns their data
+    types.
+
+    Args:
+        numAddresses: The number of addresses you want the data types
+            of.
+        address: A list of the Modbus register addresses you want the
+            data types of.
+
+    Returns:
+        A list of data types corresponding to the address list.
+
+    Raises:
+        LJMError: An error was returned from the LJM driver call.
+
+    """ 
+    cNumAddrs = ctypes.c_int32(numAddresses)
+    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
+    cTypes = (ctypes.c_int32*numAddresses)(0)
+    
+    error = _staticLib.LJM_AddressesToTypes(cNumAddrs, ctypes.byref(cAddrs), ctypes.byref(cTypes));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return _convertCtypeArrayToList(cTypes)
+
+
+def addressToType(address):
+    """Takes a Modbus register address and returns its data type.
+    
+    Args:
+        address: The Modbus register address you want the data type of.
+
+    Returns:
+        The data type of the address.
+
+    Raises:
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cType = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_AddressToType(cAddr, ctypes.byref(cType))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cType.value
 
 
 def listAll(deviceType, connectionType):
