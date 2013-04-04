@@ -149,10 +149,7 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
 
     error = _staticLib.LJM_AddressesToMBFB(cMaxBytes, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cNumFrames), ctypes.byref(cComm))
     if error != errorcodes.NOERROR:
-        if _isWarningErrorCode(error):
-            return cNumFrames.value, _convertCtypeArrayToList(cComm), LJMError(error)
-        else:
-            raise LJMError(error)
+        raise LJMError(error)
 
     return cNumFrames.value, _convertCtypeArrayToList(cComm)
 
@@ -374,10 +371,10 @@ def listAll(deviceType, connectionType):
     Args:
         deviceType: An integer that filters which devices will be
             returned (constants.dtT7, constants.dtU3, etc.).
-            constants.dtANY is not allowed.
+            constants.dtANY is allowed.
         connectionType: An integer that filters by connection type
             (constants.ctUSB, constants.ctTCP, etc).  constants.ctANY is
-            not allowed.
+            allowed.
 
     Returns:
         A tuple containing:
@@ -402,17 +399,14 @@ def listAll(deviceType, connectionType):
 
     error = _staticLib.LJM_ListAll(cDev, cConn, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != errorcodes.NOERROR:
-        if _isWarningErrorCode(error):
-            return cNumFound.value, _convertCtypeArrayToList(cSerNums[0:cNumFound.value]), _convertCtypeArrayToList(cIPAddrs[0:cNumFound.value]), error
-        else:
-            raise LJMError(error)
+        raise LJMError(error)
 
     return cNumFound.value, _convertCtypeArrayToList(cSerNums[0:cNumFound.value]), _convertCtypeArrayToList(cIPAddrs[0:cNumFound.value])
 
 
 def listAllS(deviceType, connectionType):
-    """Scans for LabJack devices with string parameters and returns lists
-    describing the devices found.
+    """Scans for LabJack devices with string parameters and returns
+    lists describing the devices found.
 
     Args:
         deviceType: A string that filters which devices will be returned
@@ -448,12 +442,105 @@ def listAllS(deviceType, connectionType):
 
     error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != errorcodes.NOERROR:
-        if _isWarningErrorCode(error):
-            return cNumFound.value, _convertCtypeArrayToList(cSerNums[0:cNumFound.value]), _convertCtypeArrayToList(cIPAddrs[0:cNumFound.value]), error
-        else:
-            raise LJMError(error)
+        raise LJMError(error)
 
     return cNumFound.value, _convertCtypeArrayToList(cSerNums[0:cNumFound.value]), _convertCtypeArrayToList(cIPAddrs[0:cNumFound.value])
+
+
+def deviceDiscovery(deviceType, connectionType):
+    """Scans for LabJack devices and returns lists describing the
+    devices.
+
+    Args:
+        deviceType: An integer that filters which devices will be
+            returned (constants.dtT7, constants.dtU3, etc.).
+            constants.dtANY is allowed.
+        connectionType: An integer that filters by connection type
+            (constants.ctUSB, constants.ctTCP, etc).  constants.ctANY is
+            allowed.
+    Returns:
+        A tuple containing:
+        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
+         aIPAddresses)
+
+        numFound: Number of devices found.
+        aDeviceTypes: List of device types for each of the numFound
+            devices.
+        aConnectionTypes: List of connection types for each of the
+            numFound devices.
+        aSerialNumbers: List of serial numbers for each of the numFound
+            devices.
+        aIPAddresses: List of IP addresses for each of the numFound
+            devices, but only if the returned connection type is
+            constants.ctTCP.
+    
+    Raises:
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    cDev = ctypes.c_int32(deviceType)
+    cConn = ctypes.c_int32(connectionType)
+    cNumFound = ctypes.c_int32(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+
+    error = _staticLib.LJM_DeviceDiscovery(cDev, cConn, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numFound = cNumFound.value
+    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
+
+
+def deviceDiscoveryS(deviceType, connectionType):
+    """Scans for LabJack devices with string parameters and returns
+    lists describing the devices.
+
+    Args:
+        deviceType: A string that filters which devices will be returned
+            ("LJM_dtT7", "LJM_dtU3", etc.). "LJM_dtANY" is allowed.
+        connectionType: A string that filters by connection type
+            ("LJM_ctUSB", "LJM_ctTCP", etc).  "LJM_ctANY" is allowed.
+
+    Returns:
+        A tuple containing:
+        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
+         aIPAddresses)
+
+        numFound: Number of devices found.
+        aDeviceTypes: List of device types for each of the numFound
+            devices.
+        aConnectionTypes: List of connection types for each of the
+            numFound devices.
+        aSerialNumbers: List of serial numbers for each of the numFound
+            devices.
+        aIPAddresses: List of IP addresses for each of the numFound
+            devices, but only if the returned connection type is
+            constants.ctTCP.
+    
+    Raises:
+        TypeError: deviceType or connectionType are not strings.
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    if not isinstance(deviceType, str):
+        raise TypeError("Expected a string instead of " + str(type(deviceType)) + ".")
+    if not isinstance(connectionType, str):
+        raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
+    cNumFound = ctypes.c_int32(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+
+    error = _staticLib.LJM_DeviceDiscoveryS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numFound = cNumFound.value
+    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
 
 
 def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_idANY"):
@@ -638,7 +725,8 @@ def loadConstants():
  
     Note:
         This step is handled automatically. This function does not
-        need to be called before either errorToString or namesToAddresses.
+        need to be called before either errorToString or
+        namesToAddresses.
 
     """
     _staticLib.LJM_LoadConstants()
@@ -821,8 +909,8 @@ def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     
     Args:
         handle: The valid handle to an open device.
-        numFrames: The total number of reads to perform.  This needs to be
-            the length of aAddresses/aDataTypes or less.
+        numFrames: The total number of reads to perform.  This needs to
+            be the length of aAddresses/aDataTypes or less.
         aAddresses: List of register addresses to read.
         aDataTypes: List of data types corresponding to aAddresses
             (constants.FLOAT32, constants.INT32, etc.).
@@ -963,8 +1051,8 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
         aNumValues: List of the number of values to read/write,
             corresponding to aWrites and aAddresses.
         aValues: List of values to write.  Needs to be the length of the
-            sum of the aNumValues list's values.  Values corresponding to
-            writes are written.
+            sum of the aNumValues list's values.  Values corresponding
+            to writes are written.
 
     Returns:
         The list of aValues written/read.
@@ -1017,8 +1105,8 @@ def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
         aNumValues: List of the number of values to read/write,
             corresponding to aWrites and names.
         aValues: List of values to write.  Needs to be the length of the
-            sum of the aNumValues list's values.  Values corresponding to
-            writes are written.
+            sum of the aNumValues list's values.  Values corresponding
+            to writes are written.
 
     Returns:
         The list of aValues written/read.
@@ -1638,12 +1726,3 @@ def _convertListToCtypeArray(li, cType):
 def _convertCtypeArrayToList(listCtype):
     """Returns a normal list from a ctypes list.""" 
     return [i for i in listCtype]
-
-
-def _isWarningErrorCode(errorCode):
-    """Returns true is a warning error code was detected, otherwise
-    returns false."""
-    if errorCode >= errorcodes.WARNINGS_BEGIN and errorCode <= errorcodes.WARNINGS_END:
-        return True
-    else:
-        return False
