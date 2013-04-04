@@ -120,7 +120,7 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
 
     Raises:
         LJMError: An error was returned from the LJM driver call.
-        
+
     Notes:
         For every entry in aWrites[i] that is constants.WRITE, aValues
         contains aNumValues[i] values to write and for every entry in
@@ -192,7 +192,7 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames, aVal
     """Takes a Modbus Feedback response from a device and the lists
     corresponding the Feedback command, and returns the converted
     response values.
-    
+
     Args:
         aDataTypes: The list of data types read/written.
         aWrites: The list of read/write directions.
@@ -202,7 +202,7 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames, aVal
             sum of the values in the aNumValues list. Default is None,
             which creates this list with a size of the sum of the values
             in the aNumValues list.
-    
+
     Returns:
         A list of converted float values from the Modbus Feedback
         response.
@@ -231,7 +231,7 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames, aVal
 def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
     """Takes a list of Modbus register names and returns two lists
     containing the corresponding addresses and data types.
-    
+
     Args:
         numFrames: The number of names to get addresses and data types
             for.
@@ -251,7 +251,7 @@ def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
             names list.
         aDataTypes: A list of data types corresponding to the register
             names list.
-    
+
     Raises:
         TypeError: names is not a list of strings.
         LJMError: An error was returned from the LJM driver call.
@@ -285,7 +285,7 @@ def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
 def nameToAddress(name):
     """Takes a Modbus register name and returns the corresponding
     address and data type values.
-    
+
     Args:
         name: Register name string.
 
@@ -295,7 +295,7 @@ def nameToAddress(name):
 
         address: Address value corresponding to the register name.
         dataType: Data type value corresponding to the register names.
-    
+
     Raises:
         TypeError: name is not a string.
         LJMError: An error was returned from the LJM driver call.
@@ -343,7 +343,7 @@ def addressesToTypes(numAddresses, aAddresses):
 
 def addressToType(address):
     """Takes a Modbus register address and returns its data type.
-    
+
     Args:
         address: The Modbus register address you want the data type of.
 
@@ -386,7 +386,7 @@ def listAll(deviceType, connectionType):
             devices.
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if connectionType is constants.ctTCP.
-    
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -426,7 +426,7 @@ def listAllS(deviceType, connectionType):
             devices.
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if connectionType is constants.ctTCP.
-    
+
     Raises:
         TypeError: deviceType or connectionType are not strings.
         LJMError: An error was returned from the LJM driver call.
@@ -458,6 +458,7 @@ def deviceDiscovery(deviceType, connectionType):
         connectionType: An integer that filters by connection type
             (constants.ctUSB, constants.ctTCP, etc).  constants.ctANY is
             allowed.
+
     Returns:
         A tuple containing:
         (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
@@ -473,7 +474,7 @@ def deviceDiscovery(deviceType, connectionType):
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if the returned connection type is
             constants.ctTCP.
-    
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -519,7 +520,7 @@ def deviceDiscoveryS(deviceType, connectionType):
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if the returned connection type is
             constants.ctTCP.
-    
+
     Raises:
         TypeError: deviceType or connectionType are not strings.
         LJMError: An error was returned from the LJM driver call.
@@ -545,7 +546,7 @@ def deviceDiscoveryS(deviceType, connectionType):
 
 def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_idANY"):
     """Opens a LabJack device, and returns the device handle.
-    
+
     Args:
         deviceType: A string containing the type of the device to be
             connected ("LJM_dtT7", "LJM_dtU3", "LJM_dtANY", etc.).
@@ -583,7 +584,7 @@ def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_id
 
 def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
     """Opens a LabJack device, and returns the device handle.
-    
+
     Args:
         deviceType: An integer containing the type of the device to be
             connected (constants.dtT7, constants.dtU3, constants.dtANY,
@@ -677,10 +678,10 @@ def getHandleInfo(handle):
 
 def resetConnection(handle):
     """Manually resets the connection associated with handle.
-    
+
     Args:
         handle: A valid handle to an open device.
-        
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -722,7 +723,7 @@ def errorToString(errorCode):
 def loadConstants():
     """Manually loads or reloads the constants files associated with
     the errorToString and namesToAddresses functions.
- 
+
     Note:
         This step is handled automatically. This function does not
         need to be called before either errorToString or
@@ -734,10 +735,10 @@ def loadConstants():
 
 def close(handle):
     """Closes the connection to the device.
-    
+
     Args:
         handle: The handle that represents an open device.
-    
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -749,7 +750,7 @@ def close(handle):
 
 def closeAll():
     """Closes all connections to all devices.
-    
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -761,7 +762,7 @@ def closeAll():
 
 def writeRaw(handle, data, numBytes=None):
     """Sends an unaltered data packet to a device.
-    
+
     Args:
         handle: The handle that represents an open device.
         data: The byte list/packet to send.
@@ -784,11 +785,11 @@ def writeRaw(handle, data, numBytes=None):
 
 def readRaw(handle, numBytes):
     """Reads an unaltered data packet from a device.
-    
+
     Args:
         handle: The handle that represents an open device.
         numBytes: The number of bytes to receive.
-    
+
     Returns:
         A list that is the read byte packet. It is length numBytes.
 
@@ -831,7 +832,7 @@ def eWriteAddress(handle, address, dataType, value):
 
 def eReadAddress(handle, address, dataType):
     """Performs Modbus operations that reads a value from a device.
-    
+
     Args:
         handle: The valid handle to an open device.
         address: Register address to read.
@@ -884,7 +885,7 @@ def eReadName(handle, name):
     Args:
         handle: The valid handle to an open device.
         name: Register name (string) to read.
-    
+
     Returns:
         The read value.
 
@@ -906,7 +907,7 @@ def eReadName(handle, name):
 
 def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     """Performs Modbus operations that reads values from a device.
-    
+
     Args:
         handle: The valid handle to an open device.
         numFrames: The total number of reads to perform.  This needs to
@@ -1056,10 +1057,10 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
 
     Returns:
         The list of aValues written/read.
-    
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
-    
+
     Notes:
         For every entry in aWrites[i] that is constants.WRITE, aValues
         contains aNumValues[i] values to write and for every entry in
@@ -1313,7 +1314,7 @@ def byteArrayToUINT16(aBytes, registerOffset=0, numUINT16=None, aUINT16=None):
         aUINT16: 16-bit unsigned integer list to pass. It should be
             at least numUINT16 in size. Default is None, which
             creates a list of the correct size filled with zeros.
-            
+
     Returns:
         A list of converted values in 16-bit unsigned integer form.
 
@@ -1382,7 +1383,7 @@ def byteArrayToUINT32(aBytes, registerOffset=0, numUINT32=None, aUINT32=None):
         aUINT32: 32-bit unsigned integer list to pass. It should be
             at least numUINT32 in size. Default is None, which
             creates a list of the correct size filled with zeros.
-            
+
     Returns:
         A List of converted values in 32-bit unsigned integer
         form.
@@ -1452,7 +1453,7 @@ def byteArrayToINT32(aBytes, registerOffset=0, numINT32=None, aINT32=None):
         aINT32: 32-bit signed integer list to pass. It should be
             at least numINT32 in size. Default is None, which
             creates a list of the correct size filled with zeros.
-            
+
     Returns:
         A List of converted values in 32-bit signed integer form.
 
@@ -1472,104 +1473,6 @@ def byteArrayToINT32(aBytes, registerOffset=0, numINT32=None, aINT32=None):
     return _convertCtypeArrayToList(cInt32s)
 
 
-def writeLibraryConfigS(parameter, value):
-    """Writes/sets a library configuration/setting.
-    
-    Args:
-        parameter: Name of the configuration value you want to set.
-            Needs to be a string and is not case-sensitive.
-        value: The config value.
-    
-    Raises:
-        TypeError: parameter is not a string.
-        LJMError: An error was returned from the LJM driver call.
- 
-    """
-    if isinstance(parameter, str) is False:
-        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
-    cVal = ctypes.c_double(value)
-
-    error = _staticLib.LJM_WriteLibraryConfigS(parameter, cVal)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def writeLibraryConfigStringS(parameter, string):
-    """Writes/sets a library configuration/setting.
-
-    Args:
-        parameter: Name of the configuration value you want to set.
-            Needs to be a string and is not case-sensitive.
-        string: The config value string. Must not be of size greater
-            than constants.MAX_NAME_SIZE
-    
-    Raises:
-        TypeError: parameter or string is not a string.
-        LJMError: An error was returned from the LJM driver call.
-
-    """
-    if not isinstance(parameter, str):
-        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
-    if not isinstance(string, str):
-        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
-    
-    error = _staticLib.LJM_WriteLibraryConfigStringS(parameter, string)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-    
-
-def readLibraryConfigS(parameter):
-    """Reads a configuration/setting value from the library.
-    
-    Args:
-        parameter: Name of the configuration value you want to read.
-            Needs to be a string and is not case-sensitive.
-
-    Returns:
-        The read config value as a float.
-    
-    Raises:
-        TypeError: parameter is not a string.
-        LJMError: An error was returned from the LJM driver call.
-
-    """
-    if not isinstance(parameter, str):
-        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
-    cVal = ctypes.c_double(0)
-
-    error = _staticLib.LJM_ReadLibraryConfigS(parameter, ctypes.byref(cVal))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return cVal.value
-
-
-def readLibraryConfigStringS(parameter):
-    """Reads a configuration/setting string from the library.
-    
-    Args:
-        parameter: Name of the configuration value you want to read.
-            Needs to be a string and is not case-sensitive.
-
-    Returns:
-        The read config string.
-    
-    Raises:
-        TypeError: parameter is not a string.
-        LJMError: An error was returned from the LJM driver call.
-
-    """
-    if not isinstance(parameter, str):
-        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
-    outStr = "\0"*constants.MAX_NAME_SIZE
-
-    error = _staticLib.LJM_ReadLibraryConfigStringS(parameter, outStr)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return outStr.split("\0", 1)[0]
-
-
 def numberToIP(number):
     """Takes an integer representing an IPv4 address and returns the
     corresponding decimal-dot IPv4 address as a string.
@@ -1580,7 +1483,7 @@ def numberToIP(number):
 
     Returns:
         The converted string representation of the IP address.
-        
+
     Raises:
         LJMError: An error was returned from the LJM driver call.
 
@@ -1680,9 +1583,107 @@ def macToNumber(macString):
     return cNum.value
 
 
+def writeLibraryConfigS(parameter, value):
+    """Writes/sets a library configuration/setting.
+
+    Args:
+        parameter: Name of the configuration value you want to set.
+            Needs to be a string and is not case-sensitive.
+        value: The config value.
+
+    Raises:
+        TypeError: parameter is not a string.
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    if isinstance(parameter, str) is False:
+        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
+    cVal = ctypes.c_double(value)
+
+    error = _staticLib.LJM_WriteLibraryConfigS(parameter, cVal)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def writeLibraryConfigStringS(parameter, string):
+    """Writes/sets a library configuration/setting.
+
+    Args:
+        parameter: Name of the configuration value you want to set.
+            Needs to be a string and is not case-sensitive.
+        string: The config value string. Must not be of size greater
+            than constants.MAX_NAME_SIZE
+
+    Raises:
+        TypeError: parameter or string is not a string.
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    if not isinstance(parameter, str):
+        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
+    if not isinstance(string, str):
+        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
+    
+    error = _staticLib.LJM_WriteLibraryConfigStringS(parameter, string)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+    
+
+def readLibraryConfigS(parameter):
+    """Reads a configuration/setting value from the library.
+
+    Args:
+        parameter: Name of the configuration value you want to read.
+            Needs to be a string and is not case-sensitive.
+
+    Returns:
+        The read config value as a float.
+
+    Raises:
+        TypeError: parameter is not a string.
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    if not isinstance(parameter, str):
+        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
+    cVal = ctypes.c_double(0)
+
+    error = _staticLib.LJM_ReadLibraryConfigS(parameter, ctypes.byref(cVal))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cVal.value
+
+
+def readLibraryConfigStringS(parameter):
+    """Reads a configuration/setting string from the library.
+
+    Args:
+        parameter: Name of the configuration value you want to read.
+            Needs to be a string and is not case-sensitive.
+
+    Returns:
+        The read config string.
+
+    Raises:
+        TypeError: parameter is not a string.
+        LJMError: An error was returned from the LJM driver call.
+
+    """
+    if not isinstance(parameter, str):
+        raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
+    outStr = "\0"*constants.MAX_NAME_SIZE
+
+    error = _staticLib.LJM_ReadLibraryConfigStringS(parameter, outStr)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return outStr.split("\0", 1)[0]
+
+
 def log(level, string):
     """Outputs a message to the log file at the specified level.
-    
+
     Args:
         level: The log level to output the message at.
             TODO: Define log levels
@@ -1709,7 +1710,7 @@ def resetLog():
 
     Raises:
         LJMError: An error was returned from the LJM driver call.
-    
+
     Note: This function may be temporary.
 
     """
