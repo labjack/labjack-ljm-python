@@ -1,6 +1,13 @@
 Version History
 ---------------
 
+0.8.3 (04/09/2013)
+ - Updated functions, constants and errorcodes to LJM v0.2.33.
+  * New eStreamStart/Read/Stop, addressToType/addressesToTypes
+    functions.
+  * listAll/listAllS parameter and return changes.
+ - Removed warning returns. Only a few functions did this.
+
 0.8.2 (02/26/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.25.
  - Changed errorFrame to errorAddress.
