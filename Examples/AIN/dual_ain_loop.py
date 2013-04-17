@@ -17,8 +17,8 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 
 # Setup and call eWriteNames to configure AINs on the LabJack.
 numFrames = 8
-names = ["AIN0_NEGATIVE", "AIN0_RANGE", "AIN0_RESOLUTION", "AIN0_SETTLING",
-         "AIN1_NEGATIVE", "AIN1_RANGE", "AIN1_RESOLUTION", "AIN1_SETTLING"]
+names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING",
+         "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING"]
 aValues = [199, 10, 0, 0,
            199, 10, 0, 0]
 ljm.eWriteNames(handle, numFrames, names, aValues)

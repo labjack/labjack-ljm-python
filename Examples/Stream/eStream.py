@@ -16,23 +16,18 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
-scansPerRead = 6
+scansPerRead = 1000
 numChannels = 2
 aScanList_Pos = [0, 2] #[AIN0, AIN1]
 aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
 scanRate = 2000
 
-try:
-    ljm.eStreamStop(handle)
-except Exception, e:
-    print e
-
 scanRate = ljm.eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg, scanRate)
-print "Start Stream", scanRate
+print "Start Stream"
 
 print "Start Read"
 try:
-    loop = 1000
+    loop = 10
     start = datetime.now()
     totScans = 0
     for i in range(loop):
@@ -50,7 +45,7 @@ try:
     time = (end-start).seconds + float((end-start).microseconds)/1000000
     print "Time taken:", time, "seconds"
     print "LJM Scan Rate:", scanRate, "scans/second"
-    print "Scan Rate:", totScans/time, "scans/second"
+    print "Timed Scan Rate:", totScans/time, "scans/second"
     print "Sample Rate:", totScans*numChannels/time, "samples/second"
 except ljm.LJMError, ljme:
     print ljme
