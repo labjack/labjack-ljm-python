@@ -1,7 +1,7 @@
 Version History
 ---------------
 
-0.8.3 (04/17/2013)
+0.8.3 (04/18/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.35.
   * New eStreamStart/Read/Stop, addressToType/addressesToTypes
     functions.

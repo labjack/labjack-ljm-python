@@ -1,15 +1,18 @@
 LJMPython
-04/17/2013
+04/18/2013
 support@labjack.com
+
 
 The Python wrapper package, modules and examples for the cross-platform LJM
 library.
+
 
 Installation Requirements:
 
 * Windows, Mac OS X, or Linux
 * LJM library: http://labjack.com/support/ljm
 * Python 2.5 or above. Python 3.x is currently not supported.
+
 
 Installation:
 
@@ -19,24 +22,27 @@ off the sudo on Windows):
 
     $ sudo python setup.py install
 
+
 Examples:
 
-    Example code can be found in the Examples directory.
+Example code can be found in the Examples directory.
+
 
 Documentation:
 
-    LJM Python documentation can be found in the docstrings of the source code.
-    The source code files are located in the labjack/ljm directory.
+LJM Python documentation can be found in the docstrings of the source code. The
+source code files are located in the labjack/ljm directory.
 
-    Alternatively, after installation in Python you can use the help function on
-    a package/module for documentation. For example:
+Alternatively, after installation in Python you can use the help function on a
+package/module for documentation. For example:
 
-        import labjack.ljm
-        help(labjack.ljm)
+    import labjack.ljm
+    help(labjack.ljm)
 
-    LJM library documentation can be found in the LJM User's Guide:
-    
-        http://labjack.com/support/ljm/users-guide
+LJM library documentation can be found in the LJM User's Guide:
+
+    http://labjack.com/support/ljm/users-guide
+
 
 License:
 
