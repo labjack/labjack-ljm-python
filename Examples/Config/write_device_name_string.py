@@ -17,7 +17,7 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 
 # Call eWriteString to set the name string on the LabJack.
 string = "LJTest"
-ljm.eWriteString(handle, "DEVICE_NAME", string)
+ljm.eWriteString(handle, "DEVICE_NAME_DEFAULT", string)
 
 print "\nSet device name : %s" % string
 

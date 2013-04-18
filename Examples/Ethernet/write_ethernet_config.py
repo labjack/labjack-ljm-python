@@ -17,14 +17,14 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 # Setup and call eWriteNames to set the ethernet configuration on the LabJack.
 numFrames = 4
 names = ["ETHERNET_IP_DEFAULT", "ETHERNET_SUBNET_DEFAULT",
-         "ETHERNET_GATEWAY_DEFAULT", "ETHERNET_DHCP_DEFAULT"]
+         "ETHERNET_GATEWAY_DEFAULT", "ETHERNET_DHCP_ENABLE_DEFAULT"]
 values = [ljm.ipToNumber("192.168.1.207"), ljm.ipToNumber("255.255.255.0"),
           ljm.ipToNumber("192.168.1.1"), 1]
 ljm.eWriteNames(handle, numFrames, names, values)
 
 print "\nSet ethernet configuration: "
 for i in range(numFrames):
-    if names[i] == "ETHERNET_DHCP_DEFAULT":
+    if names[i] == "ETHERNET_DHCP_ENABLE_DEFAULT":
         print "    %s : %.0f" % (names[i], values[i])
     else:
         print "    %s : %.0f - %s" % \

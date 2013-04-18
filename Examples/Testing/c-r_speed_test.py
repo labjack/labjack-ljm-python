@@ -51,7 +51,7 @@ if numAIN > 0:
         numFrames += 3
         names.append("AIN%i_RANGE"%i)
         aValues.append(rangeAIN)
-        names.append("AIN%i_RESOLUTION"%i)
+        names.append("AIN%i_RESOLUTION_INDEX"%i)
         aValues.append(resolutionAIN)
         names.append("AIN%i_SETTLING"%i)
         aValues.append(settlingIndexAIN)

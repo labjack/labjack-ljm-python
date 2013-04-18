@@ -17,13 +17,13 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 # Setup and call eReadNames to read ethernet configuration from the LabJack.
 names = ["ETHERNET_IP", "ETHERNET_SUBNET", "ETHERNET_GATEWAY",
          "ETHERNET_IP_DEFAULT", "ETHERNET_SUBNET_DEFAULT",
-         "ETHERNET_GATEWAY_DEFAULT", "ETHERNET_DHCP", "ETHERNET_DHCP_DEFAULT"]
+         "ETHERNET_GATEWAY_DEFAULT", "ETHERNET_DHCP_ENABLE", "ETHERNET_DHCP_ENABLE_DEFAULT"]
 numFrames = len(names)
 results = ljm.eReadNames(handle, numFrames, names)
 
 print "\nEthernet configuration: "
 for i in range(numFrames):
-    if names[i].startswith("ETHERNET_DHCP"):
+    if names[i].startswith("ETHERNET_DHCP_ENABLE"):
         print "    %s : %.0f" % (names[i], results[i])
     else:
         print "    %s : %.0f - %s" % \

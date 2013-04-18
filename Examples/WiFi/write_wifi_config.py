@@ -19,7 +19,7 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 numFrames = 3
 names = ["WIFI_IP_DEFAULT", "WIFI_SUBNET_DEFAULT",
          "WIFI_GATEWAY_DEFAULT"]
-aValues = [ljm.ipToNumber("192.168.1.208"), ljm.ipToNumber("255.255.255.0"),
+aValues = [ljm.ipToNumber("192.168.1.207"), ljm.ipToNumber("255.255.255.0"),
            ljm.ipToNumber("192.168.1.1")]
 ljm.eWriteNames(handle, numFrames, names, aValues)
 
@@ -36,7 +36,7 @@ print "    %s : %s" % (name, string)
 
 # Setup and call eWriteString to configure the default WiFi password on the
 # LabJack.
-name = "WIFI_PASS_DEFAULT"
+name = "WIFI_PASSWORD_DEFAULT"
 string = "none"
 ljm.eWriteString(handle, name, string)
 print "    %s : %s" % (name, string)

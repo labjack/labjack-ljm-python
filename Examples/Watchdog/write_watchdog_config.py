@@ -19,7 +19,7 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 # Disable the Watchdog first before any other configuration.
 numFrames = 11
 names = ["WATCHDOG_ENABLE_DEFAULT", "WATCHDOG_OPTIONS_DEFAULT",
-         "WATCHDOG_TIMEOUT_DEFAULT", "WATCHDOG_STARTUP_DELAY_DEFAULT",
+         "WATCHDOG_TIMEOUT_S_DEFAULT", "WATCHDOG_STARTUP_DELAY_S_DEFAULT",
          "WATCHDOG_DIO_STATE_DEFAULT", "WATCHDOG_DIO_DIRECTION_DEFAULT",
          "WATCHDOG_DIO_MASK_DEFAULT", "WATCHDOG_DAC0_DEFAULT",
          "WATCHDOG_DAC1_DEFAULT", "WATCHDOG_KEY_DEFAULT",
