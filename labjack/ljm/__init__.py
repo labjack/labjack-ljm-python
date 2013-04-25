@@ -49,34 +49,31 @@ class LJMError(Exception):
 
 
 def _loadLibrary():
-    """Returns a ctypes pointer to the library."""
-    import os
+    """Returns a ctypes pointer to the LJM library."""
+    import sys
 
     try:
-        if(os.name == "posix"):
-            try:
+        libraryName = None
+        try:
+            if(sys.platform.startswith("win32") or sys.platform.startswith("cygwin")):
+                #Windows
+                libraryName = "LabJackM.dll"
+            if(sys.platform.startswith("linux")):
                 #Linux
-                return ctypes.CDLL("libLabJackM.so")
-            except OSError, e:
-                pass # May be on Mac.
-            except Exception, e:
-                raise LJMError(errorString = ("Cannot load the LJM Linux SO. " + str(e)))
+                libraryName = "libLabJackM.so"
+            if(sys.platform.startswith("darwin")):
+                #Mac OS X
+                libraryName = "libLabJackM.dylib"
+            
+            if libraryName is not None:
+                return ctypes.CDLL(libraryName)
+        except Exception, e:
+            raise LJMError(errorString = "Cannot load the LJM library " + str(libraryName) + ". " + str(e))
 
-            try:
-                return ctypes.CDLL("libLabJackM.dylib")
-            except OSError, e:
-                raise LJMError(errorString = ("Cannot load the LJM library. Check that the library is installed. " + str(e)))
-            except Exception, e:
-                raise LJMError(errorString = ("Cannot load the LJM Mac OS X Dylib. " + str(e)))
-        if(os.name == "nt"):
-            #Windows
-            try:
-                #Win
-                return ctypes.CDLL("LabJackM.dll")
-            except Exception, e:
-                raise LJMError(errorString = ("Cannot load the LJM library. " + str(e)))
-    except LJMError, e:
-        print str(type(e)) + ": " + str(e)
+        #Unsupported operating system
+        raise LJMError(errorString = "Cannot load the LJM library. Unsupported platform " + sys.platform + ".")
+    except LJMError, ljme:
+        print str(type(ljme)) + ": " + str(ljme)
         return None
 
 
