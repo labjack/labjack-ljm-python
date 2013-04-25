@@ -1,5 +1,7 @@
 *.pyc
 *.pyo
+*~
+.DS_Store
 .installed.cfg
 bin
 develop-eggs

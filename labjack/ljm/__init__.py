@@ -8,7 +8,7 @@ from labjack.ljm import errorcodes
 import ctypes
 
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 
 
 class LJMError(Exception):
