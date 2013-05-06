@@ -93,6 +93,7 @@ MAX_LOG_FILE_SIZE = "LJM_MAX_LOG_FILE_SIZE"
 
 # LJM_LOG_LEVEL:
 # WARNING: These may change, and some may disappear
+STREAM_PACKET = 1
 TRACE = 2
 DEBUG = 4
 INFO = 6
