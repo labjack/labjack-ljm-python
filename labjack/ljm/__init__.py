@@ -519,7 +519,7 @@ def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
         handle: The new handle that represents a device connection.
 
     Raises:
-        TypeError: deviceType or connectionType are not strings.
+        TypeError: deviceType or connectionType are not integers.
         LJMError: An error was returned from the LJM library call.
 
     Notes:
