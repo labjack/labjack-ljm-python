@@ -15,13 +15,15 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
 # Setup and call eReadNames to read WiFi configuration from the LabJack.
-numFrames = 4
-names = ["WIFI_IP", "WIFI_SUBNET", "WIFI_GATEWAY", "WIFI_STATUS"]
+names = ["WIFI_IP", "WIFI_SUBNET", "WIFI_GATEWAY", "WIFI_DHCP_ENABLE",
+    "WIFI_IP_DEFAULT", "WIFI_SUBNET_DEFAULT", "WIFI_GATEWAY_DEFAULT",
+    "WIFI_DHCP_ENABLE_DEFAULT", "WIFI_STATUS"]
+numFrames = len(names)
 results = ljm.eReadNames(handle, numFrames, names)
 
 print "\neWifi configuration: "
 for i in range(numFrames):
-    if names[i] == "WIFI_STATUS":
+    if names[i] == "WIFI_STATUS" or names[i].startswith("WIFI_DHCP_ENABLE"):
         print "    %s : %.0f" % (names[i], results[i])
     else:
         print "    %s : %.0f - %s" % \
