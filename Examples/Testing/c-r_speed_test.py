@@ -55,7 +55,7 @@ if numAIN > 0:
         aValues.append(resolutionAIN)
         names.append("AIN%i_SETTLING"%i)
         aValues.append(settlingIndexAIN)
-    
+
     ljm.eWriteNames(handle, numFrames, names, aValues)
 
 # Initialize and configure eNames parameters for loop's eNames call
@@ -82,7 +82,7 @@ if readDigital is True:
     aValues.append(0)
 
 if writeDigital is True:
-    # Add digital write 
+    # Add digital write
     numFrames += 1
     names.append("DIO_STATE")
     aWrites.append(ljm.constants.WRITE)
@@ -97,6 +97,19 @@ if writeDACs is True:
         aWrites.append(ljm.constants.WRITE)
         aNumValues.append(1)
         aValues.append(0.0) #0.0 V
+
+
+print "\nTest frames:"
+
+for i in range(numFrames):
+    if aWrites[i] == ljm.constants.READ:
+        wrStr = "READ"
+    else:
+        wrStr = "WRITE"
+    print "    %s %s" % (wrStr, names[i])
+
+print "\nBeginning %i iterations..."%numIterations
+
 
 # Initialize time variables
 maxMS = 0
@@ -122,7 +135,6 @@ print "    Min / Max time for one iteration: %.3f ms / %.3f ms" % \
         (minMS*1000, maxMS*1000)
 
 print "\nLast eNames results: "
-start = 0
 for i in range(numFrames):
     if aWrites[i] == ljm.constants.READ:
         wrStr = "READ"

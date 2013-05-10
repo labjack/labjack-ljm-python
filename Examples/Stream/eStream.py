@@ -7,16 +7,19 @@ from labjack import ljm
 import time
 from datetime import datetime
 
+ljm.writeLibraryConfigS(ljm.constants.LOG_LEVEL, 1); # 1 is stream packets, 2 is trace log level
+ljm.writeLibraryConfigS(ljm.constants.LOG_MODE, 2); # 2 is continuous log, 3 is log on error
+
 # Open first found LabJack
-handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[0]
-#handle = ljm.openS("LJM_dtANY", "LJM_ctANY", "LJM_idANY")
+# handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[0]
+handle = ljm.openS("LJM_dtANY", "LJM_ctETHERNET", "LJM_idANY")
 
 info = ljm.getHandleInfo(handle)
 print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
-scansPerRead = 1000
+scansPerRead = 50
 numChannels = 2
 aScanList_Pos = [0, 2] #[AIN0, AIN1]
 aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
@@ -27,7 +30,7 @@ print "Start Stream"
 
 print "Start Read"
 try:
-    loop = 10
+    loop = 100
     start = datetime.now()
     totScans = 0
     for i in range(loop):
