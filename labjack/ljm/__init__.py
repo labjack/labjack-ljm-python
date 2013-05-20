@@ -66,7 +66,10 @@ def _loadLibrary():
                 libraryName = "libLabJackM.dylib"
             
             if libraryName is not None:
-                return ctypes.CDLL(libraryName)
+                if libraryName == "LabJackM.dll":
+                    return ctypes.WinDLL(libraryName)
+                else:
+                    return ctypes.CDLL(libraryName)
         except Exception, e:
             raise LJMError(errorString = "Cannot load the LJM library " + str(libraryName) + ". " + str(e))
 
@@ -458,16 +461,18 @@ def listAllS(deviceType, connectionType):
     return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
 
 
-def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_idANY"):
+def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
     Args:
-        deviceType: A string containing the type of the device to be
-            connected ("LJM_dtT7", "LJM_dtU3", "LJM_dtANY", etc.).
-        ConnectionType: A string containing the type of connection
-            desired ("LJM_ctUSB", "LJM_ctTCP", "LJM_ctANY", etc.).
-        Identifier: A string identifying the device to connect to or
-            "LJM_idANY". This can be a serial number, IP address, or
+        deviceType: A string containing the type of the device to be connected,
+            optionally prepended by "LJM_dt". Possible values include "ANY",
+            "T7", and "DIGIT".
+        connectionType: A string containing the type of the connection desired,
+            optionally prepended by "LJM_ct". Possible values include "ANY",
+            "USB", "TCP", "ETHERNET", and "WIFI".
+        identifier: A string identifying the device to be connected or
+            "LJM_idANY"/"ANY". This can be a serial number, IP address, or
             device name. Device names may not contain periods.
 
     Returns:
@@ -496,7 +501,7 @@ def openS(deviceType="LJM_dtANY", connectionType="LJM_ctANY", identifier="LJM_id
     return cHandle.value
 
 
-def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
+def open(deviceType=0, connectionType=0, identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
     Args:
@@ -506,8 +511,8 @@ def open(deviceType=0, connectionType=0, identifier="LJM_idANY"):
         connectionType: An integer containing the type of connection
             desired (constants.ctUSB, constants.ctTCP, constants.ctANY,
             etc.).
-        Identifier: A string identifying the device to connect to or
-            "LJM_idANY". This can be a serial number, IP address, or
+        identifier: A string identifying the device to be connected or
+            "LJM_idANY"/"ANY". This can be a serial number, IP address, or
             device name. Device names may not contain periods.
 
     Returns:
