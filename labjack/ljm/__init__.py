@@ -8,7 +8,7 @@ from labjack.ljm import errorcodes
 import ctypes
 
 
-__version__ = "0.8.4"
+__version__ = "0.8.5"
 
 
 class LJMError(Exception):
@@ -537,11 +537,11 @@ def open(deviceType=0, connectionType=0, identifier="ANY"):
     identifier = str(identifier)
     cHandle = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_Open(ctypes.byref(cDev), ctypes.byref(cConn), identifier, ctypes.byref(cHandle))
+    error = _staticLib.LJM_Open(cDev, cConn, identifier, ctypes.byref(cHandle))
     if error != errorcodes.NOERROR:
        raise LJMError(error)
 
-    return cHandle.value, cDev.value, cConn.value
+    return cHandle.value
 
 
 def getHandleInfo(handle):
@@ -858,28 +858,28 @@ def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     return _convertCtypeArrayToList(cVals)
 
 
-def eReadNames(handle, numFrames, names):
+def eReadNames(handle, numFrames, aNames):
     """Performs Modbus operations that reads values from a device.
 
     Args:
         handle: The valid handle to an open device.
         numFrames: The total number of reads to perform.  This needs to
             be the length of names or less.
-        names: List of register names (strings) to read.
+        aNames: List of register names (strings) to read.
 
     Returns:
         A list of read values.
 
     Raises:
-        TypeError: names is not a list of strings.
+        TypeError: aNames is not a list of strings.
         LJMError: An error was returned from the LJM library call.
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
-    for x in names:
+    for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
+    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
     cVals =  (ctypes.c_double*numFrames)(0)
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -924,26 +924,26 @@ def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
         raise LJMError(error, errAddr)
 
 
-def eWriteNames(handle, numFrames, names, aValues):
+def eWriteNames(handle, numFrames, aNames, aValues):
     """Performs Modbus operations that writes values to a device.
 
     Args:
         handle: The valid handle to an open device.
         numFrames: The total number of writes to perform.  This needs to
             be the length of names/aValues or less.
-        names: List of register names (strings) to write.
+        aNames: List of register names (strings) to write.
         aValues: List of values to write.
 
     Raises:
-        TypeError: names is not a list of strings.
+        TypeError: aNames is not a list of strings.
         LJMError: An error was returned from the LJM library call.
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
-    for x in names:
+    for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
+    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -1012,18 +1012,18 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
     return _convertCtypeArrayToList(cVals)
 
 
-def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
+def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
     """Performs Modbus operations that reads/writes values to a device.
 
     Args:
         handle: The valid handle to an open device.
         numFrames: The total number of reads/writes to perform.  This
-            needs to be the length of names/aWrites/aNumValues or less.
-        names: List of register names (strings) to write/read.
+            needs to be the length of aNames/aWrites/aNumValues or less.
+        aNames: List of register names (strings) to write/read.
         aWrites: List of directions (constants.READ or constants.WRITE)
-            corresponding to names.
+            corresponding to aNames.
         aNumValues: List of the number of values to read/write,
-            corresponding to aWrites and names.
+            corresponding to aWrites and aNames.
         aValues: List of values to write.  Needs to be the length of the
             sum of the aNumValues list's values.  Values corresponding
             to writes are written.
@@ -1032,7 +1032,7 @@ def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
         The list of aValues written/read.
 
     Raises:
-        TypeError: names is not a list of strings.
+        TypeError: aNames is not a list of strings.
         LJMError: An error was returned from the LJM library call.
 
     Notes:
@@ -1050,10 +1050,10 @@ def eNames(handle, numFrames, names, aWrites, aNumValues, aValues):
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
-    for x in names:
+    for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
+    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
     cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
@@ -1091,8 +1091,10 @@ def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg
     Raises:
         LJMError: An error was returned from the LJM library call.
 
-    Note: Channel configuration such as range and resolution must be
-        handled elsewhere
+    Notes: Channel configuration such as range and resolution must be
+        handled elsewhere.
+        Check your device's documentation for valid aScanList_Pos and
+        aScanList_Neg channels.
 
     """
     cSPR = ctypes.c_int32(scansPerRead)

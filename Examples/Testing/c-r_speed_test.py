@@ -18,8 +18,8 @@ def eNamesIteration(handle, numFrames, names, aWrites, aNumValues, aValues,
     results.extend(r)
 
 # Open first found LabJack
-handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "LJM_idANY")[0]
-#handle = ljm.openS("LJM_dtANY", "LJM_ctANY", "LJM_idANY")
+handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+#handle = ljm.openS("ANY", "ANY", "ANY")
 
 info = ljm.getHandleInfo(handle)
 print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
