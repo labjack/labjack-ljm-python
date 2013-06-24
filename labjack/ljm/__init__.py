@@ -1067,7 +1067,7 @@ def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
 
 
 _g_eStreamDataSize = {}
-def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg, scanRate):
+def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate):
     """Initializes a stream object and begins streaming. This includes
        creating a buffer in LJM that collects data from the device.
 
@@ -1076,13 +1076,8 @@ def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg
         scansPerRead: Number of scans returned by each call to the
             eStreamRead function as well as the number of scans
             buffered in LJM each time the device gives data to LJM.
-        numChannels: The size of aScanList_Pos and aScanList_Neg.
-        aScanList_Pos: List of Modbus addresses to collect samples
-            from.
-        aScanList_Neg: List of Modbus addresses corresponding to
-            aScanList_Pos. Use GND (address 199 or constants.GND) for
-            single-ended conversion, or specify addresses for
-            differential conversion.
+        numChannels: The size of aScanList_Pos.
+        aScanList_Pos: List of addresses to collect samples from.
         scanRate: Sets the desired number of scans per second.
 
     Returns:
@@ -1091,19 +1086,18 @@ def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg
     Raises:
         LJMError: An error was returned from the LJM library call.
 
-    Notes: Channel configuration such as range and resolution must be
-        handled elsewhere.
-        Check your device's documentation for valid aScanList_Pos and
-        aScanList_Neg channels.
+    Notes:
+        Channel configuration such as range, resolution, and differential
+        voltages must be handled elsewhere.
+        Check your device's documentation for valid aScanList_Pos channels.
 
     """
     cSPR = ctypes.c_int32(scansPerRead)
     cNumChans = ctypes.c_int32(numChannels)
     cSL_p = _convertListToCtypeArray(aScanList_Pos, ctypes.c_int32)
-    cSL_n = _convertListToCtypeArray(aScanList_Neg, ctypes.c_int32)
     cScanRate = ctypes.c_double(scanRate)
 
-    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumChans, ctypes.byref(cSL_p), ctypes.byref(cSL_n), ctypes.byref(cScanRate))
+    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumChans, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1149,15 +1143,14 @@ def eStreamRead(handle):
     if handle not in _g_eStreamDataSize:
         raise LJMError(errorString = "Streaming has not been started for the given handle. Please call eStreamStart first.")
     cData = (ctypes.c_double*_g_eStreamDataSize[handle])(constants.DUMMY_VALUE)
-    cNumSS = ctypes.c_int32(0)
     cD_SBL = ctypes.c_int32(0)
     cLJM_SBL = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cNumSS), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL));
+    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL));
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return _convertCtypeArrayToList(cData), cNumSS.value, cD_SBL.value, cLJM_SBL.value
+    return _convertCtypeArrayToList(cData), cD_SBL.value, cLJM_SBL.value
 
 
 def eStreamStop(handle):

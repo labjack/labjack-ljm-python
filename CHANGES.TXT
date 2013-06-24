@@ -2,9 +2,12 @@ Version History
 ---------------
 
 0.8.5 (xx/xx/2013)
- - Updated functions, constants and errorcodes to LJM v0.2.42.
+ - Updated functions, constants and errorcodes to LJM v0.2.43.
    * labjack.ljm.open was changed and is not compatible with
      with LJM library versions below 0.2.42.
+   * labjack.ljm.eStreamStart and eStreamRead were changed
+     and are not compatible with LJM library versions below
+     0.2.43.
 
 0.8.4 (05/20/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.39.

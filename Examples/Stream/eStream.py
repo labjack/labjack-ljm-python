@@ -12,7 +12,7 @@ ljm.writeLibraryConfigS(ljm.constants.LOG_MODE, 2); # 2 is continuous log, 3 is 
 
 # Open first found LabJack
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-handle = ljm.openS("ANY", "ETHERNET", "ANY")
+handle = ljm.openS("ANY", "ETHERNET", "192.168.1.175")
 
 info = ljm.getHandleInfo(handle)
 print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
@@ -21,11 +21,11 @@ print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 
 scansPerRead = 50
 numChannels = 2
-aScanList_Pos = [0, 2] #[AIN0, AIN1]
+aScanList_Pos = [0, 1] #[AIN0, AIN1]
 aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
 scanRate = 2000
 
-scanRate = ljm.eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, aScanList_Neg, scanRate)
+scanRate = ljm.eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate)
 print "Start Stream"
 
 print "Start Read"
@@ -38,7 +38,7 @@ try:
         data = ret[0]
         scans = len(data)/numChannels
         totScans += scans
-        totScans -= ret[1]
+        #totScans -= ret[1]
         print "\neStreamRead", i+1
         print "  First scan out of", scans, " AIN0 =", data[0], "AIN1 =", data[1]
         print "  numSkippedScans:", ret[1], ", deviceScanBacklog:", ret[2], ", ljmScanBacklog:", ret[2]
