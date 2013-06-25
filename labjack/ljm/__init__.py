@@ -143,7 +143,7 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
     cNumFrames = ctypes.c_int32(numFrames)
     if aMBFBCommand is None:
-        cComm = (ctypes.c_ubyte*maxBytesPerMBFB)(0)
+        cComm = (ctypes.c_ubyte*maxBytesPerMBFB)()
     else:
         cComm = _convertListToCtypeArray(aMBFBCommand, ctypes.c_ubyte)
 
@@ -217,7 +217,7 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames, aVal
     cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
     cNumFrames = ctypes.c_int32(numFrames)
     if aValues is None:
-        cVals = (ctypes.c_double*(sum(aNumValues)))(0)
+        cVals = (ctypes.c_double*(sum(aNumValues)))()
     else:
         cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
 
@@ -267,11 +267,11 @@ def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
     cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
     if aAddresses is None:
-        cAddrs = (ctypes.c_int32*numFrames)(0)
+        cAddrs = (ctypes.c_int32*numFrames)()
     else:
         cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
     if aDataTypes is None:
-        cTypes = (ctypes.c_int32*numFrames)(0)
+        cTypes = (ctypes.c_int32*numFrames)()
     else:
         cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
 
@@ -332,7 +332,7 @@ def addressesToTypes(numAddresses, aAddresses):
     """
     cNumAddrs = ctypes.c_int32(numAddresses)
     cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
-    cTypes = (ctypes.c_int32*numAddresses)(0)
+    cTypes = (ctypes.c_int32*numAddresses)()
 
     error = _staticLib.LJM_AddressesToTypes(cNumAddrs, ctypes.byref(cAddrs), ctypes.byref(cTypes));
     if error != errorcodes.NOERROR:
@@ -399,10 +399,10 @@ def listAll(deviceType, connectionType):
     cDev = ctypes.c_int32(deviceType)
     cConn = ctypes.c_int32(connectionType)
     cNumFound = ctypes.c_int32(0)
-    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
 
     error = _staticLib.LJM_ListAll(cDev, cConn, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != errorcodes.NOERROR:
@@ -448,10 +448,10 @@ def listAllS(deviceType, connectionType):
     if not isinstance(connectionType, str):
         raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
     cNumFound = ctypes.c_int32(0)
-    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
-    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
 
     error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != errorcodes.NOERROR:
@@ -717,7 +717,7 @@ def readRaw(handle, numBytes):
 
     """
     cNumBytes = ctypes.c_int32(numBytes)
-    cData = (ctypes.c_ubyte*numBytes)(0)
+    cData = (ctypes.c_ubyte*numBytes)()
 
     error = _staticLib.LJM_ReadRaw(handle, ctypes.byref(cData), cNumBytes)
     if error != errorcodes.NOERROR:
@@ -845,7 +845,7 @@ def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     cNumFrames = ctypes.c_int32(numFrames)
     cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
     cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
-    cVals = (ctypes.c_double*numFrames)(0)
+    cVals = (ctypes.c_double*numFrames)()
     cErrorAddr = ctypes.c_int32(-1)
 
     error = _staticLib.LJM_eReadAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
@@ -880,7 +880,7 @@ def eReadNames(handle, numFrames, aNames):
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
     cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
-    cVals =  (ctypes.c_double*numFrames)(0)
+    cVals =  (ctypes.c_double*numFrames)()
     cErrorAddr = ctypes.c_int32(-1)
 
     error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
@@ -1077,7 +1077,7 @@ def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate):
             eStreamRead function as well as the number of scans
             buffered in LJM each time the device gives data to LJM.
         numChannels: The size of aScanList_Pos.
-        aScanList_Pos: List of addresses to collect samples from.
+        aScanList_Pos: List of Modbus addresses to collect samples from.
         scanRate: Sets the desired number of scans per second.
 
     Returns:
@@ -1142,7 +1142,7 @@ def eStreamRead(handle):
     #May need to change to optimize
     if handle not in _g_eStreamDataSize:
         raise LJMError(errorString = "Streaming has not been started for the given handle. Please call eStreamStart first.")
-    cData = (ctypes.c_double*_g_eStreamDataSize[handle])(constants.DUMMY_VALUE)
+    cData = (ctypes.c_double*_g_eStreamDataSize[handle])()
     cD_SBL = ctypes.c_int32(0)
     cLJM_SBL = ctypes.c_int32(0)
 

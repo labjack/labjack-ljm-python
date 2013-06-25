@@ -30,14 +30,12 @@ print ljm.listAllS(devS, conS)
 
 print "open"
 print ""
-ret = ljm.open(dev, con)
-h = ret[0]
+h = ljm.open(dev, con)
 ljm.close(h)
 
 print "openS"
 print ""
-ret = ljm.openS(devS, conS)
-h = ret
+h = ljm.openS(devS, conS)
 hInfo = ljm.getHandleInfo(h)
 print "getHandleInfo", hInfo
 print ""

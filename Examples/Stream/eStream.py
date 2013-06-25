@@ -11,19 +11,26 @@ ljm.writeLibraryConfigS(ljm.constants.LOG_LEVEL, 1); # 1 is stream packets, 2 is
 ljm.writeLibraryConfigS(ljm.constants.LOG_MODE, 2); # 2 is continuous log, 3 is log on error
 
 # Open first found LabJack
-#handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-handle = ljm.openS("ANY", "ETHERNET", "192.168.1.175")
+handle = ljm.open(ljm.constants.dtT7, ljm.constants.ctETHERNET, "192.168.1.175")
+#handle = ljm.openS("ANY", "ETHERNET", "192.168.1.192")
 
 info = ljm.getHandleInfo(handle)
 print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
 
-scansPerRead = 50
 numChannels = 2
-aScanList_Pos = [0, 1] #[AIN0, AIN1]
+scansPerRead = int(252/numChannels) #252 is the max reliable # samples per packet
+aScanList_Pos = [0, 2] #[AIN0, AIN1]
 aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
-scanRate = 2000
+scanRate = 25000
+
+#unknown error
+#numChannels = 2
+#scansPerRead = int(252/numChannels) #252 is the max reliable # samples per packet
+#aScanList_Pos = [0, 2] #[AIN0, AIN1]
+#aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
+#scanRate = 50000
 
 scanRate = ljm.eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate)
 print "Start Stream"
