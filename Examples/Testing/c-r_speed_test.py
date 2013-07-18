@@ -33,7 +33,6 @@ numIterations = 1000 # Number of iterations to perform in the loop
 numAIN = 1 # Number of analog inputs to read
 rangeAIN = 10.0
 resolutionAIN = 1
-settlingIndexAIN = 0
 
 # Digital settings
 readDigital = False
@@ -48,13 +47,11 @@ if numAIN > 0:
     names = []
     aValues = []
     for i in range(numAIN):
-        numFrames += 3
+        numFrames += 2
         names.append("AIN%i_RANGE"%i)
         aValues.append(rangeAIN)
         names.append("AIN%i_RESOLUTION_INDEX"%i)
         aValues.append(resolutionAIN)
-        names.append("AIN%i_SETTLING"%i)
-        aValues.append(settlingIndexAIN)
 
     ljm.eWriteNames(handle, numFrames, names, aValues)
 

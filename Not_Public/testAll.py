@@ -158,7 +158,15 @@ print "writeLibraryConfigStringS"
 ljm.writeLibraryConfigStringS("LJM_LOG_FILE", "ljlogfile0.txt")
 print "readLibraryConfigStringS: ", ljm.readLibraryConfigStringS("LJM_LOG_FILE")
 
-t = timeit.Timer(functools.partial(timeoutTest, h))
+#t = timeit.Timer(functools.partial(timeoutTest, h))
+'''
+def timeoutTest(h):
+    try:
+        ljm.readRaw(h, 2)
+    except ljm.LJMError, e:
+        pass # print e
+'''
+t = timeit.Timer(lambda: timeoutTest(h)) #"timeoutTest("+ str(h) + ")", setup="from __main__ import timeoutTest")
 print "read timeout in sec = ", t.timeit(number = 1)
 
 print "closeAll:", ljm.closeAll()
