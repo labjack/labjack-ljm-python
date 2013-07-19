@@ -1,6 +1,10 @@
 Version History
 ---------------
 
+0.8.6 (Not released)
+ - Updated functions, function documentation, constants and 
+   errorcodes to LJM v0.2.44.
+
 0.8.5 (07/01/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.43.
    * labjack.ljm.open was changed and is not compatible with

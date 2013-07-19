@@ -11,8 +11,9 @@ ljm.writeLibraryConfigS(ljm.constants.LOG_LEVEL, 1); # 1 is stream packets, 2 is
 ljm.writeLibraryConfigS(ljm.constants.LOG_MODE, 2); # 2 is continuous log, 3 is log on error
 
 # Open first found LabJack
-handle = ljm.open(ljm.constants.dtT7, ljm.constants.ctETHERNET, "192.168.1.175")
+#handle = ljm.open(ljm.constants.dtT7, ljm.constants.ctETHERNET, "192.168.1.175")
 #handle = ljm.openS("ANY", "ETHERNET", "192.168.1.192")
+handle = ljm.openS("ANY", "USB", "ANY")
 
 info = ljm.getHandleInfo(handle)
 print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \

@@ -8,7 +8,7 @@ from labjack.ljm import errorcodes
 import ctypes
 
 
-__version__ = "0.8.5"
+__version__ = "0.8.6"
 
 
 class LJMError(Exception):
@@ -93,14 +93,16 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
             command is allowed to consist of. It is highly recommended
             to pass the size of MaxBytesPerMBFB to prevent buffer
             overflow.
-        aAddresses: A list representing the register addresses to
-            read/write.
-        aDataTypes: A list representing the data type to read/write.
-            Data types are constants.FLOAT32, constants.INT32, etc..
-        aWrites: A list representing the directions (constants.READ or
-            constants.WRITE).
-        aNumValues: A list representing how many values will be
-            read/written.
+        aAddresses: A list of size numFrames representing the register
+            addresses to read from or write to for each frame.
+        aDataTypes: A list of size numFrames representing the data types
+            to read or write. See the Data Type constants in the
+            labjack.ljm.constants module.
+        aWrites: A list of size numFrames of the direction/access
+            direction/access type (labjack.ljm.constants.READ or
+            labjack.ljm.constants.WRITE) for each frame.
+        aNumValues: A list of size numFrames giving the number of values
+            to read/write for each frame.
         aValues: A list of values to write. Needs to be the length of
             the sum of the aNumValues list's values. Values
             corresponding to writes are written.
@@ -122,13 +124,15 @@ def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues
         LJMError: An error was returned from the LJM library call.
 
     Notes:
-        For every entry in aWrites[i] that is constants.WRITE, aValues
-        contains aNumValues[i] values to write and for every entry in
-        aWrites that is constants.READ, aValues contains aNumValues[i]
+        For every entry in aWrites[i] that is
+        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
+        values to write and for every entry in aWrites that is
+        labjack.ljm.constants.READ, aValues contains aNumValues[i]
         values that will later be updated in the updateValues function.
         aValues values must be in the same order as the rest of the
         lists. For example, if aWrite is:
-            [constants.WRITE, constants.READ, constants.WRITE]
+            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
+            labjack.ljm.constants.WRITE]
         and aNumValues is:
             [1, 4, 2]
         aValues would have one value to be written, then 4 blank/garbage
@@ -228,20 +232,21 @@ def updateValues(aMBFBResponse, aDataTypes, aWrites, aNumValues, numFrames, aVal
     return _convertCtypeArrayToList(cVals)
 
 
-def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
+def namesToAddresses(numFrames, aNames, aAddresses=None, aDataTypes=None):
     """Takes a list of Modbus register names and returns two lists
     containing the corresponding addresses and data types.
 
     Args:
-        numFrames: The number of names to get addresses and data types
-            for.
-        names: List of register name string.
+        numFrames: The number of names in aNames, and minimum size of
+            aAddresses and aDataTypes if not set to None.
+        aNames: List of strings containing the register name or register
+            alternate name.
         aAddresses: List of addresses to pass. This should be at least
             the size numFrames. Default is None, which creates this list
-            with the size of numFrames and filled with zeros.
+            with size of numFrames and filled with zeros.
         aDataTypes: List of data types to pass. This should be at least
             the size numFrames. Default is None, which creates this list
-            with the size of numFrames and filled with zeros.
+            with size of numFrames and filled with zeros.
 
     Returns:
         A tuple containing:
@@ -256,16 +261,16 @@ def namesToAddresses(numFrames, names, aAddresses=None, aDataTypes=None):
         TypeError: names is not a list of strings.
         LJMError: An error was returned from the LJM library call.
 
-    Note: For each register identifier in names that is invalid, the
+    Note: For each register identifier in aNames that is invalid, the
         corresponding aAddresses value will be set to
-        constants.INVALID_NAME_ADDRESS.
+        labjack.ljm.constants.INVALID_NAME_ADDRESS.
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
-    for x in names:
+    for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(names, ctypes.c_char_p)
+    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
     if aAddresses is None:
         cAddrs = (ctypes.c_int32*numFrames)()
     else:
@@ -370,11 +375,12 @@ def listAll(deviceType, connectionType):
 
     Args:
         deviceType: An integer that filters which devices will be
-            returned (constants.dtT7, constants.dtU3, etc.).
-            constants.dtANY is allowed.
+            returned (labjack.ljm.constants.dtT7,
+            labjack.ljm.constants.dtU3, etc.).
+            labjack.ljm.constants.dtANY is allowed.
         connectionType: An integer that filters by connection type
-            (constants.ctUSB, constants.ctTCP, etc).  constants.ctANY is
-            allowed.
+            (labjack.ljm.constants.ctUSB, labjack.ljm.constants.ctTCP,
+            etc). labjack.ljm.constants.ctANY is allowed.
 
     Returns:
         A tuple containing:
@@ -390,7 +396,7 @@ def listAll(deviceType, connectionType):
             devices.
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if the returned connection type is
-            constants.ctTCP.
+            labjack.ljm.constants.ctTCP.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -436,7 +442,7 @@ def listAllS(deviceType, connectionType):
             devices.
         aIPAddresses: List of IP addresses for each of the numFound
             devices, but only if the returned connection type is
-            constants.ctTCP.
+            labjack.ljm.constants.ctTCP.
 
     Raises:
         TypeError: deviceType or connectionType are not strings.
@@ -465,18 +471,18 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
     Args:
-        deviceType: A string containing the type of the device to be connected,
-            optionally prepended by "LJM_dt". Possible values include "ANY",
-            "T7", and "DIGIT".
-        connectionType: A string containing the type of the connection desired,
-            optionally prepended by "LJM_ct". Possible values include "ANY",
-            "USB", "TCP", "ETHERNET", and "WIFI".
+        deviceType: A string containing the type of the device to be
+            connected, optionally prepended by "LJM_dt". Possible values
+            include "ANY", "T7", and "DIGIT".
+        connectionType: A string containing the type of the connection
+            desired, optionally prepended by "LJM_ct". Possible values
+            include "ANY", "USB", "TCP", "ETHERNET", and "WIFI".
         identifier: A string identifying the device to be connected or
-            "LJM_idANY"/"ANY". This can be a serial number, IP address, or
-            device name. Device names may not contain periods.
+            "LJM_idANY"/"ANY". This can be a serial number, IP address,
+            or device name. Device names may not contain periods.
 
     Returns:
-        The new handle that represents a device connection.
+        The new handle that represents a device connection upon success.
 
     Raises:
         TypeError: deviceType or connectionType are not strings.
@@ -506,22 +512,19 @@ def open(deviceType=0, connectionType=0, identifier="ANY"):
 
     Args:
         deviceType: An integer containing the type of the device to be
-            connected (constants.dtT7, constants.dtU3, constants.dtANY,
+            connected (labjack.ljm.constants.dtT7,
+            labjack.ljm.constants.dtU3, labjack.ljm.constants.dtANY,
             etc.).
         connectionType: An integer containing the type of connection
-            desired (constants.ctUSB, constants.ctTCP, constants.ctANY,
+            desired (labjack.ljm.constants.ctUSB,
+            labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,
             etc.).
         identifier: A string identifying the device to be connected or
-            "LJM_idANY"/"ANY". This can be a serial number, IP address, or
-            device name. Device names may not contain periods.
+            "LJM_idANY"/"ANY". This can be a serial number, IP address,
+            or device name. Device names may not contain periods.
 
     Returns:
-        A tuple containing:
-        (deviceType, connectionType, handle)
-
-        deviceType: The type of device opened.
-        connectionType: The type of connected opened.
-        handle: The new handle that represents a device connection.
+        The new handle that represents a device connection upon success.
 
     Raises:
         TypeError: deviceType or connectionType are not integers.
@@ -556,14 +559,14 @@ def getHandleInfo(handle):
         maxBytesPerMB)
 
         deviceType: The device type corresponding to an integer
-            constant such as constants.dtT7.
+            constant such as labjack.ljm.constants.dtT7.
         connectionType: The output device type corresponding to an
-            integer constant such as constants.ctUSB
+            integer constant such as labjack.ljm.constants.ctUSB.
         serialNumber: The serial number of the device.
         ipAddress: The integer representation of the device's IP
-            address, or constants.NO_IP_ADDRESS if the device does not
-            support Ethernet/TCP.  Use the numberToIP function to
-            convert this value to a string.
+            address, or labjack.ljm.constants.NO_IP_ADDRESS if the
+            device does not support Ethernet/TCP.  Use the numberToIP
+            function to convert this value to a string.
         port: The port the device is connected on via Ethernet/TCP, or
             the pipe the device is connected on via USB.
         maxBytesPerMB: The maximum packet size in number of bytes that
@@ -626,7 +629,7 @@ def errorToString(errorCode):
 
     Note:
         If the constants file that has been loaded does not contain
-        errorCode, this returns a message saying so.  If the constants
+        errorCode, this returns a message saying so. If the constants
         file could not be opened, this returns a string saying so and
         where that constants file was expected to be.
 
@@ -656,7 +659,7 @@ def close(handle):
     """Closes the connection to the device.
 
     Args:
-        handle: The handle that represents an open device.
+        handle: A valid handle to an open device.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -683,7 +686,7 @@ def writeRaw(handle, data, numBytes=None):
     """Sends an unaltered data packet to a device.
 
     Args:
-        handle: The handle that represents an open device.
+        handle: A valid handle to an open device.
         data: The byte list/packet to send.
         numBytes: The number of bytes to send.  Default is None and will
             automaticcally send all the bytes in the data list.
@@ -706,7 +709,7 @@ def readRaw(handle, numBytes):
     """Reads an unaltered data packet from a device.
 
     Args:
-        handle: The handle that represents an open device.
+        handle: A valid handle to an open device.
         numBytes: The number of bytes to receive.
 
     Returns:
@@ -730,10 +733,11 @@ def eWriteAddress(handle, address, dataType, value):
     """Performs Modbus operations that writes a value to a device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         address: Register address to write.
         dataTypes: The data type corresponding to the address
-            (constants.FLOAT32, constants.INT32, etc.).
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.).
         value: The value to write.
 
     Raises:
@@ -753,10 +757,11 @@ def eReadAddress(handle, address, dataType):
     """Performs Modbus operations that reads a value from a device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         address: Register address to read.
         dataTypes: The data type corresponding to the address
-            (constants.FLOAT32, constants.INT32, etc.).
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.).
 
     Returns:
         The read value.
@@ -780,7 +785,7 @@ def eWriteName(handle, name, value):
     """Performs Modbus operations that writes a value to a device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         name: Register name (string) to write.
         value: The value to write.
 
@@ -802,7 +807,7 @@ def eReadName(handle, name):
     """Performs Modbus operations that reads a value from a device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         name: Register name (string) to read.
 
     Returns:
@@ -828,12 +833,13 @@ def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
     """Performs Modbus operations that reads values from a device.
 
     Args:
-        handle: The valid handle to an open device.
-        numFrames: The total number of reads to perform.  This needs to
-            be the length of aAddresses/aDataTypes or less.
-        aAddresses: List of register addresses to read.
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads to perform.
+        aAddresses: List of register addresses to read. This list needs
+            to be at least size numFrames.
         aDataTypes: List of data types corresponding to aAddresses
-            (constants.FLOAT32, constants.INT32, etc.).
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
 
     Returns:
         A list of read values.
@@ -862,10 +868,10 @@ def eReadNames(handle, numFrames, aNames):
     """Performs Modbus operations that reads values from a device.
 
     Args:
-        handle: The valid handle to an open device.
-        numFrames: The total number of reads to perform.  This needs to
-            be the length of names or less.
-        aNames: List of register names (strings) to read.
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads to perform.
+        aNames: List of register names (strings) to read. This list
+            needs to be at least size numFrames.
 
     Returns:
         A list of read values.
@@ -897,13 +903,15 @@ def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
     """Performs Modbus operations that writes values to a device.
 
     Args:
-        handle: The valid handle to an open device.
-        numFrames: The total number of writes to perform.  This needs to
-            be the length of aAddresses/aDataTypes/aValues or less.
-        aAddresses: List of register addresses to write.
+        handle: A valid handle to an open device.
+        numFrames: The total number of writes to perform.
+        aAddresses: List of register addresses to write. This list needs
+            to be at least size numFrames.
         aDataTypes: List of data types corresponding to aAddresses
-            (constants.FLOAT32, constants.INT32, etc.).
-        aValues: The list of values to write.
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
+        aValues: The list of values to write. This list needs to be at
+            least size numFrames.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -928,11 +936,12 @@ def eWriteNames(handle, numFrames, aNames, aValues):
     """Performs Modbus operations that writes values to a device.
 
     Args:
-        handle: The valid handle to an open device.
-        numFrames: The total number of writes to perform.  This needs to
-            be the length of names/aValues or less.
-        aNames: List of register names (strings) to write.
-        aValues: List of values to write.
+        handle: A valid handle to an open device.
+        numFrames: The total number of writes to perform.
+        aNames: List of register names (strings) to write. This list
+            needs to be at least size numFrames.
+        aValues: List of values to write. This list needs to be at least
+            size numFrames.
 
     Raises:
         TypeError: aNames is not a list of strings.
@@ -959,20 +968,22 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
     """Performs Modbus operations that reads/writes values to a device.
 
     Args:
-        handle: The valid handle to an open device.
-        numFrames: The total number of reads/writes to perform.  This
-            needs to be the length of aAddresses/aDataTypes/aWrites/
-            aNumValues or less.
-        aAddresses: List of register addresses to write.
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads/writes to perform.
+        aAddresses: List of register addresses to write. This list needs
+            to be at least size numFrames.
         aDataTypes: List of data types corresponding to aAddresses
-            (constants.FLOAT32, constants.INT32, etc.).
-        aWrites: List of directions (constants.READ or constants.WRITE)
-            corresponding to aAddresses.
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
+        aWrites: List of directions (labjack.ljm.constants.READ or
+            labjack.ljm.constants.WRITE) corresponding to aAddresses.
+            This list needs to be at least size numFrames.
         aNumValues: List of the number of values to read/write,
-            corresponding to aWrites and aAddresses.
-        aValues: List of values to write.  Needs to be the length of the
-            sum of the aNumValues list's values.  Values corresponding
-            to writes are written.
+            corresponding to aWrites and aAddresses. This list needs to
+            be at least size numFrames.
+        aValues: List of values to write. This list needs to be the
+            length of the sum of the aNumValues list's values. Values
+            corresponding to writes are written.
 
     Returns:
         The list of aValues written/read.
@@ -981,13 +992,15 @@ def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, a
         LJMError: An error was returned from the LJM library call.
 
     Notes:
-        For every entry in aWrites[i] that is constants.WRITE, aValues
-        contains aNumValues[i] values to write and for every entry in
-        aWrites that is constants.READ, aValues contains aNumValues[i]
+        For every entry in aWrites[i] that is
+        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
+        values to write and for every entry in aWrites that is
+        labjack.ljm.constants.READ, aValues contains aNumValues[i]
         values that will be updated in the returned list. aValues values
         must be in the same order as the rest of the lists. For example,
         if aWrite is:
-            [constants.WRITE, constants.READ, constants.WRITE]
+            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
+            labjack.ljm.constants.WRITE]
         and aNumValues is:
             [1, 4, 2]
         aValues would have one value to be written, then 4 blank/garbage
@@ -1016,17 +1029,20 @@ def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
     """Performs Modbus operations that reads/writes values to a device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         numFrames: The total number of reads/writes to perform.  This
             needs to be the length of aNames/aWrites/aNumValues or less.
-        aNames: List of register names (strings) to write/read.
-        aWrites: List of directions (constants.READ or constants.WRITE)
-            corresponding to aNames.
+        aNames: List of register names (strings) to write/read. This
+            list needs to be at least size numFrames.
+        aWrites: List of directions (labjack.ljm.constants.READ or
+            labjack.ljm.constants.WRITE) corresponding to aNames. This
+            list needs to be at least size numFrames.
         aNumValues: List of the number of values to read/write,
-            corresponding to aWrites and aNames.
-        aValues: List of values to write.  Needs to be the length of the
-            sum of the aNumValues list's values.  Values corresponding
-            to writes are written.
+            corresponding to aWrites and aNames. This list needs to be
+            at least size numFrames.
+        aValues: List of values to write.  This list needs to be the
+            length of the sum of the aNumValues list's values.  Values
+            corresponding to writes are written.
 
     Returns:
         The list of aValues written/read.
@@ -1036,13 +1052,15 @@ def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
         LJMError: An error was returned from the LJM library call.
 
     Notes:
-        For every entry in aWrites[i] that is constants.WRITE, aValues
-        contains aNumValues[i] values to write and for every entry in
-        aWrites that is constants.READ, aValues contains aNumValues[i]
+        For every entry in aWrites[i] that is
+        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
+        values to write and for every entry in aWrites that is
+        labjack.ljm.constants.READ, aValues contains aNumValues[i]
         values that will be updated in the returned list. aValues values
         must be in the same order as the rest of the lists. For example,
         if aWrite is:
-            [constants.WRITE, constants.READ, constants.WRITE]
+            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
+            labjack.ljm.constants.WRITE]
         and aNumValues is:
             [1, 4, 2]
         aValues would have one value to be written, then 4 blank/garbage
@@ -1067,17 +1085,19 @@ def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
 
 
 _g_eStreamDataSize = {}
-def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate):
+def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
     """Initializes a stream object and begins streaming. This includes
        creating a buffer in LJM that collects data from the device.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
         scansPerRead: Number of scans returned by each call to the
-            eStreamRead function as well as the number of scans
-            buffered in LJM each time the device gives data to LJM.
-        numChannels: The size of aScanList_Pos.
-        aScanList_Pos: List of Modbus addresses to collect samples from.
+            eStreamRead function. This is not tied to the maximum packet
+            size for the device.
+        numAddresses: The size of aScanList. The number of addresses to
+            scan.
+        aScanList: List of Modbus addresses to collect samples from,
+            per scan.
         scanRate: Sets the desired number of scans per second.
 
     Returns:
@@ -1087,21 +1107,21 @@ def eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate):
         LJMError: An error was returned from the LJM library call.
 
     Notes:
-        Channel configuration such as range, resolution, and differential
-        voltages must be handled elsewhere.
-        Check your device's documentation for valid aScanList_Pos channels.
+        Address configuration such as range, resolution, and
+        differential voltages must be handled elsewhere.
+        Check your device's documentation for valid aScanList channels.
 
     """
     cSPR = ctypes.c_int32(scansPerRead)
-    cNumChans = ctypes.c_int32(numChannels)
-    cSL_p = _convertListToCtypeArray(aScanList_Pos, ctypes.c_int32)
+    cNumAddrs = ctypes.c_int32(numAddresses)
+    cSL_p = _convertListToCtypeArray(aScanList, ctypes.c_int32)
     cScanRate = ctypes.c_double(scanRate)
 
-    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumChans, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
+    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumAddrs, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    _g_eStreamDataSize[handle] = scansPerRead*numChannels
+    _g_eStreamDataSize[handle] = scansPerRead*numAddresses
     return cScanRate.value
 
 
@@ -1110,20 +1130,16 @@ def eStreamRead(handle):
     Waits for data to become available, if necessary.
 
     Args:
-        handle: The valid handle to an open device.
+        handle: A valid handle to an open device.
 
     Returns:
         A tuple containing:
         (aData, numSkippedScans, deviceScanBacklog, ljmScanBackLog)
 
         aData: Stream data list with all channels interleaved. It will
-            contain scansPerRead*numChannels values configured from
+            contain scansPerRead*numAddresses values configured from
             eStreamStart. The data returned is removed from the LJM
             stream buffer.
-        numSkippedScans: The number of scans for which the device
-            buffer was too full to record new results. (Rounds up if
-            relevant). Corresponding aData values are set to
-            constants.DUMMY_VALUE.
         deviceScanBacklog: The number of scans left in the device
             buffer, as measured from when data was last collected from
             the device. This should usually be near zero and not
@@ -1637,7 +1653,7 @@ def writeLibraryConfigStringS(parameter, string):
         parameter: Name of the configuration value you want to set.
             Needs to be a string and is not case-sensitive.
         string: The config value string. Must not be of size greater
-            than constants.MAX_NAME_SIZE
+            than labjack.ljm.constants.MAX_NAME_SIZE
 
     Raises:
         TypeError: parameter or string is not a string.
