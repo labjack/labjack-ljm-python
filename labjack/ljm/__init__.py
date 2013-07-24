@@ -70,13 +70,15 @@ def _loadLibrary():
                     return ctypes.WinDLL(libraryName)
                 else:
                     return ctypes.CDLL(libraryName)
-        except Exception, e:
+        except Exception:
+            e = sys.exc_info()[1]
             raise LJMError(errorString = "Cannot load the LJM library " + str(libraryName) + ". " + str(e))
 
         #Unsupported operating system
         raise LJMError(errorString = "Cannot load the LJM library. Unsupported platform " + sys.platform + ".")
-    except LJMError, ljme:
-        print str(type(ljme)) + ": " + str(ljme)
+    except LJMError:
+        ljme = sys.exc_info()[1]
+        print(str(type(ljme)) + ": " + str(ljme))
         return None
 
 
@@ -267,10 +269,12 @@ def namesToAddresses(numFrames, aNames, aAddresses=None, aDataTypes=None):
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
     for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
     if aAddresses is None:
         cAddrs = (ctypes.c_int32*numFrames)()
     else:
@@ -311,7 +315,7 @@ def nameToAddress(name):
     cAddr = ctypes.c_int32(0)
     cType = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_NameToAddress(name, ctypes.byref(cAddr), ctypes.byref(cType))
+    error = _staticLib.LJM_NameToAddress(name.encode("ascii"), ctypes.byref(cAddr), ctypes.byref(cType))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -459,7 +463,7 @@ def listAllS(deviceType, connectionType):
     cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
     cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
 
-    error = _staticLib.LJM_ListAllS(deviceType, connectionType, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    error = _staticLib.LJM_ListAllS(deviceType.encode("ascii"), connectionType.encode("ascii"), ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -500,7 +504,7 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     identifier = str(identifier)
     cHandle = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_OpenS(deviceType, connectionType, identifier, ctypes.byref(cHandle))
+    error = _staticLib.LJM_OpenS(deviceType.encode("ascii"), connectionType.encode("ascii"), identifier.encode("ascii"), ctypes.byref(cHandle))
     if error != errorcodes.NOERROR:
        raise LJMError(error)
 
@@ -540,7 +544,7 @@ def open(deviceType=0, connectionType=0, identifier="ANY"):
     identifier = str(identifier)
     cHandle = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_Open(cDev, cConn, identifier, ctypes.byref(cHandle))
+    error = _staticLib.LJM_Open(cDev, cConn, identifier.encode("ascii"), ctypes.byref(cHandle))
     if error != errorcodes.NOERROR:
        raise LJMError(error)
 
@@ -635,11 +639,11 @@ def errorToString(errorCode):
 
     """
     cErr = ctypes.c_int32(errorCode)
-    errStr = "\0"*constants.MAX_NAME_SIZE
+    errStr = ("\0"*constants.MAX_NAME_SIZE).encode("ascii")
 
     _staticLib.LJM_ErrorToString(cErr, errStr)
 
-    return errStr.split("\0", 1)[0]
+    return errStr.decode("ascii").split("\0", 1)[0]
 
 
 def loadConstants():
@@ -798,7 +802,7 @@ def eWriteName(handle, name, value):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     cVal = ctypes.c_double(value)
 
-    error = _staticLib.LJM_eWriteName(handle, name, cVal)
+    error = _staticLib.LJM_eWriteName(handle, name.encode("ascii"), cVal)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -822,7 +826,7 @@ def eReadName(handle, name):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     cVal = ctypes.c_double(0)
 
-    error = _staticLib.LJM_eReadName(handle, name, ctypes.byref(cVal))
+    error = _staticLib.LJM_eReadName(handle, name.encode("ascii"), ctypes.byref(cVal))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -882,10 +886,12 @@ def eReadNames(handle, numFrames, aNames):
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
     for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
     cVals =  (ctypes.c_double*numFrames)()
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -949,10 +955,12 @@ def eWriteNames(handle, numFrames, aNames, aValues):
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
     for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -1068,10 +1076,12 @@ def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
 
     """
     cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
     for x in aNames:
         if not isinstance(x, str):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-    cNames = _convertListToCtypeArray(aNames, ctypes.c_char_p)
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
     cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
     cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
     cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
@@ -1207,13 +1217,13 @@ def eReadString(handle, name):
     """
     if not isinstance(name, str):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
-    outStr = "\0"*constants.STRING_ALLOCATION_SIZE
+    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
 
     error = _staticLib.LJM_eReadString(handle, name, outStr);
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return outStr.split("\0", 1)[0]
+    return outStr.decode("ascii").split("\0", 1)[0]
 
 
 def eWriteString(handle, name, string):
@@ -1235,7 +1245,7 @@ def eWriteString(handle, name, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_eWriteString(handle, name, string);
+    error = _staticLib.LJM_eWriteString(handle, name.encode("ascii"), string.encode("ascii"));
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1530,13 +1540,13 @@ def numberToIP(number):
 
     """
     cNum = ctypes.c_uint32(number)
-    ipv4String = "\0"*constants.IPv4_STRING_SIZE
+    ipv4String = ("\0"*constants.IPv4_STRING_SIZE).encode("ascii")
 
     error = _staticLib.LJM_NumberToIP(cNum, ipv4String)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return ipv4String.split("\0", 1)[0]
+    return ipv4String.decode("ascii").split("\0", 1)[0]
 
 
 def ipToNumber(ipv4String):
@@ -1561,7 +1571,7 @@ def ipToNumber(ipv4String):
         ipv4String += "\0"*(constants.IPv4_STRING_SIZE-len(ipv4String))
     cNum = ctypes.c_uint32(0)
 
-    error = _staticLib.LJM_IPToNumber(ipv4String, ctypes.byref(cNum));
+    error = _staticLib.LJM_IPToNumber(ipv4String.encode("ascii"), ctypes.byref(cNum));
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1585,14 +1595,14 @@ def numberToMAC(number):
 
     """
     cNum = ctypes.c_uint64(number)
-    macString = "\0"*constants.MAC_STRING_SIZE
+    macString = ("\0"*constants.MAC_STRING_SIZE).encode("ascii")
 
     _staticLib.LJM_NumberToMAC.argtypes = [ctypes.c_uint64, ctypes.c_char_p]
     error = _staticLib.LJM_NumberToMAC(number, macString)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return macString.split("\0", 1)[0]
+    return macString.decode("ascii").split("\0", 1)[0]
 
 
 def macToNumber(macString):
@@ -1617,7 +1627,7 @@ def macToNumber(macString):
         macString += "\0"*(constants.MAC_STRING_SIZE-len(macString))
     cNum = ctypes.c_uint64(0)
 
-    error = _staticLib.LJM_MACToNumber(macString, ctypes.byref(cNum))
+    error = _staticLib.LJM_MACToNumber(macString.encode("ascii"), ctypes.byref(cNum))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1641,7 +1651,7 @@ def writeLibraryConfigS(parameter, value):
         raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
     cVal = ctypes.c_double(value)
 
-    error = _staticLib.LJM_WriteLibraryConfigS(parameter, cVal)
+    error = _staticLib.LJM_WriteLibraryConfigS(parameter.encode("ascii"), cVal)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1665,7 +1675,7 @@ def writeLibraryConfigStringS(parameter, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_WriteLibraryConfigStringS(parameter, string)
+    error = _staticLib.LJM_WriteLibraryConfigStringS(parameter.encode("ascii"), string.encode("ascii"))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1689,7 +1699,7 @@ def readLibraryConfigS(parameter):
         raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
     cVal = ctypes.c_double(0)
 
-    error = _staticLib.LJM_ReadLibraryConfigS(parameter, ctypes.byref(cVal))
+    error = _staticLib.LJM_ReadLibraryConfigS(parameter.encode("ascii"), ctypes.byref(cVal))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1713,13 +1723,13 @@ def readLibraryConfigStringS(parameter):
     """
     if not isinstance(parameter, str):
         raise TypeError("Expected a string instead of " + str(type(parameter)) + ".")
-    outStr = "\0"*constants.MAX_NAME_SIZE
+    outStr = ("\0"*constants.MAX_NAME_SIZE).encode("ascii")
 
-    error = _staticLib.LJM_ReadLibraryConfigStringS(parameter, outStr)
+    error = _staticLib.LJM_ReadLibraryConfigStringS(parameter.encode("ascii"), outStr)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return outStr.split("\0", 1)[0]
+    return outStr.decode("ascii").split("\0", 1)[0]
 
 
 def log(level, string):
@@ -1741,7 +1751,7 @@ def log(level, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_Log(cLev, string)
+    error = _staticLib.LJM_Log(cLev, string.encode("ascii"))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 

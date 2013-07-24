@@ -1,5 +1,5 @@
 LJMPython
-07/01/2013
+07/24/2013
 support@labjack.com
 
 
@@ -11,12 +11,8 @@ Installation Requirements:
 
 * Windows, Mac OS X, or Linux
 * LJM library: http://labjack.com/support/ljm
-* Python 2.5, 2.6 or 2.7. Python 3.x is currently not supported.
+* Python 2.5, 2.6, 2.7 and 3.x.
   
-  Note to Python 3.x users: The Python program 2to3 can be used on the examples
-  and wrapper source code in the labjack directory to translate the Python 2
-  code to Python 3.
-
 
 Installation:
 
