@@ -134,9 +134,11 @@ print("eNames: " + str(ljm.eNames(h, 3, ["AIN0", "AIN1", "AIN3"], [ljm.constants
 
 print("\n--- Other tests --------------\n")
 
-#print "eWriteString: " + name + " " + string
+name = "DEVICE_NAME_DEFAULT"
+string = "My_T7"
+print("eWriteString (skip): " + name + " " + string)
 #eWriteString(h, name, string)
-#print "eReadString: " + eReadString(h, name)
+print("eReadString: " + eReadString(h, name))
 
 ipnum = 0
 ipstr = "192.168.1.89"

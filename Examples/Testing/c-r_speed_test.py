@@ -22,9 +22,9 @@ handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
 #handle = ljm.openS("ANY", "ANY", "ANY")
 
 info = ljm.getHandleInfo(handle)
-print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
+print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
-    (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
+    (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
 
 numIterations = 1000 # Number of iterations to perform in the loop
@@ -96,16 +96,16 @@ if writeDACs is True:
         aValues.append(0.0) #0.0 V
 
 
-print "\nTest frames:"
+print("\nTest frames:")
 
 for i in range(numFrames):
     if aWrites[i] == ljm.constants.READ:
         wrStr = "READ"
     else:
         wrStr = "WRITE"
-    print "    %s %s" % (wrStr, names[i])
+    print("    %s %s" % (wrStr, names[i]))
 
-print "\nBeginning %i iterations..."%numIterations
+print("\nBeginning %i iterations..." % numIterations)
 
 
 # Initialize time variables
@@ -125,19 +125,20 @@ for i in range(numIterations):
     maxMS = max(ttMS, maxMS)
     totalMS += ttMS
 
-print "\n%i iterations performed:" % numIterations
-print "    Time taken: %.3f ms" % (totalMS * 1000)
-print "    Average time per iteration: %.3f ms" % (totalMS/numIterations * 1000)
-print "    Min / Max time for one iteration: %.3f ms / %.3f ms" % \
-        (minMS*1000, maxMS*1000)
+print("\n%i iterations performed:" % numIterations)
+print("    Time taken: %.3f ms" % (totalMS * 1000))
+print("    Average time per iteration: %.3f ms" %
+      (totalMS/numIterations * 1000))
+print("    Min / Max time for one iteration: %.3f ms / %.3f ms" % \
+        (minMS*1000, maxMS*1000))
 
-print "\nLast eNames results: "
+print("\nLast eNames results: ")
 for i in range(numFrames):
     if aWrites[i] == ljm.constants.READ:
         wrStr = "READ"
     else:
         wrStr = "WRITE"
-    print "    %s %s value : %f" % (names[i], wrStr, results[i])
+    print("    %s %s value : %f" % (names[i], wrStr, results[i]))
 
 # Close handle
 ljm.close(handle)

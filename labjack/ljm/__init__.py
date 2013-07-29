@@ -1219,7 +1219,7 @@ def eReadString(handle, name):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
 
-    error = _staticLib.LJM_eReadString(handle, name, outStr);
+    error = _staticLib.LJM_eReadString(handle, name.encode("ascii"), outStr);
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 

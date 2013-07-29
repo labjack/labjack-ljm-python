@@ -16,54 +16,59 @@ ljm.writeLibraryConfigS(ljm.constants.LOG_MODE, 2); # 2 is continuous log, 3 is 
 handle = ljm.openS("ANY", "USB", "ANY")
 
 info = ljm.getHandleInfo(handle)
-print "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
+print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
-    (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
+    (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-numChannels = 2
-scansPerRead = int(252/numChannels) #252 is the max reliable # samples per packet
-aScanList_Pos = [0, 2] #[AIN0, AIN1]
-aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
-scanRate = 25000
+numAddresses = 2
+scansPerRead = int(252/numAddresses) #252 is the max reliable # samples per packet
+aScanList = [0, 2] #[AIN0, AIN1]
+#aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
+scanRate = 15000
 
 #unknown error
-#numChannels = 2
-#scansPerRead = int(252/numChannels) #252 is the max reliable # samples per packet
-#aScanList_Pos = [0, 2] #[AIN0, AIN1]
-#aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
+#numAddresses = 2
+#scansPerRead = int(252/numAddresses) #252 is the max reliable # samples per packet
+#aScanList = [0, 2] #[AIN0, AIN1]
+##aScanList_Neg = [ljm.constants.GND, ljm.constants.GND]
 #scanRate = 50000
 
-scanRate = ljm.eStreamStart(handle, scansPerRead, numChannels, aScanList_Pos, scanRate)
-print "Start Stream"
+scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
+print("Start Stream")
 
-print "Start Read"
+print("Start Read")
 try:
-    loop = 100
+    loop = 1000
     start = datetime.now()
     totScans = 0
     for i in range(loop):
         ret = ljm.eStreamRead(handle)
         data = ret[0]
-        scans = len(data)/numChannels
+        scans = len(data)/numAddresses
         totScans += scans
+        #figure out the missing scans
         #totScans -= ret[1]
-        print "\neStreamRead", i+1
-        print "  First scan out of", scans, " AIN0 =", data[0], "AIN1 =", data[1]
-        print "  numSkippedScans:", ret[1], ", deviceScanBacklog:", ret[2], ", ljmScanBacklog:", ret[2]
+        print("\neStreamRead %i" % (i+1))
+        print("  First scan out of %i: AIN0 = %f, AIN1 = %f" % \
+              (scans, data[0], data[1]))
+        print("  numSkippedScans: %i, deviceScanBacklog: %i, ljmScanBacklog: " \
+              "%i" % (0, ret[1], ret[2])) #fix num skipped scans
     end = datetime.now()
 
-    print "\nTotal scans: ", totScans
+    print("\nTotal scans: %i" % (totScans))
     time = (end-start).seconds + float((end-start).microseconds)/1000000
-    print "Time taken:", time, "seconds"
-    print "LJM Scan Rate:", scanRate, "scans/second"
-    print "Timed Scan Rate:", totScans/time, "scans/second"
-    print "Sample Rate:", totScans*numChannels/time, "samples/second"
-except ljm.LJMError, ljme:
-    print ljme
-except Exception, e:
-    print e
+    print("Time taken: %f seconds" % (time))
+    print("LJM Scan Rate: %f scans/second" % (scanRate))
+    print("Timed Scan Rate: %f scans/second" % (totScans/time))
+    print("Sample Rate: %f samples/second" % (totScans*numAddresses/time))
+except ljm.LJMError:
+    ljme = sys.exc_info()[1]
+    print(ljme)
+except Exception:
+    e = sys.exc_info()[1]
+    print(e)
 
-print "Stop Stream"
+print("Stop Stream")
 ljm.eStreamStop(handle)
 
 # Close handle
