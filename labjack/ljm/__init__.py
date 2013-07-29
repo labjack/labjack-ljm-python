@@ -1198,7 +1198,7 @@ def eStreamStop(handle):
         _g_eStreamDataSize[handle]
 
 
-def eReadString(handle, name):
+def eReadNameString(handle, name):
     """Reads a string from a device.
 
     Args:
@@ -1219,19 +1219,46 @@ def eReadString(handle, name):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
 
-    error = _staticLib.LJM_eReadString(handle, name.encode("ascii"), outStr);
+    error = _staticLib.LJM_eReadNameString(handle, name.encode("ascii"), outStr);
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
     return outStr.decode("ascii").split("\0", 1)[0]
 
 
-def eWriteString(handle, name, string):
+def eReadAddressString(handle, address):
+    """Reads a string from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: The integer address of a register to read.
+
+    Returns:
+        The read string.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
+
+    error = _staticLib.LJM_eReadAddressString(handle, cAddr, outStr);
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return outStr.decode("ascii").split("\0", 1)[0]
+
+
+def eWriteNameString(handle, name, string):
     """Writes a string to a device.
 
     Args:
         handle: A valid handle to an open device.
         name: The string name of a register to write.
+        string: The string to write.
 
     Raises:
         TypeError: name is not a string.
@@ -1245,9 +1272,61 @@ def eWriteString(handle, name, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_eWriteString(handle, name.encode("ascii"), string.encode("ascii"));
+    error = _staticLib.LJM_eWriteNameString(handle, name.encode("ascii"), string.encode("ascii"));
     if error != errorcodes.NOERROR:
         raise LJMError(error)
+
+
+def eWriteNameString(handle, address, string):
+    """Writes a string to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: The integer address of a register to write.
+        string: The string to write.
+
+    Raises:
+        TypeError: string parameter is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    if not isinstance(string, str):
+        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
+
+    error = _staticLib.LJM_eWriteAddressString(handle, cAddr, string.encode("ascii"));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def tcVoltsToTemp(tcType, tcVolts, cjTempK):
+    """Converts thermocouple voltage to a temperature.
+
+    Args:
+        tcType: The thermocouple type. See "Thermocouple Type constants"
+            in labjack.ljm.constants (ttX).
+        tcVolts: The voltage reported by the thermocouple.
+        cjTempK: The cold junction temperature in degrees Kelvin.
+
+    Returns:
+        The calculated temperature in degrees Kelvin.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cTCType = ctypes.c_int32(tcType)
+    cTCVolts = ctypes.c_double(tcVolts)
+    cCJTempK = ctypes.c_double(cjTempK)
+    cTCTempK = ctypes.c_double(0)
+
+    error = _staticLib.LJM_TCVoltsToTemp(cTCType, cTCVolts, cCJTempK, ctypes.byref(cTCTempK))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cTCTempK.value
 
 
 def float32ToByteArray(aFLOAT32, registerOffset=0, numFLOAT32=None, aBytes=None):
