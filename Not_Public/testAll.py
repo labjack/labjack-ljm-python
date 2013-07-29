@@ -137,8 +137,8 @@ print("\n--- Other tests --------------\n")
 name = "DEVICE_NAME_DEFAULT"
 string = "My_T7"
 print("eWriteString (skip): " + name + " " + string)
-#eWriteString(h, name, string)
-print("eReadString: " + eReadString(h, name))
+#ljm.eWriteString(h, name, string)
+print("eReadString: " + ljm.eReadString(h, name))
 
 ipnum = 0
 ipstr = "192.168.1.89"
