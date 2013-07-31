@@ -136,14 +136,25 @@ print("\n--- Other tests --------------\n")
 
 name = "DEVICE_NAME_DEFAULT"
 string = "My_T7"
-print("eWriteString (skip): " + name + " " + string)
-#ljm.eWriteString(h, name, string)
-print("eReadString: " + ljm.eReadString(h, name))
+print("eWriteNameString (skip): " + name + " " + string)
+#ljm.eWriteNameString(h, name, string)
+print("eReadNameString: " + ljm.eReadNameString(h, name))
+
+addr = 60500
+print("eWriteAddressString (skip): " + str(addr) + " " + string)
+#ljm.eWriteAddressString(h, addr, string)
+print("eReadAddressString: " + ljm.eReadAddressString(h, addr))
+
+tcType = ljm.constants.ttK
+tcVolts = 0.001203 #about 303.15 K
+cjTempK = 273.15#293.15 #about what we want
+print("\ntcVoltsToTemp (k type, " + str(tcVolts) + " V or ~303.15 Kelvin, cj = " + str(cjTempK) + " K): " + str(ljm.tcVoltsToTemp(tcType, tcVolts, cjTempK)))
+
 
 ipnum = 0
 ipstr = "192.168.1.89"
 ipnum = ljm.ipToNumber(ipstr)
-print("IPToNumber: " + str(ipstr) + " : " + str(ipnum))
+print("\nIPToNumber: " + str(ipstr) + " : " + str(ipnum))
 print("numberToIP: " + str(ljm.numberToIP(ipnum)))
 
 macnum = 0
@@ -154,7 +165,7 @@ print("numberToMAC: " + str(ljm.numberToMAC(macnum)))
 
 to = 1500 #in ms
 ljm.writeLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS, to)
-print("writeLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS: " + str(to))
+print("\nwriteLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS: " + str(to))
 print("readLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS:" + str(ljm.readLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS)))
 
 print("writeLibraryConfigStringS")
@@ -162,7 +173,7 @@ ljm.writeLibraryConfigStringS(ljm.constants.LOG_FILE, "ljlogfile0.txt")
 print("readLibraryConfigStringS: " + str(ljm.readLibraryConfigStringS("LJM_LOG_FILE")))
 
 t = timeit.Timer(lambda: timeoutTest(h)) #"timeoutTest("+ str(h) + ")", setup="from __main__ import timeoutTest")
-print("read timeout in sec = " + str(t.timeit(number = 1)))
+print("\nread timeout in sec = " + str(t.timeit(number = 1)))
 
 print("closeAll:" + str(ljm.closeAll()))
 

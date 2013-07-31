@@ -4,6 +4,7 @@ Version History
 0.8.6 (Not released)
  - Updated functions, function documentation, constants and 
    errorcodes to LJM v0.2.44.
+   * eRead/eWriteString renamed to eRead/eWriteNameString.
  - Updated to support Python 2.5, 2.6, 2.7 and 3.x.
 
 0.8.5 (07/01/2013)

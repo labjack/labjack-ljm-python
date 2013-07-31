@@ -31,14 +31,14 @@ for i in range(numFrames):
 # Setup and call eWriteString to configure the default WiFi SSID on the LabJack.
 name = "WIFI_SSID_DEFAULT"
 string = "LJOpen"
-ljm.eWriteString(handle, name, string)
+ljm.eWriteNameString(handle, name, string)
 print("    %s : %s" % (name, string))
 
 # Setup and call eWriteString to configure the default WiFi password on the
 # LabJack.
 name = "WIFI_PASSWORD_DEFAULT"
 string = "none"
-ljm.eWriteString(handle, name, string)
+ljm.eWriteNameString(handle, name, string)
 print("    %s : %s" % (name, string))
 
 # Setup and call eWriteName to apply the new WiFi configuration on the LabJack.

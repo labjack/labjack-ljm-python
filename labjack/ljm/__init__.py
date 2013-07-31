@@ -1277,7 +1277,7 @@ def eWriteNameString(handle, name, string):
         raise LJMError(error)
 
 
-def eWriteNameString(handle, address, string):
+def eWriteAddressString(handle, address, string):
     """Writes a string to a device.
 
     Args:

@@ -15,9 +15,9 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-# Call eWriteString to set the name string on the LabJack.
+# Call eWriteNameString to set the name string on the LabJack.
 string = "LJTest"
-ljm.eWriteString(handle, "DEVICE_NAME_DEFAULT", string)
+ljm.eWriteNameString(handle, "DEVICE_NAME_DEFAULT", string)
 
 print("\nSet device name : %s" % string)
 

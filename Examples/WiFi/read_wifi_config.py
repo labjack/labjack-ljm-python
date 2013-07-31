@@ -29,9 +29,9 @@ for i in range(numFrames):
         print("    %s : %.0f - %s" % \
             (names[i], results[i], ljm.numberToIP(int(results[i]))))
 
-# Setup and call eReadString to read the WiFi SSID string from the LabJack.
+# Setup and call eReadNameString to read the WiFi SSID string from the LabJack.
 name = "WIFI_SSID"
-result = ljm.eReadString(handle, name)
+result = ljm.eReadNameString(handle, name)
 
 print("    %s : %s" % (name, result))
 
