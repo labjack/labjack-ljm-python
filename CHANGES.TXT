@@ -2,18 +2,18 @@ Version History
 ---------------
 
 0.8.6 (Not released)
- - Updated functions, function documentation, constants and 
-   errorcodes to LJM v0.2.44.
+ - Updated functions, documentation, constants and errorcodes to LJM v0.2.44.
    * eRead/eWriteString renamed to eRead/eWriteNameString.
  - Updated to support Python 2.5, 2.6, 2.7 and 3.x.
+ - Moved labjack/ljm/__init__.py classes and functions to labjack/ljm/ljm.py
+   module. Functionality from the labjack.ljm import remains the same.
 
 0.8.5 (07/01/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.43.
-   * labjack.ljm.open was changed and is not compatible with
-     with LJM library versions below 0.2.42.
-   * labjack.ljm.eStreamStart and eStreamRead were changed
-     and are not compatible with LJM library versions below
-     0.2.43.
+   * labjack.ljm.open was changed and is not compatible with library versions
+     below 0.2.42.
+   * labjack.ljm.eStreamStart and eStreamRead were changed and are not
+     compatible with LJM library versions below 0.2.43.
 
 0.8.4 (05/20/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.39.
@@ -21,8 +21,7 @@ Version History
 
 0.8.3 (04/18/2013)
  - Updated functions, constants and errorcodes to LJM v0.2.35.
-  * New eStreamStart/Read/Stop, addressToType/addressesToTypes
-    functions.
+  * New eStreamStart/Read/Stop, addressToType/addressesToTypes functions.
   * listAll/listAllS parameter and return changes.
  - Removed warning returns. Only a few functions did this.
 

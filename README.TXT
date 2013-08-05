@@ -34,10 +34,11 @@ LJM Python documentation can be found in the docstrings of the source code. The
 source code files are located in the labjack/ljm directory.
 
 Alternatively, after installation in Python you can use the help function on a
-package/module for documentation. For example:
+module for documentation. For example:
 
-    import labjack.ljm
-    help(labjack.ljm)
+    $ python
+    >>> import labjack.ljm
+    >>> help(labjack.ljm.ljm)
 
 LJM library documentation can be found in the LJM User's Guide:
 
