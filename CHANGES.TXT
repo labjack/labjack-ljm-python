@@ -2,8 +2,8 @@ Version History
 ---------------
 
 0.8.6 (Not released)
- - Updated functions, documentation, constants and errorcodes to LJM v0.2.44.
-   * eRead/eWriteString renamed to eRead/eWriteNameString.
+ - Updated functions, documentation, constants and errorcodes to LJM v0.2.45.
+   * eRead/eWriteString renamed to eRead/eWriteNameString in LJM v0.2.44.
  - Updated to support Python 2.5, 2.6, 2.7 and 3.x.
  - Moved labjack/ljm/__init__.py classes and functions to labjack/ljm/ljm.py
    module. Functionality from the labjack.ljm import remains the same.
