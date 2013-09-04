@@ -5,6 +5,7 @@ Demonstrates how to stream using the eStream functions.
 
 from labjack import ljm
 import time
+import sys
 from datetime import datetime
 
 ljm.writeLibraryConfigS(ljm.constants.LOG_LEVEL, 1); # 1 is stream packets, 2 is trace log level
