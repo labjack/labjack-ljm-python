@@ -68,11 +68,11 @@ try:
     end = datetime.now()
 
     print("\nTotal scans = %i" % (totScans))
-    time = (end-start).seconds + float((end-start).microseconds)/1000000
-    print("Time taken = %f seconds" % (time))
+    tt = (end-start).seconds + float((end-start).microseconds)/1000000
+    print("Time taken = %f seconds" % (tt))
     print("LJM Scan Rate = %f scans/second" % (scanRate))
-    print("Timed Scan Rate = %f scans/second" % (totScans/time))
-    print("Sample Rate = %f samples/second" % (totScans*numAddresses/time))
+    print("Timed Scan Rate = %f scans/second" % (totScans/tt))
+    print("Sample Rate = %f samples/second" % (totScans*numAddresses/tt))
     print("Skipped scans = %0.0f" % (totSkip/numAddresses))
 except ljm.LJMError:
     ljme = sys.exc_info()[1]
