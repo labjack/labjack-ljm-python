@@ -82,6 +82,891 @@ def _loadLibrary():
 _staticLib = _loadLibrary()
 
 
+def listAll(deviceType, connectionType):
+    """Scans for LabJack devices and returns lists describing the
+    devices.
+
+    Args:
+        deviceType: An integer that filters which devices will be
+            returned (labjack.ljm.constants.dtT7,
+            labjack.ljm.constants.dtU3, etc.).
+            labjack.ljm.constants.dtANY is allowed.
+        connectionType: An integer that filters by connection type
+            (labjack.ljm.constants.ctUSB, labjack.ljm.constants.ctTCP,
+            etc). labjack.ljm.constants.ctANY is allowed.
+
+    Returns:
+        A tuple containing:
+        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
+         aIPAddresses)
+
+        numFound: Number of devices found.
+        aDeviceTypes: List of device types for each of the numFound
+            devices.
+        aConnectionTypes: List of connection types for each of the
+            numFound devices.
+        aSerialNumbers: List of serial numbers for each of the numFound
+            devices.
+        aIPAddresses: List of IP addresses for each of the numFound
+            devices, but only if the connection type is TCP-based. For
+            each corresponding device for which aIPAddresses[i] is not
+            TCP-based, aIPAddresses[i] will be
+            labjack.ljm.constants.NO_IP_ADDRESS.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        This function only shows what devices can be opened. To
+        actually open a device, use labjack.ljm.open/openS.
+
+    """
+    cDev = ctypes.c_int32(deviceType)
+    cConn = ctypes.c_int32(connectionType)
+    cNumFound = ctypes.c_int32(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+
+    error = _staticLib.LJM_ListAll(cDev, cConn, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numFound = cNumFound.value
+    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
+
+
+def listAllS(deviceType, connectionType):
+    """Scans for LabJack devices with string parameters and returns
+    lists describing the devices.
+
+    Args:
+        deviceType: A string that filters which devices will be returned
+            ("LJM_dtT7", "LJM_dtU3", etc.). "LJM_dtANY" is allowed.
+        connectionType: A string that filters by connection type
+            ("LJM_ctUSB", "LJM_ctTCP", etc).  "LJM_ctANY" is allowed.
+
+    Returns:
+        A tuple containing:
+        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
+         aIPAddresses)
+
+        numFound: Number of devices found.
+        aDeviceTypes: List of device types for each of the numFound
+            devices.
+        aConnectionTypes: List of connection types for each of the
+            numFound devices.
+        aSerialNumbers: List of serial numbers for each of the numFound
+            devices.
+        aIPAddresses: List of IP addresses for each of the numFound
+            devices, but only if the connection type is TCP-based. For
+            each corresponding device for which aIPAddresses[i] is not
+            TCP-based, aIPAddresses[i] will be
+            labjack.ljm.constants.NO_IP_ADDRESS.
+
+    Raises:
+        TypeError: deviceType or connectionType are not strings.
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        This function only shows what devices can be opened. To
+        actually open a device, use labjack.ljm.open/openS.
+
+    """
+    if not isinstance(deviceType, str):
+        raise TypeError("Expected a string instead of " + str(type(deviceType)) + ".")
+    if not isinstance(connectionType, str):
+        raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
+    cNumFound = ctypes.c_int32(0)
+    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+
+    error = _staticLib.LJM_ListAllS(deviceType.encode("ascii"), connectionType.encode("ascii"), ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numFound = cNumFound.value
+    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
+
+
+def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
+    """Opens a LabJack device, and returns the device handle.
+
+    Args:
+        deviceType: A string containing the type of the device to be
+            connected, optionally prepended by "LJM_dt". Possible values
+            include "ANY", "T7", and "DIGIT".
+        connectionType: A string containing the type of the connection
+            desired, optionally prepended by "LJM_ct". Possible values
+            include "ANY", "USB", "TCP", "ETHERNET", and "WIFI".
+        identifier: A string identifying the device to be connected or
+            "LJM_idANY"/"ANY". This can be a serial number, IP address,
+            or device name. Device names may not contain periods.
+
+    Returns:
+        The new handle that represents a device connection upon success.
+
+    Raises:
+        TypeError: deviceType or connectionType are not strings.
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        Args are not case-sensitive, and empty strings indicate the
+        same thing as "LJM_xxANY".
+
+    """
+    if not isinstance(deviceType, str):
+        raise TypeError("Expected a string instead of " + str(type(deviceType)) + ".")
+    if not isinstance(connectionType, str):
+        raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
+    identifier = str(identifier)
+    cHandle = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_OpenS(deviceType.encode("ascii"), connectionType.encode("ascii"), identifier.encode("ascii"), ctypes.byref(cHandle))
+    if error != errorcodes.NOERROR:
+       raise LJMError(error)
+
+    return cHandle.value
+
+
+def open(deviceType=0, connectionType=0, identifier="ANY"):
+    """Opens a LabJack device, and returns the device handle.
+
+    Args:
+        deviceType: An integer containing the type of the device to be
+            connected (labjack.ljm.constants.dtT7,
+            labjack.ljm.constants.dtU3, labjack.ljm.constants.dtANY,
+            etc.).
+        connectionType: An integer containing the type of connection
+            desired (labjack.ljm.constants.ctUSB,
+            labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,
+            etc.).
+        identifier: A string identifying the device to be connected or
+            "LJM_idANY"/"ANY". This can be a serial number, IP address,
+            or device name. Device names may not contain periods.
+
+    Returns:
+        The new handle that represents a device connection upon success.
+
+    Raises:
+        TypeError: deviceType or connectionType are not integers.
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        Args are not case-sensitive.
+        Empty strings indicate the same thing as "LJM_xxANY".
+
+    """
+    cDev = ctypes.c_int32(deviceType)
+    cConn = ctypes.c_int32(connectionType)
+    identifier = str(identifier)
+    cHandle = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_Open(cDev, cConn, identifier.encode("ascii"), ctypes.byref(cHandle))
+    if error != errorcodes.NOERROR:
+       raise LJMError(error)
+
+    return cHandle.value
+
+
+def getHandleInfo(handle):
+    """Returns the device handle's details.
+
+    Args:
+        handle: A valid handle to an open device.
+
+    Returns:
+        A tuple containing:
+        (deviceType, connectionType, serialNumber, ipAddress, port,
+        maxBytesPerMB)
+
+        deviceType: The device type corresponding to an integer
+            constant such as labjack.ljm.constants.dtT7.
+        connectionType: The output device type corresponding to an
+            integer constant such as labjack.ljm.constants.ctUSB.
+        serialNumber: The serial number of the device.
+        ipAddress: The integer representation of the device's IP
+            address when connectionType is TCP-based. If connectionType
+            is not TCP-based, this will be
+            labjack.ljm.constants.NO_IP_ADDRESS. The integer can be
+            converted to a human-readable string with the
+            labjack.ljm.numberToIP function.
+        port: The port if the device connection is TCP-based, or the
+            pipe if the device connection is USB based.
+        maxBytesPerMB: The maximum packet size in number of bytes that
+            can be sent or received from this device. This can change
+            depending on connection and device type.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        This function returns device information loaded during an open
+        call and therefore does not initiate communications with the
+        device. In other words, it is fast but will not represent
+        changes to serial number or IP address since the device was
+        opened.
+
+    """
+    cDev = ctypes.c_int32(0)
+    cConn = ctypes.c_int32(0)
+    cSer = ctypes.c_int32(0)
+    cIPAddr = ctypes.c_int32(0)
+    cPort = ctypes.c_int32(0)
+    cPktMax = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_GetHandleInfo(handle, ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cSer), ctypes.byref(cIPAddr), ctypes.byref(cPort), ctypes.byref(cPktMax))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cDev.value, cConn.value, cSer.value, cIPAddr.value, cPort.value, cPktMax.value
+
+
+def close(handle):
+    """Closes the connection to the device.
+
+    Args:
+        handle: A valid handle to an open device.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    error = _staticLib.LJM_Close(handle)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def closeAll():
+    """Closes all connections to all devices.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    error = _staticLib.LJM_CloseAll()
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def eWriteAddress(handle, address, dataType, value):
+    """Performs Modbus operations that writes a value to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: An address to write.
+        dataTypes: The data type corresponding to the address
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.).
+        value: The value to write.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cType = ctypes.c_int32(dataType)
+    cVal = ctypes.c_double(value)
+
+    error = _staticLib.LJM_eWriteAddress(handle, cAddr, cType, cVal)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def eReadAddress(handle, address, dataType):
+    """Performs Modbus operations that reads a value from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: An address to read.
+        dataTypes: The data type corresponding to the address
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.).
+
+    Returns:
+        The read value.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cType = ctypes.c_int32(dataType)
+    cVal = ctypes.c_double(0)
+
+    error = _staticLib.LJM_eReadAddress(handle, cAddr, cType, ctypes.byref(cVal))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cVal.value
+
+
+def eWriteName(handle, name, value):
+    """Performs Modbus operations that writes a value to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: A name (string) to write.
+        value: The value to write.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cVal = ctypes.c_double(value)
+
+    error = _staticLib.LJM_eWriteName(handle, name.encode("ascii"), cVal)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def eReadName(handle, name):
+    """Performs Modbus operations that reads a value from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: A name (string) to read.
+
+    Returns:
+        The read value.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cVal = ctypes.c_double(0)
+
+    error = _staticLib.LJM_eReadName(handle, name.encode("ascii"), ctypes.byref(cVal))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cVal.value
+
+
+def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
+    """Performs Modbus operations that reads values from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads to perform.
+        aAddresses: List of addresses to read. This list needs to be at
+            least size numFrames.
+        aDataTypes: List of data types corresponding to aAddresses
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
+
+    Returns:
+        A list of read values.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
+    cVals = (ctypes.c_double*numFrames)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eReadNames(handle, numFrames, aNames):
+    """Performs Modbus operations that reads values from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads to perform.
+        aNames: List of names (strings) to read. This list needs to be
+            at least size numFrames.
+
+    Returns:
+        A list of read values.
+
+    Raises:
+        TypeError: aNames is not a list of strings.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
+    for x in aNames:
+        if not isinstance(x, str):
+            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
+    cVals =  (ctypes.c_double*numFrames)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
+    """Performs Modbus operations that writes values to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of writes to perform.
+        aAddresses: List of addresses to write. This list needs to be at
+            least size numFrames.
+        aDataTypes: List of data types corresponding to aAddresses
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
+        aValues: The list of values to write. This list needs to be at
+            least size numFrames.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    numFrames = len(cAddrs)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+
+def eWriteNames(handle, numFrames, aNames, aValues):
+    """Performs Modbus operations that writes values to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of writes to perform.
+        aNames: List of names (strings) to write. This list needs to be
+            at least size numFrames.
+        aValues: List of values to write. This list needs to be at least
+            size numFrames.
+
+    Raises:
+        TypeError: aNames is not a list of strings.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
+    for x in aNames:
+        if not isinstance(x, str):
+            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+
+def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
+    """Performs Modbus operations that reads/writes values to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads/writes to perform.
+        aAddresses: List of addresses to write. This list needs to be at
+            least size numFrames.
+        aDataTypes: List of data types corresponding to aAddresses
+            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
+            etc.). This list needs to be at least size numFrames.
+        aWrites: List of directions (labjack.ljm.constants.READ or
+            labjack.ljm.constants.WRITE) corresponding to aAddresses.
+            This list needs to be at least size numFrames.
+        aNumValues: List of the number of values to read/write,
+            corresponding to aWrites and aAddresses. This list needs to
+            be at least size numFrames.
+        aValues: List of values to write. This list needs to be the
+            length of the sum of the aNumValues list's values. Values
+            corresponding to writes are written.
+
+    Returns:
+        The list of aValues written/read.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        For every entry in aWrites[i] that is
+        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
+        values to write and for every entry in aWrites that is
+        labjack.ljm.constants.READ, aValues contains aNumValues[i]
+        values that will be updated in the returned list. aValues values
+        must be in the same order as the rest of the lists. For example,
+        if aWrite is:
+            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
+            labjack.ljm.constants.WRITE]
+        and aNumValues is:
+            [1, 4, 2]
+        aValues would have one value to be written, then 4 blank/garbage
+        values, and then 2 values to be written.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
+    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
+    cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
+    """Performs Modbus operations that reads/writes values to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numFrames: The total number of reads/writes to perform.  This
+            needs to be the length of aNames/aWrites/aNumValues or less.
+        aNames: List of names (strings) to write/read. This list needs
+            to be at least size numFrames.
+        aWrites: List of directions (labjack.ljm.constants.READ or
+            labjack.ljm.constants.WRITE) corresponding to aNames. This
+            list needs to be at least size numFrames.
+        aNumValues: List of the number of values to read/write,
+            corresponding to aWrites and aNames. This list needs to be
+            at least size numFrames.
+        aValues: List of values to write.  This list needs to be the
+            length of the sum of the aNumValues list's values.  Values
+            corresponding to writes are written.
+
+    Returns:
+        The list of aValues written/read.
+
+    Raises:
+        TypeError: aNames is not a list of strings.
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        For every entry in aWrites[i] that is
+        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
+        values to write and for every entry in aWrites that is
+        labjack.ljm.constants.READ, aValues contains aNumValues[i]
+        values that will be updated in the returned list. aValues values
+        must be in the same order as the rest of the lists. For example,
+        if aWrite is:
+            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
+            labjack.ljm.constants.WRITE]
+        and aNumValues is:
+            [1, 4, 2]
+        aValues would have one value to be written, then 4 blank/garbage
+        values, and then 2 values to be written.
+
+    """
+    cNumFrames = ctypes.c_int32(numFrames)
+    asciiNames = []
+    for x in aNames:
+        if not isinstance(x, str):
+            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
+        asciiNames.append(x.encode("ascii"))
+    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
+    cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
+    cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error, cErrorAddr.value)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eReadNameString(handle, name):
+    """Reads a string from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: The string name of a register to read.
+
+    Returns:
+        The read string.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
+
+    error = _staticLib.LJM_eReadNameString(handle, name.encode("ascii"), outStr);
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return outStr.decode("ascii").split("\0", 1)[0]
+
+
+def eReadAddressString(handle, address):
+    """Reads a string from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: The integer address of a register to read.
+
+    Returns:
+        The read string.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
+
+    error = _staticLib.LJM_eReadAddressString(handle, cAddr, outStr);
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return outStr.decode("ascii").split("\0", 1)[0]
+
+
+def eWriteNameString(handle, name, string):
+    """Writes a string to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: The string name of a register to write.
+        string: The string to write.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    if not isinstance(string, str):
+        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
+
+    error = _staticLib.LJM_eWriteNameString(handle, name.encode("ascii"), string.encode("ascii"));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def eWriteAddressString(handle, address, string):
+    """Writes a string to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: The integer address of a register to write.
+        string: The string to write.
+
+    Raises:
+        TypeError: string parameter is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Note: This is a convenience function for eNames.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    if not isinstance(string, str):
+        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
+
+    error = _staticLib.LJM_eWriteAddressString(handle, cAddr, string.encode("ascii"));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+_g_eStreamDataSize = {}
+def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
+    """Initializes a stream object and begins streaming. This includes
+       creating a buffer in LJM that collects data from the device.
+
+    Args:
+        handle: A valid handle to an open device.
+        scansPerRead: Number of scans returned by each call to the
+            eStreamRead function. This is not tied to the maximum packet
+            size for the device.
+        numAddresses: The size of aScanList. The number of addresses to
+            scan.
+        aScanList: List of Modbus addresses to collect samples from,
+            per scan.
+        scanRate: Sets the desired number of scans per second.
+
+    Returns:
+        The actual scan rate the device will scan at.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        Address configuration such as range, resolution, and
+        differential voltages must be handled elsewhere.
+        Check your device's documentation for valid aScanList channels.
+
+    """
+    cSPR = ctypes.c_int32(scansPerRead)
+    cNumAddrs = ctypes.c_int32(numAddresses)
+    cSL_p = _convertListToCtypeArray(aScanList, ctypes.c_int32)
+    cScanRate = ctypes.c_double(scanRate)
+
+    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumAddrs, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    _g_eStreamDataSize[handle] = scansPerRead*numAddresses
+    return cScanRate.value
+
+
+def eStreamRead(handle):
+    """Returns data from an initialized and running LJM stream buffer.
+    Waits for data to become available, if necessary.
+
+    Args:
+        handle: A valid handle to an open device.
+
+    Returns:
+        A tuple containing:
+        (aData, numSkippedScans, deviceScanBacklog, ljmScanBackLog)
+
+        aData: Stream data list with all channels interleaved. It will
+            contain scansPerRead*numAddresses values configured from
+            eStreamStart. The data returned is removed from the LJM
+            stream buffer.
+        deviceScanBacklog: The number of scans left in the device
+            buffer, as measured from when data was last collected from
+            the device. This should usually be near zero and not
+            growing.
+        ljmScanBacklog: The number of scans left in the LJM buffer, as
+            measured from after the data returned from this function is
+            removed from the LJM buffer. This should usually be near
+            zero and not growing.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call or
+            eStreamStart was not called first on the handle and
+            the aData size cannot be determined.
+
+    """
+    #May need to change to optimize
+    if handle not in _g_eStreamDataSize:
+        raise LJMError(errorString = "Streaming has not been started for the given handle. Please call eStreamStart first.")
+    cData = (ctypes.c_double*_g_eStreamDataSize[handle])()
+    cD_SBL = ctypes.c_int32(0)
+    cLJM_SBL = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return _convertCtypeArrayToList(cData), cD_SBL.value, cLJM_SBL.value
+
+
+def eStreamStop(handle):
+    """Stops the LJM library from streaming any more data from the
+    device, while leaving any collected data in the LJM library's
+    buffer to be read. Stops the device from streaming.
+
+    Args:
+        handle: A valid handle to an open device.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    error = _staticLib.LJM_eStreamStop(handle)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+    if handle in _g_eStreamDataSize:
+        _g_eStreamDataSize[handle]
+
+
+def writeRaw(handle, data, numBytes=None):
+    """Sends an unaltered data packet to a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        data: The byte list/packet to send.
+        numBytes: The number of bytes to send.  Default is None and will
+            automaticcally send all the bytes in the data list.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cData = _convertListToCtypeArray(data, ctypes.c_ubyte)
+    if numBytes is None:
+        numBytes = len(cData)
+    cNumBytes = ctypes.c_int32(numBytes)
+
+    error = _staticLib.LJM_WriteRaw(handle, ctypes.byref(cData), cNumBytes)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def readRaw(handle, numBytes):
+    """Reads an unaltered data packet from a device.
+
+    Args:
+        handle: A valid handle to an open device.
+        numBytes: The number of bytes to receive.
+
+    Returns:
+        A list that is the read byte packet. It is length numBytes.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cNumBytes = ctypes.c_int32(numBytes)
+    cData = (ctypes.c_ubyte*numBytes)()
+
+    error = _staticLib.LJM_ReadRaw(handle, ctypes.byref(cData), cNumBytes)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return _convertCtypeArrayToList(cData)
+
+
 def addressesToMBFB(maxBytesPerMBFB, aAddresses, aDataTypes, aWrites, aNumValues, aValues, numFrames, aMBFBCommand=None):
     """Takes in lists that together represent operations to be performed
     on a device and returns the numbers of frames created and a byte
@@ -370,255 +1255,6 @@ def addressToType(address):
     return cType.value
 
 
-def listAll(deviceType, connectionType):
-    """Scans for LabJack devices and returns lists describing the
-    devices.
-
-    Args:
-        deviceType: An integer that filters which devices will be
-            returned (labjack.ljm.constants.dtT7,
-            labjack.ljm.constants.dtU3, etc.).
-            labjack.ljm.constants.dtANY is allowed.
-        connectionType: An integer that filters by connection type
-            (labjack.ljm.constants.ctUSB, labjack.ljm.constants.ctTCP,
-            etc). labjack.ljm.constants.ctANY is allowed.
-
-    Returns:
-        A tuple containing:
-        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
-         aIPAddresses)
-
-        numFound: Number of devices found.
-        aDeviceTypes: List of device types for each of the numFound
-            devices.
-        aConnectionTypes: List of connection types for each of the
-            numFound devices.
-        aSerialNumbers: List of serial numbers for each of the numFound
-            devices.
-        aIPAddresses: List of IP addresses for each of the numFound
-            devices, but only if the returned connection type is
-            labjack.ljm.constants.ctTCP.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cDev = ctypes.c_int32(deviceType)
-    cConn = ctypes.c_int32(connectionType)
-    cNumFound = ctypes.c_int32(0)
-    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-
-    error = _staticLib.LJM_ListAll(cDev, cConn, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    numFound = cNumFound.value
-    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
-
-
-def listAllS(deviceType, connectionType):
-    """Scans for LabJack devices with string parameters and returns
-    lists describing the devices.
-
-    Args:
-        deviceType: A string that filters which devices will be returned
-            ("LJM_dtT7", "LJM_dtU3", etc.). "LJM_dtANY" is allowed.
-        connectionType: A string that filters by connection type
-            ("LJM_ctUSB", "LJM_ctTCP", etc).  "LJM_ctANY" is allowed.
-
-    Returns:
-        A tuple containing:
-        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
-         aIPAddresses)
-
-        numFound: Number of devices found.
-        aDeviceTypes: List of device types for each of the numFound
-            devices.
-        aConnectionTypes: List of connection types for each of the
-            numFound devices.
-        aSerialNumbers: List of serial numbers for each of the numFound
-            devices.
-        aIPAddresses: List of IP addresses for each of the numFound
-            devices, but only if the returned connection type is
-            labjack.ljm.constants.ctTCP.
-
-    Raises:
-        TypeError: deviceType or connectionType are not strings.
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    if not isinstance(deviceType, str):
-        raise TypeError("Expected a string instead of " + str(type(deviceType)) + ".")
-    if not isinstance(connectionType, str):
-        raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
-    cNumFound = ctypes.c_int32(0)
-    cDevTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cConnTypes = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cSerNums = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cIPAddrs = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-
-    error = _staticLib.LJM_ListAllS(deviceType.encode("ascii"), connectionType.encode("ascii"), ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    numFound = cNumFound.value
-    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
-
-
-def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
-    """Opens a LabJack device, and returns the device handle.
-
-    Args:
-        deviceType: A string containing the type of the device to be
-            connected, optionally prepended by "LJM_dt". Possible values
-            include "ANY", "T7", and "DIGIT".
-        connectionType: A string containing the type of the connection
-            desired, optionally prepended by "LJM_ct". Possible values
-            include "ANY", "USB", "TCP", "ETHERNET", and "WIFI".
-        identifier: A string identifying the device to be connected or
-            "LJM_idANY"/"ANY". This can be a serial number, IP address,
-            or device name. Device names may not contain periods.
-
-    Returns:
-        The new handle that represents a device connection upon success.
-
-    Raises:
-        TypeError: deviceType or connectionType are not strings.
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        Args are not case-sensitive, and empty strings indicate the
-        same thing as "LJM_xxANY".
-
-    """
-    if not isinstance(deviceType, str):
-        raise TypeError("Expected a string instead of " + str(type(deviceType)) + ".")
-    if not isinstance(connectionType, str):
-        raise TypeError("Expected a string instead of " + str(type(connectionType)) + ".")
-    identifier = str(identifier)
-    cHandle = ctypes.c_int32(0)
-
-    error = _staticLib.LJM_OpenS(deviceType.encode("ascii"), connectionType.encode("ascii"), identifier.encode("ascii"), ctypes.byref(cHandle))
-    if error != errorcodes.NOERROR:
-       raise LJMError(error)
-
-    return cHandle.value
-
-
-def open(deviceType=0, connectionType=0, identifier="ANY"):
-    """Opens a LabJack device, and returns the device handle.
-
-    Args:
-        deviceType: An integer containing the type of the device to be
-            connected (labjack.ljm.constants.dtT7,
-            labjack.ljm.constants.dtU3, labjack.ljm.constants.dtANY,
-            etc.).
-        connectionType: An integer containing the type of connection
-            desired (labjack.ljm.constants.ctUSB,
-            labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,
-            etc.).
-        identifier: A string identifying the device to be connected or
-            "LJM_idANY"/"ANY". This can be a serial number, IP address,
-            or device name. Device names may not contain periods.
-
-    Returns:
-        The new handle that represents a device connection upon success.
-
-    Raises:
-        TypeError: deviceType or connectionType are not integers.
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        Args are not case-sensitive.
-        Empty strings indicate the same thing as "LJM_xxANY".
-
-    """
-    cDev = ctypes.c_int32(deviceType)
-    cConn = ctypes.c_int32(connectionType)
-    identifier = str(identifier)
-    cHandle = ctypes.c_int32(0)
-
-    error = _staticLib.LJM_Open(cDev, cConn, identifier.encode("ascii"), ctypes.byref(cHandle))
-    if error != errorcodes.NOERROR:
-       raise LJMError(error)
-
-    return cHandle.value
-
-
-def getHandleInfo(handle):
-    """Returns the device handle's details.
-
-    Args:
-        handle: A valid handle to an open device.
-
-    Returns:
-        A tuple containing:
-        (deviceType, connectionType, serialNumber, ipAddress, port,
-        maxBytesPerMB)
-
-        deviceType: The device type corresponding to an integer
-            constant such as labjack.ljm.constants.dtT7.
-        connectionType: The output device type corresponding to an
-            integer constant such as labjack.ljm.constants.ctUSB.
-        serialNumber: The serial number of the device.
-        ipAddress: The integer representation of the device's IP
-            address, or labjack.ljm.constants.NO_IP_ADDRESS if the
-            device does not support Ethernet/TCP.  Use the numberToIP
-            function to convert this value to a string.
-        port: The port the device is connected on via Ethernet/TCP, or
-            the pipe the device is connected on via USB.
-        maxBytesPerMB: The maximum packet size in number of bytes that
-            can be sent or received from this device. Note that this
-            can change, depending on connection and device type.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Note:
-        This function returns device information loaded during an open
-        call and therefore does not initiate communications with the
-        device. In other words, it is fast but will not represent
-        changes to serial number or IP address since the device was
-        opened.
-
-    """
-    cDev = ctypes.c_int32(0)
-    cConn = ctypes.c_int32(0)
-    cSer = ctypes.c_int32(0)
-    cIPAddr = ctypes.c_int32(0)
-    cPort = ctypes.c_int32(0)
-    cPktMax = ctypes.c_int32(0)
-
-    error = _staticLib.LJM_GetHandleInfo(handle, ctypes.byref(cDev), ctypes.byref(cConn), ctypes.byref(cSer), ctypes.byref(cIPAddr), ctypes.byref(cPort), ctypes.byref(cPktMax))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return cDev.value, cConn.value, cSer.value, cIPAddr.value, cPort.value, cPktMax.value
-
-
-def resetConnection(handle):
-    """Manually resets the connection associated with handle.
-
-    Args:
-        handle: A valid handle to an open device.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Note:
-        This function will not necessarily always exist. It will
-        eventually be taken care of automatically. In other words, don't
-        use this function. :)
-
-    """
-    error = _staticLib.LJM_ResetConnection(handle);
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
 def errorToString(errorCode):
     """Returns the the name of an error code.
 
@@ -654,648 +1290,6 @@ def loadConstants():
 
     """
     _staticLib.LJM_LoadConstants()
-
-
-def close(handle):
-    """Closes the connection to the device.
-
-    Args:
-        handle: A valid handle to an open device.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    error = _staticLib.LJM_Close(handle)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def closeAll():
-    """Closes all connections to all devices.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    error = _staticLib.LJM_CloseAll()
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def writeRaw(handle, data, numBytes=None):
-    """Sends an unaltered data packet to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        data: The byte list/packet to send.
-        numBytes: The number of bytes to send.  Default is None and will
-            automaticcally send all the bytes in the data list.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cData = _convertListToCtypeArray(data, ctypes.c_ubyte)
-    if numBytes is None:
-        numBytes = len(cData)
-    cNumBytes = ctypes.c_int32(numBytes)
-
-    error = _staticLib.LJM_WriteRaw(handle, ctypes.byref(cData), cNumBytes)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def readRaw(handle, numBytes):
-    """Reads an unaltered data packet from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numBytes: The number of bytes to receive.
-
-    Returns:
-        A list that is the read byte packet. It is length numBytes.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cNumBytes = ctypes.c_int32(numBytes)
-    cData = (ctypes.c_ubyte*numBytes)()
-
-    error = _staticLib.LJM_ReadRaw(handle, ctypes.byref(cData), cNumBytes)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return _convertCtypeArrayToList(cData)
-
-
-def eWriteAddress(handle, address, dataType, value):
-    """Performs Modbus operations that writes a value to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        address: Register address to write.
-        dataTypes: The data type corresponding to the address
-            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
-            etc.).
-        value: The value to write.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cAddr = ctypes.c_int32(address)
-    cType = ctypes.c_int32(dataType)
-    cVal = ctypes.c_double(value)
-
-    error = _staticLib.LJM_eWriteAddress(handle, cAddr, cType, cVal)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def eReadAddress(handle, address, dataType):
-    """Performs Modbus operations that reads a value from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        address: Register address to read.
-        dataTypes: The data type corresponding to the address
-            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
-            etc.).
-
-    Returns:
-        The read value.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cAddr = ctypes.c_int32(address)
-    cType = ctypes.c_int32(dataType)
-    cVal = ctypes.c_double(0)
-
-    error = _staticLib.LJM_eReadAddress(handle, cAddr, cType, ctypes.byref(cVal))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return cVal.value
-
-
-def eWriteName(handle, name, value):
-    """Performs Modbus operations that writes a value to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        name: Register name (string) to write.
-        value: The value to write.
-
-    Raises:
-        TypeError: name is not a string.
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    if not isinstance(name, str):
-        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
-    cVal = ctypes.c_double(value)
-
-    error = _staticLib.LJM_eWriteName(handle, name.encode("ascii"), cVal)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def eReadName(handle, name):
-    """Performs Modbus operations that reads a value from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        name: Register name (string) to read.
-
-    Returns:
-        The read value.
-
-    Raises:
-        TypeError: name is not a string.
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    if not isinstance(name, str):
-        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
-    cVal = ctypes.c_double(0)
-
-    error = _staticLib.LJM_eReadName(handle, name.encode("ascii"), ctypes.byref(cVal))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return cVal.value
-
-
-def eReadAddresses(handle, numFrames, aAddresses, aDataTypes):
-    """Performs Modbus operations that reads values from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of reads to perform.
-        aAddresses: List of register addresses to read. This list needs
-            to be at least size numFrames.
-        aDataTypes: List of data types corresponding to aAddresses
-            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
-            etc.). This list needs to be at least size numFrames.
-
-    Returns:
-        A list of read values.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
-    cVals = (ctypes.c_double*numFrames)()
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eReadAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        errAddr = cErrorAddr.value
-        if errAddr == -1:
-            errAddr = None
-        raise LJMError(error, errAddr)
-
-    return _convertCtypeArrayToList(cVals)
-
-
-def eReadNames(handle, numFrames, aNames):
-    """Performs Modbus operations that reads values from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of reads to perform.
-        aNames: List of register names (strings) to read. This list
-            needs to be at least size numFrames.
-
-    Returns:
-        A list of read values.
-
-    Raises:
-        TypeError: aNames is not a list of strings.
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    asciiNames = []
-    for x in aNames:
-        if not isinstance(x, str):
-            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-        asciiNames.append(x.encode("ascii"))
-    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
-    cVals =  (ctypes.c_double*numFrames)()
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        errAddr = cErrorAddr.value
-        if errAddr == -1:
-            errAddr = None
-        raise LJMError(error, errAddr)
-
-    return _convertCtypeArrayToList(cVals)
-
-
-def eWriteAddresses(handle, numFrames, aAddresses, aDataTypes, aValues):
-    """Performs Modbus operations that writes values to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of writes to perform.
-        aAddresses: List of register addresses to write. This list needs
-            to be at least size numFrames.
-        aDataTypes: List of data types corresponding to aAddresses
-            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
-            etc.). This list needs to be at least size numFrames.
-        aValues: The list of values to write. This list needs to be at
-            least size numFrames.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
-    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    numFrames = len(cAddrs)
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eWriteAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        errAddr = cErrorAddr.value
-        if errAddr == -1:
-            errAddr = None
-        raise LJMError(error, errAddr)
-
-
-def eWriteNames(handle, numFrames, aNames, aValues):
-    """Performs Modbus operations that writes values to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of writes to perform.
-        aNames: List of register names (strings) to write. This list
-            needs to be at least size numFrames.
-        aValues: List of values to write. This list needs to be at least
-            size numFrames.
-
-    Raises:
-        TypeError: aNames is not a list of strings.
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    asciiNames = []
-    for x in aNames:
-        if not isinstance(x, str):
-            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-        asciiNames.append(x.encode("ascii"))
-    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
-    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eWriteNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        errAddr = cErrorAddr.value
-        if errAddr == -1:
-            errAddr = None
-        raise LJMError(error, errAddr)
-
-
-def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
-    """Performs Modbus operations that reads/writes values to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of reads/writes to perform.
-        aAddresses: List of register addresses to write. This list needs
-            to be at least size numFrames.
-        aDataTypes: List of data types corresponding to aAddresses
-            (labjack.ljm.constants.FLOAT32, labjack.ljm.constants.INT32,
-            etc.). This list needs to be at least size numFrames.
-        aWrites: List of directions (labjack.ljm.constants.READ or
-            labjack.ljm.constants.WRITE) corresponding to aAddresses.
-            This list needs to be at least size numFrames.
-        aNumValues: List of the number of values to read/write,
-            corresponding to aWrites and aAddresses. This list needs to
-            be at least size numFrames.
-        aValues: List of values to write. This list needs to be the
-            length of the sum of the aNumValues list's values. Values
-            corresponding to writes are written.
-
-    Returns:
-        The list of aValues written/read.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        For every entry in aWrites[i] that is
-        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
-        values to write and for every entry in aWrites that is
-        labjack.ljm.constants.READ, aValues contains aNumValues[i]
-        values that will be updated in the returned list. aValues values
-        must be in the same order as the rest of the lists. For example,
-        if aWrite is:
-            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
-            labjack.ljm.constants.WRITE]
-        and aNumValues is:
-            [1, 4, 2]
-        aValues would have one value to be written, then 4 blank/garbage
-        values, and then 2 values to be written.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
-    cTypes = _convertListToCtypeArray(aDataTypes, ctypes.c_int32)
-    cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
-    cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
-    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eAddresses(handle, cNumFrames, ctypes.byref(cAddrs), ctypes.byref(cTypes), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        errAddr = cErrorAddr.value
-        if errAddr == -1:
-            errAddr = None
-        raise LJMError(error, errAddr)
-
-    return _convertCtypeArrayToList(cVals)
-
-
-def eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues):
-    """Performs Modbus operations that reads/writes values to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        numFrames: The total number of reads/writes to perform.  This
-            needs to be the length of aNames/aWrites/aNumValues or less.
-        aNames: List of register names (strings) to write/read. This
-            list needs to be at least size numFrames.
-        aWrites: List of directions (labjack.ljm.constants.READ or
-            labjack.ljm.constants.WRITE) corresponding to aNames. This
-            list needs to be at least size numFrames.
-        aNumValues: List of the number of values to read/write,
-            corresponding to aWrites and aNames. This list needs to be
-            at least size numFrames.
-        aValues: List of values to write.  This list needs to be the
-            length of the sum of the aNumValues list's values.  Values
-            corresponding to writes are written.
-
-    Returns:
-        The list of aValues written/read.
-
-    Raises:
-        TypeError: aNames is not a list of strings.
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        For every entry in aWrites[i] that is
-        labjack.ljm.constants.WRITE, aValues contains aNumValues[i]
-        values to write and for every entry in aWrites that is
-        labjack.ljm.constants.READ, aValues contains aNumValues[i]
-        values that will be updated in the returned list. aValues values
-        must be in the same order as the rest of the lists. For example,
-        if aWrite is:
-            [labjack.ljm.constants.WRITE, labjack.ljm.constants.READ,
-            labjack.ljm.constants.WRITE]
-        and aNumValues is:
-            [1, 4, 2]
-        aValues would have one value to be written, then 4 blank/garbage
-        values, and then 2 values to be written.
-
-    """
-    cNumFrames = ctypes.c_int32(numFrames)
-    asciiNames = []
-    for x in aNames:
-        if not isinstance(x, str):
-            raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
-        asciiNames.append(x.encode("ascii"))
-    cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
-    cWrites = _convertListToCtypeArray(aWrites, ctypes.c_int32)
-    cNumVals = _convertListToCtypeArray(aNumValues, ctypes.c_int32)
-    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
-    cErrorAddr = ctypes.c_int32(-1)
-
-    error = _staticLib.LJM_eNames(handle, cNumFrames, ctypes.byref(cNames), ctypes.byref(cWrites), ctypes.byref(cNumVals), ctypes.byref(cVals), ctypes.byref(cErrorAddr))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error, cErrorAddr.value)
-
-    return _convertCtypeArrayToList(cVals)
-
-
-_g_eStreamDataSize = {}
-def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
-    """Initializes a stream object and begins streaming. This includes
-       creating a buffer in LJM that collects data from the device.
-
-    Args:
-        handle: A valid handle to an open device.
-        scansPerRead: Number of scans returned by each call to the
-            eStreamRead function. This is not tied to the maximum packet
-            size for the device.
-        numAddresses: The size of aScanList. The number of addresses to
-            scan.
-        aScanList: List of Modbus addresses to collect samples from,
-            per scan.
-        scanRate: Sets the desired number of scans per second.
-
-    Returns:
-        The actual scan rate the device will scan at.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        Address configuration such as range, resolution, and
-        differential voltages must be handled elsewhere.
-        Check your device's documentation for valid aScanList channels.
-
-    """
-    cSPR = ctypes.c_int32(scansPerRead)
-    cNumAddrs = ctypes.c_int32(numAddresses)
-    cSL_p = _convertListToCtypeArray(aScanList, ctypes.c_int32)
-    cScanRate = ctypes.c_double(scanRate)
-
-    error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumAddrs, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    _g_eStreamDataSize[handle] = scansPerRead*numAddresses
-    return cScanRate.value
-
-
-def eStreamRead(handle):
-    """Returns data from an initialized and running LJM stream buffer.
-    Waits for data to become available, if necessary.
-
-    Args:
-        handle: A valid handle to an open device.
-
-    Returns:
-        A tuple containing:
-        (aData, numSkippedScans, deviceScanBacklog, ljmScanBackLog)
-
-        aData: Stream data list with all channels interleaved. It will
-            contain scansPerRead*numAddresses values configured from
-            eStreamStart. The data returned is removed from the LJM
-            stream buffer.
-        deviceScanBacklog: The number of scans left in the device
-            buffer, as measured from when data was last collected from
-            the device. This should usually be near zero and not
-            growing.
-        ljmScanBacklog: The number of scans left in the LJM buffer, as
-            measured from after the data returned from this function is
-            removed from the LJM buffer. This should usually be near
-            zero and not growing.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call or
-            eStreamStart was not called first on the handle and
-            the aData size cannot be determined.
-
-    """
-    #May need to change to optimize
-    if handle not in _g_eStreamDataSize:
-        raise LJMError(errorString = "Streaming has not been started for the given handle. Please call eStreamStart first.")
-    cData = (ctypes.c_double*_g_eStreamDataSize[handle])()
-    cD_SBL = ctypes.c_int32(0)
-    cLJM_SBL = ctypes.c_int32(0)
-
-    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL));
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return _convertCtypeArrayToList(cData), cD_SBL.value, cLJM_SBL.value
-
-
-def eStreamStop(handle):
-    """Stops the LJM library from streaming any more data from the
-    device, while leaving any collected data in the LJM library's
-    buffer to be read.
-
-    Args:
-        handle: A valid handle to an open device.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    error = _staticLib.LJM_eStreamStop(handle)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-    if handle in _g_eStreamDataSize:
-        _g_eStreamDataSize[handle]
-
-
-def eReadNameString(handle, name):
-    """Reads a string from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        name: The string name of a register to read.
-
-    Returns:
-        The read string.
-
-    Raises:
-        TypeError: name is not a string.
-        LJMError: An error was returned from the LJM library call.
-
-    Note: This is a convenience function for eNames.
-
-    """
-    if not isinstance(name, str):
-        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
-    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
-
-    error = _staticLib.LJM_eReadNameString(handle, name.encode("ascii"), outStr);
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return outStr.decode("ascii").split("\0", 1)[0]
-
-
-def eReadAddressString(handle, address):
-    """Reads a string from a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        address: The integer address of a register to read.
-
-    Returns:
-        The read string.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Note: This is a convenience function for eNames.
-
-    """
-    cAddr = ctypes.c_int32(address)
-    outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
-
-    error = _staticLib.LJM_eReadAddressString(handle, cAddr, outStr);
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    return outStr.decode("ascii").split("\0", 1)[0]
-
-
-def eWriteNameString(handle, name, string):
-    """Writes a string to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        name: The string name of a register to write.
-        string: The string to write.
-
-    Raises:
-        TypeError: name is not a string.
-        LJMError: An error was returned from the LJM library call.
-
-    Note: This is a convenience function for eNames.
-
-    """
-    if not isinstance(name, str):
-        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
-    if not isinstance(string, str):
-        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
-
-    error = _staticLib.LJM_eWriteNameString(handle, name.encode("ascii"), string.encode("ascii"));
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-
-def eWriteAddressString(handle, address, string):
-    """Writes a string to a device.
-
-    Args:
-        handle: A valid handle to an open device.
-        address: The integer address of a register to write.
-        string: The string to write.
-
-    Raises:
-        TypeError: string parameter is not a string.
-        LJMError: An error was returned from the LJM library call.
-
-    Note: This is a convenience function for eNames.
-
-    """
-    cAddr = ctypes.c_int32(address)
-    if not isinstance(string, str):
-        raise TypeError("Expected a string instead of " + str(type(string)) + ".")
-
-    error = _staticLib.LJM_eWriteAddressString(handle, cAddr, string.encode("ascii"));
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
 
 
 def tcVoltsToTemp(tcType, tcVolts, cjTempK):
@@ -1806,6 +1800,27 @@ def readLibraryConfigStringS(parameter):
         raise LJMError(error)
 
     return outStr.decode("ascii").split("\0", 1)[0]
+
+
+def loadConfigurationFile(fileName):
+    """Reads a file in as the new LJM configurations.
+
+    Args:
+        fileName: A file name using relative or absolute path.
+            "default" maps to the default configuration file
+            ljm_startup_config.json in the constants file location.
+
+    Raises:
+        TypeError: fileName is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(fileName, str):
+        raise TypeError("Expected a string instead of " + str(type(fileName)) + ".")
+    
+    error = _staticLib.LJM_LoadConfigurationFile(fileName.encode("ascii"))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
 
 
 def log(level, string):
