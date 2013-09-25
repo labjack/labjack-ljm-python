@@ -1824,18 +1824,19 @@ def loadConfigurationFile(fileName):
 
 
 def log(level, string):
-    """Outputs a message to the log file at the specified level.
+    """Sends a message of the specified level to the LJM debug logger.
 
     Args:
-        level: The log level to output the message at.
-            TODO: Define log levels
-        string: The message string to be written to the log file.
+        level: The level to output the message at. See
+            labjack.ljm.constants.DEBUG_LOG_LEVEL.
+        string: The debug message to be written to the log file.
 
     Raises:
         TypeError: string parameter is not a string.
         LJMError: An error was returned from the LJM library call.
 
-    Note: This function may be temporary.
+    Note: By default, DEBUG_LOG_MODE is to never log, so LJM does
+        not output any log messages, even from this function.
 
     """
     cLev = ctypes.c_int32(level)
@@ -1848,12 +1849,10 @@ def log(level, string):
 
 
 def resetLog():
-    """Clears the log file.
+    """Clears all characters from the debug log file.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
-
-    Note: This function may be temporary.
 
     """
     error = _staticLib.LJM_ResetLog()
