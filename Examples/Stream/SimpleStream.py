@@ -8,14 +8,9 @@ import time
 import sys
 from datetime import datetime
 
-ljm.writeLibraryConfigS(ljm.constants.DEBUG_LOG_LEVEL, 1); # 1 is stream packets, 2 is trace log level
-ljm.writeLibraryConfigS(ljm.constants.DEBUG_LOG_MODE, 2); # 2 is continuous log, 3 is log on error
-
 # Open first found LabJack
-#handle = ljm.open(ljm.constants.ANY, ljm.constants.ANY, "ANY")
-#handle = ljm.openS("ANY", "ANY", "ANT")
-#handle = ljm.openS("ANY", "ETHERNET", "192.168.1.192")
-handle = ljm.openS("ANY", "USB", "ANY")
+handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+#handle = ljm.openS("ANY", "ANY", "ANY")
 
 info = ljm.getHandleInfo(handle)
 print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
@@ -82,7 +77,7 @@ except Exception:
     e = sys.exc_info()[1]
     print(e)
 
-print("Stop Stream")
+print("\nStop Stream")
 ljm.eStreamStop(handle)
 
 # Close handle

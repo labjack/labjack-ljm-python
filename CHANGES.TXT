@@ -1,8 +1,9 @@
 Version History
 ---------------
 
-0.8.7 (xx/xx/xxxx)
+0.8.7 (10/03/2013)
  - Updated functions, documentation, constants and errorcodes to LJM v1.0.
+ - Added SimpleStream example.
 
 0.8.6 (08/16/2013)
  - Updated functions, documentation, constants and errorcodes to LJM v0.2.45.

@@ -1,5 +1,5 @@
 LJMPython
-08/16/2013
+10/03/2013
 support@labjack.com
 
 

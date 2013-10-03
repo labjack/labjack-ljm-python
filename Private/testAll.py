@@ -163,6 +163,9 @@ macnum = ljm.macToNumber(macstr)
 print("MACToNumber: " + str(macstr) + " : " + str(macnum))
 print("numberToMAC: " + str(ljm.numberToMAC(macnum)))
 
+print("loadConfigurationFile: default")
+ljm.loadConfigurationFile("default")
+
 to = 1500 #in ms
 ljm.writeLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS, to)
 print("\nwriteLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS: " + str(to))
@@ -171,9 +174,6 @@ print("readLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS:" + str(ljm.readLibraryCon
 print("writeLibraryConfigStringS")
 ljm.writeLibraryConfigStringS(ljm.constants.DEBUG_LOG_FILE, "ljlogfile0.txt")
 print("readLibraryConfigStringS: " + str(ljm.readLibraryConfigStringS(ljm.constants.DEBUG_LOG_FILE)))
-
-print("loadConfigurationFile: default")
-ljm.loadConfigurationFile("default")
 
 t = timeit.Timer(lambda: timeoutTest(h)) #"timeoutTest("+ str(h) + ")", setup="from __main__ import timeoutTest")
 print("\nread timeout in sec = " + str(t.timeit(number = 1)))

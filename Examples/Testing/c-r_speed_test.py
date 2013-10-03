@@ -118,7 +118,7 @@ t = timeit.Timer(functools.partial(eNamesIteration, handle, numFrames, names,
 
 # eNames loop
 for i in range(numIterations):
-    ttMS = t.timeit(number = 1)
+    ttMS = t.timeit(number = 13
     if minMS == 0:
         minMS = ttMS
     minMS = min(ttMS, minMS)
