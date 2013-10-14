@@ -738,7 +738,7 @@ def eReadNameString(handle, name):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return outStr.decode("ascii").split("\0", 1)[0]
+    return str(outStr.decode("ascii").split("\0", 1)[0])
 
 
 def eReadAddressString(handle, address):
@@ -764,7 +764,7 @@ def eReadAddressString(handle, address):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return outStr.decode("ascii").split("\0", 1)[0]
+    return str(outStr.decode("ascii").split("\0", 1)[0])
 
 
 def eWriteNameString(handle, name, string):
@@ -1276,7 +1276,7 @@ def errorToString(errorCode):
 
     _staticLib.LJM_ErrorToString(cErr, errStr)
 
-    return errStr.decode("ascii").split("\0", 1)[0]
+    return str(errStr.decode("ascii").split("\0", 1)[0])
 
 
 def loadConstants():
@@ -1290,6 +1290,55 @@ def loadConstants():
 
     """
     _staticLib.LJM_LoadConstants()
+
+
+def loadConstantsFromFile(fileName):
+    """Loads the constants file from the given file name. Alias for
+    executing:
+        writeLibraryConfigStringS(labjack.ljm.constants.CONSTANTS_FILE,
+            fileName)
+
+    Args:
+        fileName: A file name string using relative or absolute path
+            to pass to writeLibraryConfigStringS.
+
+    Raises:
+        TypeError: filePath is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(fileName, str):
+        raise TypeError("Expected a string instead of " + str(type(fileName)) + ".")
+
+    error = _staticLib.LJM_LoadConstantsFromFile(fileName.encode("ascii"))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def loadConstantsFromString(jsonString):
+    """Parses jsonString as the constants file and loads it.
+
+    Args:
+        jsonString: A JSON string containing a "registers" array and/or
+            an "errors" array.
+
+    Raises:
+        TypeError: jsonString is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        If the JSON string does not contain a "registers" array, the
+        Modbus-related constants are not affected. Similarly, if the
+        JSON string does not contain an "errors" array, the errorcode-
+        related constants are not affected.
+
+    """
+    if not isinstance(jsonString, str):
+        raise TypeError("Expected a string instead of " + str(type(jsonString)) + ".")
+
+    error = _staticLib.LJM_LoadConstantsFromString(jsonString.encode("ascii"))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
 
 
 def tcVoltsToTemp(tcType, tcVolts, cjTempK):
@@ -1616,7 +1665,7 @@ def numberToIP(number):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return ipv4String.decode("ascii").split("\0", 1)[0]
+    return str(ipv4String.decode("ascii").split("\0", 1)[0])
 
 
 def ipToNumber(ipv4String):
@@ -1672,7 +1721,7 @@ def numberToMAC(number):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return macString.decode("ascii").split("\0", 1)[0]
+    return str(macString.decode("ascii").split("\0", 1)[0])
 
 
 def macToNumber(macString):
@@ -1799,14 +1848,14 @@ def readLibraryConfigStringS(parameter):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return outStr.decode("ascii").split("\0", 1)[0]
+    return str(outStr.decode("ascii").split("\0", 1)[0])
 
 
 def loadConfigurationFile(fileName):
     """Reads a file in as the new LJM configurations.
 
     Args:
-        fileName: A file name using relative or absolute path.
+        fileName: A file name string using relative or absolute path.
             "default" maps to the default configuration file
             ljm_startup_config.json in the constants file location.
 

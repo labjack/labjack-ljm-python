@@ -25,7 +25,7 @@ con = ljm.constants.ctUSB
 conS = 'USB'
 
 print("errorToString: " + ljm.errorToString(0))
-print("")
+print(type(ljm.errorToString(0))) #"")
 print(ljm.listAll(dev, con))
 print(ljm.listAllS(devS, conS))
 
@@ -154,17 +154,24 @@ print("\ntcVoltsToTemp (k type, " + str(tcVolts) + " V or ~303.15 Kelvin, cj = "
 ipnum = 0
 ipstr = "192.168.1.89"
 ipnum = ljm.ipToNumber(ipstr)
-print("\nIPToNumber: " + str(ipstr) + " : " + str(ipnum))
-print("numberToIP: " + str(ljm.numberToIP(ipnum)))
+print("\nIPToNumber: " + ipstr + " : " + str(ipnum))
+print("numberToIP: " + ljm.numberToIP(ipnum))
 
 macnum = 0
 macstr = "E0:69:95:C1:45:12" #E0-69-95-C1-45-12 (E06995C14512)
 macnum = ljm.macToNumber(macstr)
-print("MACToNumber: " + str(macstr) + " : " + str(macnum))
-print("numberToMAC: " + str(ljm.numberToMAC(macnum)))
+print("MACToNumber: " + macstr + " : " + str(macnum))
+print("numberToMAC: " + ljm.numberToMAC(macnum))
 
-print("loadConfigurationFile: default")
+print("\nloadConfigurationFile: default")
 ljm.loadConfigurationFile("default")
+
+#Get the current path to reload it
+pStr = ljm.readLibraryConfigStringS(ljm.constants.MODBUS_MAP_CONSTANTS_FILE)
+#pStr = str(pStr.replace("ljm_constants.json", ""))
+
+print("loadConstantsFromFile " + pStr)
+ljm.loadConstantsFromFile(pStr)
 
 to = 1500 #in ms
 ljm.writeLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS, to)
@@ -186,5 +193,9 @@ try:
 except ljm.LJMError:
     e = sys.exc_info()[1]
     print(e)
-    
+
+jsonStr = "{\"address\":0, \"name\":\"AIN#(0:254)\", \"type\":\"FLOAT32\", \"devices\":[\"U3\", \"U6\", \"T7\", \"UE9\"], \"readwrite\":\"R\", \"tags\":[\"AIN\"], \"streamable\":true, \"displayname\":[\"Analog In #\"], \"description\":\"Returns the voltage of the specified analog input.\"},\n" + \
+   "{\"address\":1000, \"name\":\"DAC#(0:1)\", \"type\":\"FLOAT32\", \"devices\":[\"U3\", \"U6\", \"T7\", \"UE9\"], \"readwrite\":\"RW\", \"tags\":[\"DAC\"], \"displayname\":[\"Analog Out #\"], \"description\":\"Pass a voltage for the specified analog output.\"},\n";
+print("\nloadConstantsFromString \n" + jsonStr)
+ljm.loadConstantsFromString(jsonStr)
 print("\n----- Test End ----------------\n")
