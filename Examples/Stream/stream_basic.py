@@ -8,6 +8,8 @@ import time
 import sys
 from datetime import datetime
 
+MAX_REQUESTS = 50 # The number of eStreamRead calls that will be performed.
+
 # Open first found LabJack
 handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
 #handle = ljm.openS("ANY", "ANY", "ANY")
@@ -17,49 +19,49 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-#Stream Configuration
-aScanListNames = ["AIN0", "AIN1"] #Scan list names to stream
+# Stream Configuration
+aScanListNames = ["AIN0", "AIN1", "AIN2", "AIN3"] #Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
-scansPerRead = int(2000/numAddresses)
-scanRate = 5000
+scanRate = 1000
+scansPerRead = int(scanRate/2)
 
-#Configure scan list for single ended readings
+# Configure scan list for single ended readings
 aNames = [s+"_NEGATIVE_CH" for s in aScanListNames] #AINX_NEGATIVE_CH
 ljm.eWriteNames(handle, numAddresses, aNames, [ljm.constants.GND]*numAddresses)
 
 try:
-    #Configure and start stream
+    # Configure and start stream
     scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
-    print("Start Stream")
-    
-    print("Start Read")
-    loop = 50
+    print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
+
+    print("\nPerforming %i stream reads." % MAX_REQUESTS)
     start = datetime.now()
     totScans = 0
-    totSkip = 0 #Total skipped samples
-    for i in range(loop):
+    totSkip = 0 # Total skipped samples
+
+    i = 1
+    while i <= MAX_REQUESTS:
         ret = ljm.eStreamRead(handle)
         
         data = ret[0]
         scans = len(data)/numAddresses
         totScans += scans
         
-        #Count the skipped samples which are indicated by -9999 values. Missed
-        #samples occur after a device's stream buffer overflows and are reported
-        #after auto-recover mode ends.
+        # Count the skipped samples which are indicated by -9999 values. Missed
+        # samples occur after a device's stream buffer overflows and are
+        # reported after auto-recover mode ends.
         curSkip = data.count(-9999.0)
         totSkip += curSkip
         
-        #Display every 5 eStreamRead calls or when skipped scans are detected
-        if (i+1) % 5 == 0 or curSkip > 0:
-            print("\neStreamRead %i" % (i+1))
-            ainStr = ""
-            for i in range(0, numAddresses):
-                ainStr += "%s = %0.5f " % (aScanListNames[i], data[i])
-            print("  1st scan out of %i: %s" % (scans, ainStr))
-            print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = " \
-                  "%i" % (curSkip/numAddresses, ret[1], ret[2]))
+        print("\neStreamRead %i" % i)
+        ainStr = ""
+        for j in range(0, numAddresses):
+            ainStr += "%s = %0.5f " % (aScanListNames[j], data[j])
+        print("  1st scan out of %i: %s" % (scans, ainStr))
+        print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = " \
+              "%i" % (curSkip/numAddresses, ret[1], ret[2]))
+        i += 1
 
     end = datetime.now()
 
