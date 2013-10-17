@@ -1,7 +1,7 @@
 Version History
 ---------------
 
-0.8.8 (xx/xx/xxxx)
+0.8.8 (10/17/2013)
  - Updated functions, documentation, constants and errorcodes to LJM v1.1.1.
  - Force string returns in functions to str.
  - Renamed SimpleStream example to stream_basic and updated it. 
