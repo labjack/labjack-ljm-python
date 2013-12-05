@@ -29,7 +29,7 @@ values = [0, 1,
           0, 0,
           0, 0,
           0, 0,
-          0] # Set 10th element to 1 to enable
+          0] # Set WATCHDOG_ENABLE_DEFAULT to 1 to enable
 ljm.eWriteNames(handle, numFrames, names, values)
 
 print("\nSet Watchdog configuration:")
