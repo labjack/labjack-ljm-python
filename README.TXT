@@ -1,4 +1,4 @@
-LJMPython
+LJM Python
 10/17/2013
 support@labjack.com
 
@@ -17,8 +17,8 @@ Installation Requirements:
 Installation:
 
 After fulfilling the requirements, open a terminal/console and go to the
-LJMPython root directory. To install LJMPython run the following command (Leave
-off the sudo on Windows):
+Python_LJM root directory. To install the LJM Python modules run the following
+command (Leave off the sudo on Windows):
 
     $ sudo python setup.py install
 
@@ -47,5 +47,5 @@ LJM library documentation can be found in the LJM User's Guide:
 
 License:
 
-All LJMPython packages, modules and examples are licensed under MIT X11. The
-license can be found in the LICENSE.TXT file.
+All LJM Python modules and examples are licensed under MIT X11. The license can
+be found in the LICENSE.TXT file.
