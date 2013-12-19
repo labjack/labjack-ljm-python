@@ -63,15 +63,14 @@ ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 2)
 # Selecting Mode: A - CPHA=1, CPOL=1.
 ljm.eWriteName(handle, "SPI_MODE", 0)
 
-# Speed:
-# Frequency = 1000000000 / (175*(65536-Speed) + 1020)
+# Speed Throttle:
+# Frequency = 1000000000 / (175*(65536-SpeedThrottle) + 1020)
 # Valid speed values are 1 to 65536 where 0 = 65536.
-# Note: The above equation and its frequency range
-# was tested for firmware 1.0009 and may change in
-# the future.
+# Note: The above equation and its frequency range was tested for firmware
+# 1.0009 and may change in the future.
 
-# Configuring Max. Speed of about 980kHz.
-ljm.eWriteName(handle, "SPI_SPEED", 0)
+# Configuring Max. Speed (~ 1 MHz)
+ljm.eWriteName(handle, "SPI_SPEED_THROTTLE", 0)
 
 # Options
 # bit 0:
@@ -89,7 +88,8 @@ ljm.eWriteName(handle, "SPI_OPTIONS", 0)
 
 # Read back and display the SPI settings
 aNames = ["SPI_CS_DIONUM", "SPI_CLK_DIONUM", "SPI_MISO_DIONUM",
-          "SPI_MOSI_DIONUM", "SPI_MODE", "SPI_SPEED", "SPI_OPTIONS"]
+          "SPI_MOSI_DIONUM", "SPI_MODE", "SPI_SPEED_THROTTLE",
+          "SPI_OPTIONS"]
 aValues = [0]*len(aNames)
 numFrames = len(aNames)
 aValues = ljm.eReadNames(handle, numFrames, aNames)
@@ -109,11 +109,10 @@ dataWrite = []
 dataWrite.extend([randrange(0, 256) for _ in range(numBytes)])
 
 # Write the bytes
-aAddresses = [5010] #"SPI_DATA_WRITE"
-aTypes = [ljm.constants.BYTE]
+aNames = ["SPI_DATA_WRITE"]
 aWrites = [ljm.constants.WRITE]
 aNumValues = [numBytes];
-dataWrite = ljm.eAddresses(handle, 1, aAddresses, aTypes, aWrites, aNumValues, dataWrite)
+dataWrite = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataWrite)
 
 # Display the bytes written
 print("");
@@ -123,11 +122,10 @@ for i in range(numBytes):
 
 # Read the bytes
 dataRead = [0]*numBytes
-aAddresses = [5050] #"SPI_DATA_READ"
-aTypes = [ljm.constants.BYTE]
+aNames = ["SPI_DATA_READ"]
 aWrites = [ljm.constants.READ]
 aNumValues = [numBytes];
-dataRead = ljm.eAddresses(handle, 1, aAddresses, aTypes, aWrites, aNumValues, dataRead)
+dataRead = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataRead)
 
 # Display the bytes read
 print("")
