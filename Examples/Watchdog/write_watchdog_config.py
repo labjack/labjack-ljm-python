@@ -17,24 +17,28 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 
 # Setup and call eWriteNames to configure the Watchdog on a LabJack.
 # Disable the Watchdog first before any other configuration.
-numFrames = 11
-names = ["WATCHDOG_ENABLE_DEFAULT", "WATCHDOG_OPTIONS_DEFAULT",
-         "WATCHDOG_TIMEOUT_S_DEFAULT", "WATCHDOG_STARTUP_DELAY_S_DEFAULT",
-         "WATCHDOG_DIO_STATE_DEFAULT", "WATCHDOG_DIO_DIRECTION_DEFAULT",
-         "WATCHDOG_DIO_INHIBIT_DEFAULT", "WATCHDOG_DAC0_DEFAULT",
-         "WATCHDOG_DAC1_DEFAULT", "WATCHDOG_KEY_DEFAULT",
-         "WATCHDOG_ENABLE_DEFAULT"]
-values = [0, 1,
-          20, 0,
-          0, 0,
-          0, 0,
-          0, 0,
-          0] # Set WATCHDOG_ENABLE_DEFAULT to 1 to enable
-ljm.eWriteNames(handle, numFrames, names, values)
+aNames = ["WATCHDOG_ENABLE_DEFAULT", "WATCHDOG_ADVANCED_DEFAULT",
+          "WATCHDOG_TIMEOUT_S_DEFAULT", "WATCHDOG_STARTUP_DELAY_S_DEFAULT",
+          "WATCHDOG_STRICT_ENABLE_DEFAULT", "WATCHDOG_STRICT_KEY_DEFAULT",
+          "WATCHDOG_RESET_ENABLE_DEFAULT", "WATCHDOG_DIO_ENABLE_DEFAULT",
+          "WATCHDOG_DIO_STATE_DEFAULT", "WATCHDOG_DIO_DIRECTION_DEFAULT",
+          "WATCHDOG_DIO_INHIBIT_DEFAULT", "WATCHDOG_DAC0_ENABLE_DEFAULT",
+          "WATCHDOG_DAC0_DEFAULT", "WATCHDOG_DAC1_ENABLE_DEFAULT",
+          "WATCHDOG_DAC1_DEFAULT", "WATCHDOG_ENABLE_DEFAULT"]
+aValues = [0, 0,
+           20, 0,
+           0, 0,
+           1, 0,
+           0, 0,
+           0, 0,
+           0, 0,
+           0, 0] #Set WATCHDOG_ENABLE_DEFAULT to 1 to enable
+numFrames = len(aNames)
+ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
 print("\nSet Watchdog configuration:")
 for i in range(numFrames):
-    print("    %s : %f" % (names[i], values[i]))
+    print("    %s : %f" % (aNames[i], aValues[i]))
 
 # Close handle
 ljm.close(handle)
