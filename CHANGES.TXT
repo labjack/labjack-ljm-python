@@ -1,6 +1,11 @@
 Version History
 ---------------
 
+0.8.9 (12/19/2013)
+ - Updated constants to LJM v1.1.3.
+ - Added I2C and SPI examples.
+ - Updated Watchdog example to use current registers.
+
 0.8.8 (10/17/2013)
  - Updated functions, documentation, constants and errorcodes to LJM v1.1.1.
  - Force string returns in functions to str.
