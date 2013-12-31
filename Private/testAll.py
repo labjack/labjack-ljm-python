@@ -86,6 +86,16 @@ print("")
 print("eAddresses: " + str(ljm.eAddresses(h, 2, addrs, dtypes, writes, [1]*2, [0, 0, 0])))
 print("")
 
+ljm.eWriteNameArray(h, "DAC0", 2, [2.3, 4.8])
+print("eWriteNameArray (DAC0, 2, [2.3 4.8])")
+print("eReadNameArray (DAC0, 2): " + str(ljm.eReadNameArray(h, "DAC0", 2)))
+
+print("")
+
+ljm.eWriteAddressArray(h, 1000, ljm.constants.FLOAT32, 2, [0.2, 2.6])
+print("eWriteAddressArray (1000, FLOAT32, 2, [0.2 2.6])")
+print("eReadAddressArray (1000, FLOAT32, 2): " + str(ljm.eReadAddressArray(h, 1000, ljm.constants.FLOAT32, 2)))
+
 print("\n--- Conversion tests --------------\n")
 offset = 0
 num = 3

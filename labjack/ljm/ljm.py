@@ -591,6 +591,128 @@ def eWriteNames(handle, numFrames, aNames, aValues):
         raise LJMError(error, errAddr)
 
 
+def eReadAddressArray(handle, address, dataType, numValues):
+    """Performs Modbus operations that reads values from a device.
+    
+    Args:
+        handle: A valid handle to an open device.
+        address: The address to read an array from.
+        dataType: The data type of address.
+        numValues: The size of the array to read.
+
+    Returns:
+        A list of size numValues with the read values.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cType = ctypes.c_int32(dataType)
+    cNumVals = ctypes.c_int32(numValues)
+    cVals = (ctypes.c_double*numValues)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadAddressArray(handle, cAddr, cType, cNumVals, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eReadNameArray(handle, name, numValues):
+    """Performs Modbus operations that reads values from a device.
+    
+    Args:
+        handle: A valid handle to an open device.
+        name: The register name to read an array from.
+        numValues: The size of the array to read.
+
+    Returns:
+        A list of size numValues with the read values.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cNumVals = ctypes.c_int32(numValues)
+    cVals = (ctypes.c_double*numValues)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadNameArray(handle, name.encode("ascii"), cNumVals, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cVals)
+
+
+def eWriteAddressArray(handle, address, dataType, numValues, aValues):
+    """Performs Modbus operations that writes values to a device.
+    
+    Args:
+        handle: A valid handle to an open device.
+        address: The address to write an array to.
+        dataType: The data type of address.
+        numValues: The size of the array to write.
+        aValues: List of values to write. This list needs to be at least
+            size numValues.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cType = ctypes.c_int32(dataType)
+    cNumVals = ctypes.c_int32(numValues)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteAddressArray(handle, cAddr, cType, cNumVals, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+
+def eWriteNameArray(handle, name, numValues, aValues):
+    """Performs Modbus operations that writes values to a device.
+    
+    Args:
+        handle: A valid handle to an open device.
+        name: The register name to write an array to.
+        numValues: The size of the array to write.
+        aValues: List of values to write. This list needs to be at least
+            size numValues.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cNumVals = ctypes.c_int32(numValues)
+    cVals = _convertListToCtypeArray(aValues, ctypes.c_double)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteNameArray(handle, name.encode("ascii"), cNumVals, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+
 def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
     """Performs Modbus operations that reads/writes values to a device.
 
