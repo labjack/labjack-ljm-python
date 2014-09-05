@@ -38,38 +38,10 @@ ljm.eWriteName(handle, "SPI_MISO_DIONUM", 3)
 # MOSI is FIO2
 ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 2)
 
-# Modes:
-# 0 = A: CPHA=0, CPOL=0 
-#     Data clocked on the rising edge
-#     Data changed on the falling edge
-# Final clock state low
-#     Initial clock state low
-# 1 = B: CPHA=0, CPOL=1
-#     Data clocked on the falling edge
-#     Data changed on the rising edge
-#     Final clock state low
-#     Initial clock state low
-# 2 = C: CPHA=1, CPOL=0 
-#     Data clocked on the falling edge
-#     Data changed on the rising edge
-#     Final clock state high
-#     Initial clock state high
-# 3 = D: CPHA=1, CPOL=1 
-#     Data clocked on the rising edge
-#     Data changed on the falling edge
-#     Final clock state high
-#     Initial clock state high
+# Selecting Mode CPHA=1 (bit 1), CPOL=1 (bit 2)
+ljm.eWriteName(handle, "SPI_MODE", 3)
 
-# Selecting Mode: A - CPHA=1, CPOL=1.
-ljm.eWriteName(handle, "SPI_MODE", 0)
-
-# Speed Throttle:
-# Frequency = 1000000000 / (175*(65536-SpeedThrottle) + 1020)
-# Valid speed values are 1 to 65536 where 0 = 65536.
-# Note: The above equation and its frequency range was tested for firmware
-# 1.0009 and may change in the future.
-
-# Configuring Max. Speed (~ 1 MHz)
+# Speed Throttle: Max. Speed (~ 1 MHz) = 0
 ljm.eWriteName(handle, "SPI_SPEED_THROTTLE", 0)
 
 # Options
@@ -99,20 +71,20 @@ for i in range(numFrames):
     print("  %s = %0.0f" % (aNames[i],  aValues[i]))
 
 
-# Write/Read 4 bytes
+# Write(TX)/Read(RX) 4 bytes
 numBytes = 4;
 ljm.eWriteName(handle, "SPI_NUM_BYTES", numBytes)
 
 
-# Setup write bytes
+# Write the bytes
 dataWrite = []
 dataWrite.extend([randrange(0, 256) for _ in range(numBytes)])
-
-# Write the bytes
-aNames = ["SPI_DATA_WRITE"]
+aNames = ["SPI_DATA_TX"]
 aWrites = [ljm.constants.WRITE]
 aNumValues = [numBytes];
 dataWrite = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataWrite)
+
+ljm.eWriteName(handle, "SPI_GO", 1) # Do the SPI communications
 
 # Display the bytes written
 print("");
@@ -122,10 +94,11 @@ for i in range(numBytes):
 
 # Read the bytes
 dataRead = [0]*numBytes
-aNames = ["SPI_DATA_READ"]
+aNames = ["SPI_DATA_RX"]
 aWrites = [ljm.constants.READ]
 aNumValues = [numBytes];
 dataRead = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataRead)
+ljm.eWriteName(handle, "SPI_GO", 1)
 
 # Display the bytes read
 print("")

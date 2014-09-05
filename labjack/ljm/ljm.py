@@ -143,7 +143,7 @@ def listAllS(deviceType, connectionType):
 
     Args:
         deviceType: A string that filters which devices will be returned
-            ("LJM_dtT7", "LJM_dtU3", etc.). "LJM_dtANY" is allowed.
+            ("LJM_dtT7", etc.). "LJM_dtANY" is allowed.
         connectionType: A string that filters by connection type
             ("LJM_ctUSB", "LJM_ctTCP", etc).  "LJM_ctANY" is allowed.
 
@@ -192,6 +192,79 @@ def listAllS(deviceType, connectionType):
     return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound])
 
 
+def listAllExtended(deviceType, connectionType, numAddresses, aAddresses, aNumRegs, maxNumFound):
+    """Advanced version of listAll that performs an additional query of
+    arbitrary registers on the device.
+
+    Args:
+        deviceType: An integer containing the type of the device to be
+            connected (labjack.ljm.constants.dtT7,
+            labjack.ljm.constants.dtDIGIT, etc.).
+            labjack.ljm.constants.dtANY is allowed.
+        connectionType: An integer that filters by connection type
+            (labjack.ljm.constants.ctUSB,
+            labjack.ljm.constants.ctTCP, etc.).
+            labjack.ljm.constants.ctANY is allowed.
+        numAddresses: The number of addresses to query. Also the size of
+            aAddresses and aNumRegs.
+        aAddresses: List of addresses to query for each device that is
+            found.
+        aNumRegs: List of the number of registers to query for each
+            address. Each aNumRegs[i] corresponds to aAddresses[i].
+        maxNumFound: The maximum number of devices to find.
+ 
+    Returns:
+        A tuple containing:
+        (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
+         aIPAddresses, aBytes)
+
+        numFound: Number of devices found.
+        aDeviceTypes: List of device types for each of the numFound
+            devices.
+        aConnectionTypes: List of connection types for each of the
+            numFound devices.
+        aSerialNumbers: List of serial numbers for each of the numFound
+            devices.
+        aIPAddresses: List of IP addresses for each of the numFound
+            devices, but only if the connection type is TCP-based. For
+            each corresponding device for which aIPAddresses[i] is not
+            TCP-based, aIPAddresses[i] will be
+            labjack.ljm.constants.NO_IP_ADDRESS.
+        aBytes: List of the queried bytes sequentially. A device
+            represented by index i will have an aBytes index of:
+            (i * <the sum of aNumRegs> *
+             labjack.ljm.constants.BYTES_PER_REGISTER).
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        This function only shows what devices can be opened. To
+        actually open a device, use labjack.ljm.open/openS.
+
+    """
+    cDev = ctypes.c_int32(deviceType)
+    cConn = ctypes.c_int32(connectionType)
+    cNumAddrs = ctypes.c_int32(numAddresses)
+    cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
+    cNumRegs = _convertListToCtypeArray(aNumRegs, ctypes.c_int32)
+    cMaxNumFound = ctypes.c_int32(maxNumFound)
+    cNumFound = ctypes.c_int32(0)
+    cDevTypes = (ctypes.c_int32*maxNumFound)()
+    cConnTypes = (ctypes.c_int32*maxNumFound)()
+    cSerNums = (ctypes.c_int32*maxNumFound)()
+    cIPAddrs = (ctypes.c_int32*maxNumFound)()
+    sumNumRegs = sum(aNumRegs[0:numAddresses])
+    cBytes = (ctypes.c_ubyte*(maxNumFound*sumNumRegs*constants.BYTES_PER_REGISTER))()
+
+    error = _staticLib.LJM_ListAllExtended(cDev, cConn, cNumAddrs, ctypes.byref(cAddrs), ctypes.byref(cNumRegs), cMaxNumFound, ctypes.byref(cNumFound), ctypes.byref(cDevTypes), ctypes.byref(cConnTypes), ctypes.byref(cSerNums), ctypes.byref(cIPAddrs), ctypes.byref(cBytes))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numFound = cNumFound.value
+    return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound]), _convertCtypeArrayToList(cBytes[0:(numFound*sumNumRegs*constants.BYTES_PER_REGISTER)])
+
+
 def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
@@ -238,8 +311,7 @@ def open(deviceType=0, connectionType=0, identifier="ANY"):
     Args:
         deviceType: An integer containing the type of the device to be
             connected (labjack.ljm.constants.dtT7,
-            labjack.ljm.constants.dtU3, labjack.ljm.constants.dtANY,
-            etc.).
+            labjack.ljm.constants.dtANY, etc.).
         connectionType: An integer containing the type of connection
             desired (labjack.ljm.constants.ctUSB,
             labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,
@@ -1375,6 +1447,63 @@ def addressToType(address):
         raise LJMError(error)
 
     return cType.value
+
+
+def lookupConstantValue(scope, constantName):
+    """Takes a register name or other scope and a constant name, and
+    returns the constant value.
+
+    Args:
+        scope: The register name or other scope string to search within.
+        constantName: The name of the constant string to search for.
+
+    Returns:
+        The constant value from the given scope, if found.
+
+    Raises:
+        TypeError: scope or constantName is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(scope, str):
+        raise TypeError("Expected a string instead of " + str(type(scope)) + ".")
+    if not isinstance(constantName, str):
+        raise TypeError("Expected a string instead of " + str(type(constantName)) + ".")
+    cConstVal = ctypes.c_double(0)
+
+    error = _staticLib.LJM_LookupConstantValue(scope.encode("ascii"), constantName.encode("ascii"), ctypes.byref(cConstVal))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cConstVal.value
+
+
+def lookupConstantName(scope, constantValue):
+    """Takes a register name or other scope and a value, and returns the
+    name of that value.
+
+    Args:
+        scope: The register name or other scope string to search within.
+        constantName: The constant value integer to search for.
+
+    Returns:
+        The constant name from the given scope, if found.
+
+    Raises:
+        TypeError: scope is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    if not isinstance(scope, str):
+        raise TypeError("Expected a string instead of " + str(type(scope)) + ".")
+    cConstVal = ctypes.c_double(constantValue)
+    cConstName = ("\0"*constants.MAX_NAME_SIZE).encode("ascii")
+    
+    error = _staticLib.LJM_LookupConstantName(scope.encode("ascii"), cConstVal, cConstName)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return str(cConstName.decode("ascii").split("\0", 1)[0])
 
 
 def errorToString(errorCode):

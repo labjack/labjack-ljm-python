@@ -25,9 +25,16 @@ con = ljm.constants.ctUSB
 conS = 'USB'
 
 print("errorToString: " + ljm.errorToString(0))
-print(type(ljm.errorToString(0))) #"")
+#print(type(ljm.errorToString(0))) #"")
 print(ljm.listAll(dev, con))
 print(ljm.listAllS(devS, conS))
+res = ljm.listAllExtended(dev, con, 2, [60028, 48005], [2, 1], 10)
+print(res) #serial, POWER_AIN
+print("  SERIAL, POWER_AIN ="),
+x = res[5]
+for i in range(res[0]):
+    print(str((x[i*6]<<24) + (x[i*6 + 1]<<16) + (x[i*6 + 2]<<8) + x[i*6 + 3]) + " " + str((x[i*6 + 4]<<8) + x[i*6 + 5]) + ","),  
+print("")
 
 print("open")
 print("")
@@ -142,6 +149,9 @@ print("eWriteNames (" + str(aNam) + " " + str(aVal1) + "): " + str(ljm.eWriteNam
 print("eReadNames:" + str(ljm.eReadNames(h, 2, ["AIN0", "AIN1"])))
 print("eNames: " + str(ljm.eNames(h, 3, ["AIN0", "AIN1", "AIN3"], [ljm.constants.READ, ljm.constants.READ, ljm.constants.READ], [1, 2, 1], [0, 0, 0, 0])))
 
+print("\n--- Stream tests --------------\n")
+#setStreamCallback(handle, callback, arg)
+
 print("\n--- Other tests --------------\n")
 
 name = "DEVICE_NAME_DEFAULT"
@@ -172,6 +182,20 @@ macstr = "E0:69:95:C1:45:12" #E0-69-95-C1-45-12 (E06995C14512)
 macnum = ljm.macToNumber(macstr)
 print("MACToNumber: " + macstr + " : " + str(macnum))
 print("numberToMAC: " + ljm.numberToMAC(macnum))
+
+
+print("\naddressesToTypes (2, 4): " + str(ljm.addressesToTypes(2, [2, 4])))
+
+print("addressToType (4):" + str(ljm.addressToType(4)))
+
+#
+scope = "WIFI_STATUS"
+name = "ASSOCIATED"
+print("lookupConstantValue(" + scope +", " + name + " ) = " + str(ljm.lookupConstantValue(scope, name)))
+
+
+print("lookupConstantName (val): " + str(ljm.lookupConstantName("WIFI_STATUS", 2900)))
+
 
 print("\nloadConfigurationFile: default")
 ljm.loadConfigurationFile("default")

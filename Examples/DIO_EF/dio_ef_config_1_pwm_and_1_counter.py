@@ -37,5 +37,11 @@ value = ljm.eReadName(handle, "DIO18_EF_READ_A")
 
 print("\nCounter = %f" % (value))
 
+# Turn off PWM output and counter
+aNames = ["DIO_EF_CLOCK0_ENABLE", "DIO0_EF_ENABLE"]
+aValues = [0, 0]
+numFrames = len(aNames)
+results = ljm.eWriteNames(handle, numFrames, aNames, aValues)
+
 # Close handle
 ljm.close(handle)
