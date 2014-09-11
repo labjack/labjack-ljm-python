@@ -23,7 +23,7 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
 # Configure the I2C communication.
 ljm.eWriteName(handle, "I2C_SDA_DIONUM", 1) # SDA pin number = 1 (FIO1)
 
-ljm.eWriteName(handle, "I2C_SCL_DIONUM", 0) # SCA pin number = 0 (FIO0)
+ljm.eWriteName(handle, "I2C_SCL_DIONUM", 0) # SCL pin number = 0 (FIO0)
 
 # Speed throttle is inversely proportional to clock frequency. 0 = max.
 ljm.eWriteName(handle, "I2C_SPEED_THROTTLE", 0) # Speed throttle = 0
