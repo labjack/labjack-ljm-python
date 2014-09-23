@@ -1,6 +1,9 @@
 Version History
 ---------------
 
+0.9.1 (09/23/2014)
+ - Updated stream examples.
+
 0.9.1 (09/04/2014)
  - Updated functions and errorcodes to LJM v1.7.2. LJM_SetStreamCallback not
    supported.

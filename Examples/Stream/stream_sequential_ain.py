@@ -1,5 +1,7 @@
 """
-Demonstrates how to stream using the eStream functions.
+Demonstrates how to stream a range of sequential analog inputs using the eStream
+functions. Useful when streaming many analog inputs. AIN channel scan list is
+FIRST_AIN_CHANNEL to FIRST_AIN_CHANNEL + NUMBER_OF_AINS - 1.
 
 """
 
@@ -9,6 +11,8 @@ import sys
 from datetime import datetime
 
 MAX_REQUESTS = 50 # The number of eStreamRead calls that will be performed.
+FIRST_AIN_CHANNEL = 0 #AIN0
+NUMBER_OF_AINS = 16
 
 # Open first found LabJack
 handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
@@ -20,7 +24,8 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
     (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
 # Stream Configuration
-aScanListNames = ["AIN0", "AIN1", "AIN2", "AIN3"] #Scan list names to stream
+aScanListNames = ["AIN%i"%i for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL+NUMBER_OF_AINS)] #Scan list names
+print("\nScan List = " + " ".join(aScanListNames))
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
 scanRate = 1000

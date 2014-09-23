@@ -1,5 +1,5 @@
 LJM Python
-09/04/2014
+09/23/2014
 support@labjack.com
 
 
@@ -43,6 +43,10 @@ module for documentation. For example:
 LJM library documentation can be found in the LJM User's Guide:
 
     http://labjack.com/support/ljm/users-guide
+
+T7 documentation can be found in the T7 datasheet:
+
+    http://labjack.com/support/datasheets/t7
 
 
 License:

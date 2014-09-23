@@ -64,9 +64,16 @@ scansPerRead = 60
 # Add the stream out token 4800 to the end
 aScanList.extend([4800])
 
-# Configure positive channels for single ended readings
-aNames = [s+"_NEGATIVE_CH" for s in POS_IN_NAMES] #AINX_NEGATIVE_CH
-ljm.eWriteNames(handle, NUM_IN_CHANNELS, aNames, [ljm.constants.GND]*NUM_IN_CHANNELS)
+# Configure the analog inputs' negative channel, range, settling time and
+# resolution.
+# Note when streaming, negative channels and ranges can be configured for
+# individual analog inputs, but the stream has only one settling time and
+# resolution.
+aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US",
+          "STREAM_RESOLUTION_INDEX"]
+aValues = [ljm.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default),
+                                          #0 (default)
+ljm.eWriteNames(handle, len(aNames), aNames, aValues)
 
 try:
     # Configure and start stream
@@ -114,7 +121,7 @@ try:
     print("Time taken = %f seconds" % (tt))
     print("LJM Scan Rate = %f scans/second" % (scanRate))
     print("Timed Scan Rate = %f scans/second" % (totScans/tt))
-    print("Sample Rate = %f samples/second" % (totScans*NUM_IN_CHANNELS/tt))
+    print("Timed Sample Rate = %f samples/second" % (totScans*NUM_IN_CHANNELS/tt))
     print("Skipped scans = %0.0f" % (totSkip/NUM_IN_CHANNELS))
 except ljm.LJMError:
     ljme = sys.exc_info()[1]
