@@ -1,5 +1,5 @@
 LJM Python
-09/23/2014
+10/09/2014
 support@labjack.com
 
 

@@ -63,7 +63,7 @@ def _loadLibrary():
                 libraryName = "libLabJackM.dylib"
             
             if libraryName is not None:
-                if libraryName == "LabJackM.dll":
+                if libraryName == "LabJackM.dll" and sys.platform.startswith("win32"):
                     return ctypes.WinDLL(libraryName)
                 else:
                     return ctypes.CDLL(libraryName)
