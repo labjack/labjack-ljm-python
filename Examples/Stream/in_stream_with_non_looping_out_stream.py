@@ -26,21 +26,16 @@ from datetime import datetime
 
 IN_NAMES = ["AIN0", "AIN1"]
 
-"""STREAM_OUTS = [
+"""
+STREAM_OUTS = [
     {
-        "target": (str),
-        # The register that stream-out values will be sent to.
+        "target": str register name that stream-out values will be sent to,
+        "buffer_num_bytes": int size in bytes for this stream-out buffer,
 
-        "buffer_num_bytes": (int),
-        # The desired number of bytes for this stream-out buffer. Must be a
-        # power of 2.
+        "stream_out_index": int STREAM_OUT# offset. 0 would generate names like
+            "STREAM_OUT0_BUFFER_STATUS", etc.
 
-        "stream_out_index": (int),
-        # For generating the stream-out names. 0 would generate names like
-        # "STREAM_OUT0_BUFFER_STATUS", etc.
-
-        "set_loop": (int)
-        # The value to be written to STREAM_OUT#(0:3)_SET_LOOP.
+        "set_loop": int value to be written to STREAM_OUT#(0:3)_SET_LOOP
     },
     ...
 ]
@@ -212,8 +207,6 @@ def create_out_context(stream_out):
         )
     )
 
-    print out_context
-
     return out_context
 
 def create_stream_out_names(out_context):
@@ -252,14 +245,14 @@ def update_stream_out_buffer(handle, out_context):
     # entirety will the next set of values that have been set using
     # STREAM_OUT#_SET_LOOP start being used.
 
-    out_names = out_context['names']
+    out_names = out_context["names"]
 
-    ljm.eWriteName(handle, out_names['loop_size'], out_context['state_size'])
+    ljm.eWriteName(handle, out_names["loop_size"], out_context["state_size"])
 
-    state_index = out_context['current_index']
+    state_index = out_context["current_index"]
     error_address = -1
-    current_state = out_context['states'][state_index]
-    values = current_state['values']
+    current_state = out_context["states"][state_index]
+    values = current_state["values"]
 
     info = ljm.getHandleInfo(handle)
     max_bytes = info[5]
@@ -279,28 +272,28 @@ def update_stream_out_buffer(handle, out_context):
         end = start + num_samples
         write_values = values[start:end]
 
-        ljm.eWriteNameArray(handle, out_names['buffer'], num_samples, write_values)
+        ljm.eWriteNameArray(handle, out_names["buffer"], num_samples, write_values)
 
         start = start + num_samples
 
-    ljm.eWriteName(handle, out_names['set_loop'], out_context['set_loop'])
+    ljm.eWriteName(handle, out_names["set_loop"], out_context["set_loop"])
 
-    print('  Wrote ' + \
-        out_context['names']['stream_out'] + \
-        ' state: ' + \
-        current_state['state_name']
+    print("  Wrote " + \
+        out_context["names"]["stream_out"] + \
+        " state: " + \
+        current_state["state_name"]
     )
 
     # Increment the state and wrap it back to zero
-    out_context['current_index'] = (state_index + 1) % len(out_context['states'])
+    out_context["current_index"] = (state_index + 1) % len(out_context["states"])
 
 def initialize_stream_out(handle, out_context):
     # Allocate memory on the T7 for the stream-out buffer
-    out_address = convert_name_to_address(out_context['target'])
-    names = out_context['names']
-    ljm.eWriteName(handle, names['target'], out_address)
-    ljm.eWriteName(handle, names['buffer_size'], out_context['buffer_num_bytes'])
-    ljm.eWriteName(handle, names['enable'], 1)
+    out_address = convert_name_to_address(out_context["target"])
+    names = out_context["names"]
+    ljm.eWriteName(handle, names["target"], out_address)
+    ljm.eWriteName(handle, names["buffer_size"], out_context["buffer_num_bytes"])
+    ljm.eWriteName(handle, names["enable"], 1)
 
     update_stream_out_buffer(handle, out_context)
 
@@ -308,7 +301,13 @@ def print_register_value(handle, register_name):
     value = ljm.eReadName(handle, register_name)
     print("%s = %f" % (register_name, value))
 
-def process_stream_results(iteration, stream_read, in_names):
+def process_stream_results(
+    iteration,
+    stream_read,
+    in_names,
+    device_threshold=0,
+    ljm_threshold=0
+):
     """Print ljm.eStreamRead results and count the number of skipped samples."""
     data = stream_read[0]
     device_num_backlog_scans = stream_read[1]
@@ -321,59 +320,62 @@ def process_stream_results(iteration, stream_read, in_names):
     # reported after auto-recover mode ends.
     num_skipped_samples = data.count(-9999.0)
 
-    print('\neStreamRead %i' % iteration)
+    print("\neStreamRead %i" % iteration)
     result_strs = []
     for index in range(len(in_names)):
-        result_strs.append('%s = %0.5f' % (in_names[index], data[index]))
+        result_strs.append("%s = %0.5f" % (in_names[index], data[index]))
 
     if result_strs:
-        print('  1st scan out of %i: %s' % (num_scans, ", ".join(result_strs)))
+        print("  1st scan out of %i: %s" % (num_scans, ", ".join(result_strs)))
 
-    def print_if_not_equiv_floats(index, a, b, delta=0.01):
-        diff = abs(a - b)
-        if diff > delta:
-            print("index: %d, a: %0.5f, b: %0.5f, diff: %0.5f, delta: %0.5f" % \
-                (index, a, b, diff, delta)
-            )
+    # This is a test to ensure that 2 in channels are synchronized
+    # def print_if_not_equiv_floats(index, a, b, delta=0.01):
+    #     diff = abs(a - b)
+    #     if diff > delta:
+    #         print("index: %d, a: %0.5f, b: %0.5f, diff: %0.5f, delta: %0.5f" % \
+    #             (index, a, b, diff, delta)
+    #         )
 
-    for index in range(0, len(data), 2):
-        print_if_not_equiv_floats(index, data[index], data[index + 1])
+    # for index in range(0, len(data), 2):
+    #     print_if_not_equiv_floats(index, data[index], data[index + 1])
+
+    if num_skipped_samples:
+        "**** Samples skipped = %i (of %i) ****" % \
+            (num_skipped_samples, len(data))
 
     status_strs = []
-    if num_skipped_samples:
-        status_strs.append('Scans skipped = %i' % num_skipped_samples)
-    if device_num_backlog_scans:
-        status_strs.append('Device scan backlog = %i' % device_num_backlog_scans)
-    if ljm_num_backlog_scans:
-        status_strs.append('LJM scan backlog = %i' % ljm_num_backlog_scans)
+    if device_num_backlog_scans > device_threshold:
+        status_strs.append("Device scan backlog = %i" % device_num_backlog_scans)
+    if ljm_num_backlog_scans > ljm_threshold:
+        status_strs.append("LJM scan backlog = %i" % ljm_num_backlog_scans)
 
     if status_strs:
-        status_str = '  ' + ','.join(status_strs)
+        status_str = "  " + ",".join(status_strs)
         print(status_str)
 
     return num_skipped_samples
 
 def prepare_for_exit(handle, stop_stream=True):
     if stop_stream:
-        print('\nStopping Stream')
+        print("\nStopping Stream")
         try:
             ljm.eStreamStop(handle)
         except ljm.LJMError as exception:
-            if exception.errorString != 'STREAM_NOT_RUNNING':
+            if exception.errorString != "STREAM_NOT_RUNNING":
                 raise
 
     ljm.close(handle)
 
 def open_ljm_device(device_type, connection_type, identifier):
     try:
-        handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+        handle = ljm.open(device_type, connection_type, identifier)
 
     except ljm.LJMError:
         print(
-            'Error calling ljm.open(' + \
-            'device_type=' + str(device_type) + ', ' + \
-            'connection_type=' + str(connection_type) + ', ' + \
-            'identifier=' + identifier + ')'
+            "Error calling ljm.open(" + \
+            "device_type=" + str(device_type) + ", " + \
+            "connection_type=" + str(connection_type) + ", " + \
+            "identifier=" + identifier + ")"
         )
         raise
 
@@ -415,6 +417,7 @@ def main(
         print(update_str + str(out_context["state_size"]))
 
     scans_per_read = min([context["state_size"] for context in out_contexts])
+    buffer_status_names = [out["names"]["buffer_status"] for out in out_contexts]
     try:
         scan_list = create_scan_list(in_names=in_names, out_contexts=out_contexts)
         print("scan_list: " + str(scan_list))
@@ -428,10 +431,24 @@ def main(
         iteration = 0
         total_num_skipped_scans = 0
         while iteration < num_cycles:
+
+            buffer_statuses = [0]
+            infinity_preventer = 0
+            while max(buffer_statuses) < out_context["state_size"]:
+                buffer_statuses = ljm.eReadNames(
+                    handle,
+                    len(buffer_status_names),
+                    buffer_status_names
+                )
+                infinity_preventer = infinity_preventer + 1
+                if infinity_preventer > scan_rate:
+                    raise ValueError(
+                        "Buffer statuses don't appear to be updating:" + \
+                        str(buffer_status_names) + str(buffer_statuses)
+                    )
+
             for out_context in out_contexts:
-                bs = ljm.eReadName(handle, out_context["names"]["buffer_status"])
-                if bs >= out_context["state_size"]:
-                    update_stream_out_buffer(handle, out_context)
+                update_stream_out_buffer(handle, out_context)
 
             # ljm.eStreamRead will sleep until data has arrived
             stream_read = ljm.eStreamRead(handle)
@@ -439,9 +456,12 @@ def main(
             num_skipped_scans = process_stream_results(
                 iteration,
                 stream_read,
-                in_names
+                in_names,
+                device_threshold=out_context["state_size"],
+                ljm_threshold=out_context["state_size"]
             )
             total_num_skipped_scans += num_skipped_scans
+
             iteration = iteration + 1
 
     except ljm.LJMError:
