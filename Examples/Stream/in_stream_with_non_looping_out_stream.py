@@ -8,7 +8,7 @@ generated during the call to create_out_context, the values could be
 dynamically generated, read from a file, etc. To convert this example file into
 a program to suit your needs, the primary things you need to do are:
 
-    1. Edit the setup variables
+    1. Edit the global setup variables in this file
     2. Define your own create_out_context function or equivalent
     3. Define your own process_stream_results function or equivalent
 
