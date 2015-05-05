@@ -89,7 +89,7 @@ def listAll(deviceType, connectionType):
     Args:
         deviceType: An integer that filters which devices will be
             returned (labjack.ljm.constants.dtT7,
-            labjack.ljm.constants.dtU3, etc.).
+            labjack.ljm.constants.dtDIGIT, etc.).
             labjack.ljm.constants.dtANY is allowed.
         connectionType: An integer that filters by connection type
             (labjack.ljm.constants.ctUSB, labjack.ljm.constants.ctTCP,
