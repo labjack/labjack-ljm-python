@@ -60,7 +60,7 @@ def generate_state(start, diff, state_size, state_name):
     """Generates a dict that contains a state_name and a list of values."""
     values = []
     increment = float(1) / state_size
-    for iteration in range(state_size):
+    for iteration in range(int(state_size)):
         # Get a value between start + diff
         sample = start + diff * increment * iteration
         values.append(sample)
@@ -194,7 +194,7 @@ def update_stream_out_buffer(handle, out_context):
 
     NUM_HEADER_BYTES = 12
     NUM_BYTES_PER_F32 = 4
-    max_samples = (max_bytes - NUM_HEADER_BYTES) / NUM_BYTES_PER_F32
+    max_samples = int((max_bytes - NUM_HEADER_BYTES) / NUM_BYTES_PER_F32)
 
     start = 0
     while start < len(values):

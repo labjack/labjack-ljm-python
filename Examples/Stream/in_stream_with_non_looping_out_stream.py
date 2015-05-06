@@ -17,9 +17,7 @@ You may also need to configure AIN, etc.
 """
 
 import sys
-
 from labjack import ljm
-
 import ljm_stream_util
 
 
@@ -125,7 +123,7 @@ def main(
             "%(buffer_status)s is greater or equal to " % out_context["names"]
         print(update_str + str(out_context["state_size"]))
 
-    scans_per_read = min([context["state_size"] for context in out_contexts])
+    scans_per_read = int(min([context["state_size"] for context in out_contexts]))
     buffer_status_names = [out["names"]["buffer_status"] for out in out_contexts]
     try:
         scan_list = ljm_stream_util.create_scan_list(
@@ -186,7 +184,7 @@ def main(
 
     ljm_stream_util.prepare_for_exit(handle)
 
-    print "Total number of skipped scans: %d" % total_num_skipped_scans
+    print("Total number of skipped scans: %d" % total_num_skipped_scans)
 
 
 if __name__ == "__main__":

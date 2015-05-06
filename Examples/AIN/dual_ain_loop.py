@@ -5,6 +5,7 @@ Demonstrates reading 2 analog inputs (AINs) in a loop from a LabJack.
 
 from labjack import ljm
 import time
+import sys
 
 # Open first found LabJack
 handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
@@ -31,13 +32,28 @@ for i in range(numFrames):
 numFrames = 2
 names = ["AIN0", "AIN1"]
 
-print("\nStarting read loop.  Press Ctrl+C to stop.")
+s = ""
+if len(sys.argv) > 1:
+    #An argument was passed. The first argument specfies how many times to loop.
+    try:
+        loopAmount = int(sys.argv[1])
+    except:
+        raise Exception("Invalid first argument \"%s\". This specifies how many " \
+                        "times to loop and needs to be a number." % str(sys.argv[1]))
+else:
+    #An argument was not passed. Loop an infinite amount of times.
+    loopAmount = float("inf")
+    s = " Press Ctrl+C to stop."
+
+print("\nStarting %s read loops.%s" % (str(loopAmount), s))
 delay = 1 #delay between readings (in sec)
-while True:
+i = 0
+while i < loopAmount:
     try:
         results = ljm.eReadNames(handle, numFrames, names)
         print("\nAIN0 : %f V, AIN1 : %f V" % (results[0], results[1]))
         time.sleep(delay)
+        i = i + 1
     except KeyboardInterrupt:
         break
     except Exception:

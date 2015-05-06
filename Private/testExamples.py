@@ -4,60 +4,85 @@ Examples that change startup configurations are disabled by default and need
 to be turned on with TEST_WRITES.
 
 """
+from labjack.ljm import LJMError
+import sys
+import os
 
 TEST_WRITES = False
 
-dir = "../Examples/"
+#os.chdir(directoryName)
+#exec(open(fileName).read())
 
-#execfile(dir + "")
-execfile(dir + "eWriteName.py")
-execfile(dir + "eReadName.py")
-execfile(dir + "eWriteNames.py")
-execfile(dir + "eReadNames.py")
-execfile(dir + "eNames.py")
+os.chdir("../Examples/")
+os.chdir("List_All")
 
-execfile(dir + "eWriteAddress.py")
-execfile(dir + "eReadAddress.py")
-execfile(dir + "eWriteAddresses.py")
-execfile(dir + "eReadAddresses.py")
-execfile(dir + "eAddresses.py")
+exec(open("list_all.py").read())
 
-execfile(dir + "/AIN/single_ain.py")
-execfile(dir + "/AIN/single_ain_with_config.py")
+os.chdir("..")
+exec(open("eWriteName.py").read())
+exec(open("eReadName.py").read())
+exec(open("eWriteNames.py").read())
+exec(open("eReadNames.py").read())
+exec(open("eNames.py").read())
 
+exec(open("eWriteAddress.py").read())
+exec(open("eReadAddress.py").read())
+exec(open("eWriteAddresses.py").read())
+exec(open("eReadAddresses.py").read())
+exec(open("eAddresses.py").read())
+
+os.chdir("AIN")
+exec(open("single_ain.py").read())
+exec(open("single_ain_with_config.py").read())
+sys.argv = ["dual_ain_loop.py", "5"]
+exec(open("dual_ain_loop.py").read())
+sys.argv = []
+
+os.chdir("../Config")
 if TEST_WRITES:
-    execfile(dir + "/Config/write_device_name_string.py")
-    execfile(dir + "/Config/write_power_config.py")
-execfile(dir + "/Config/read_config.py")
-execfile(dir + "/Config/read_device_name_string.py")
+    exec(open("write_device_name_string.py").read())
+    exec(open("write_power_config.py").read())
+exec(open("read_config.py").read())
+exec(open("read_device_name_string.py").read())
 
-execfile(dir + "/DIO/single_dio_read.py")
-execfile(dir + "/DIO/single_dio_write.py")
+os.chdir("../DIO")
+exec(open("single_dio_read.py").read())
+exec(open("single_dio_write.py").read())
 
-execfile(dir + "/DIO_EF/dio_ef_config_1_pwm_and_1_counter.py")
+os.chdir("../DIO_EF")
+exec(open("dio_ef_config_1_pwm_and_1_counter.py").read())
 
-execfile(dir + "/Ethernet/read_ethernet_config.py")
-execfile(dir + "/Ethernet/read_ethernet_mac.py")
-execfile(dir + "/Ethernet/write_ethernet_config.py")
+os.chdir("../Ethernet")
+exec(open("read_ethernet_config.py").read())
+exec(open("read_ethernet_mac.py").read())
+exec(open("write_ethernet_config.py").read())
 
-execfile(dir + "/I2C/i2c_eeprom.py")
+os.chdir("../I2C")
+exec(open("i2c_eeprom.py").read())
 
-execfile(dir + "/SPI/spi.py")
+os.chdir("../SPI")
+exec(open("spi.py").read())
 
-execfile(dir + "/Stream/stream_basic.py")
-execfile(dir + "/Stream/o_stream_run.py")
+os.chdir("../Stream")
+exec(open("stream_basic.py").read())
+exec(open("o_stream_run.py").read())
+exec(open("stream_sequential_ain.py").read())
+sys.path.append(".")
+exec(open("in_stream_with_non_looping_out_stream.py").read())
 
-execfile(dir + "/Testing/c-r_speed_test.py")
+os.chdir("../Testing")
+exec(open("c-r_speed_test.py").read())
 
+os.chdir("../Watchdog")
 if TEST_WRITES:
-    execfile(dir + "/Watchdog/write_watchdog_config.py")
-execfile(dir + "/Watchdog/read_watchdog_config.py")
+    exec(open("write_watchdog_config.py").read())
+exec(open("read_watchdog_config.py").read())
 
+os.chdir("../WiFi")
 if TEST_WRITES:
-    execfile(dir + "/WiFi/write_wifi_config.py")
+    exec(open("write_wifi_config.py").read())
+exec(open("read_wifi_config.py").read())
+exec(open("read_wifi_rssi.py").read())
+exec(open("read_wifi_mac.py").read())
 
-execfile(dir + "/WiFi/read_wifi_config.py")
-execfile(dir + "/WiFi/read_wifi_rssi.py")
-execfile(dir + "/WiFi/read_wifi_mac.py")
-
-execfile(dir + "/AIN/dual_ain_loop.py") #Requires ctrl-C, so run last
+print("\n+++ Test Success +++")
