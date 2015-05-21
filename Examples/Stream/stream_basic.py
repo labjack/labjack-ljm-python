@@ -26,18 +26,18 @@ aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
 scanRate = 1000
 scansPerRead = int(scanRate/2)
 
-# Configure the analog inputs' negative channel, range, settling time and
-# resolution.
-# Note when streaming, negative channels and ranges can be configured for
-# individual analog inputs, but the stream has only one settling time and
-# resolution.
-aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US",
-          "STREAM_RESOLUTION_INDEX"]
-aValues = [ljm.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default),
-                                          #0 (default)
-ljm.eWriteNames(handle, len(aNames), aNames, aValues)
-
 try:
+    # Configure the analog inputs' negative channel, range, settling time and
+    # resolution.
+    # Note when streaming, negative channels and ranges can be configured for
+    # individual analog inputs, but the stream has only one settling time and
+    # resolution.
+    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US",
+              "STREAM_RESOLUTION_INDEX"]
+    aValues = [ljm.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default),
+                                              #0 (default)
+    ljm.eWriteNames(handle, len(aNames), aNames, aValues)
+
     # Configure and start stream
     scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
     print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
