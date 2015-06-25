@@ -1,6 +1,9 @@
 Version History
 ---------------
 
+1.0.0 (06/25/2015)
+ - Updated constants and errorcodes to LJM v1.8.6.
+
 0.9.3 (05/21/2015)
  - Updated functions, constants and errorcodes to LJM v1.8.0.
  - Added and updated some examples.
