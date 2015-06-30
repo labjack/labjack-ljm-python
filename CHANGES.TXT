@@ -1,6 +1,9 @@
 Version History
 ---------------
 
+1.0.0 (06/30/2015)
+ - Updated o_stream_run example.
+
 1.0.0 (06/25/2015)
  - Updated constants and errorcodes to LJM v1.8.6.
 

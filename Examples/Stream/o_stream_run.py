@@ -64,6 +64,14 @@ scansPerRead = 60
 # Add the stream out token 4800 to the end
 aScanList.extend([4800])
 
+# Add the scan list outputs to the end of the scan list.
+# STREAM_OUT0 = 4800, STREAM_OUT1 = 4801, etc.
+aScanList.extend([4800]) # STREAM_OUT0
+# If we had more STREAM_OUTs
+# aScanList.extend([4801]) # STREAM_OUT1
+# aScanList.extend([4802]) # STREAM_OUT2
+# etc.
+            
 try:
     # Configure the analog inputs' negative channel, range, settling time and
     # resolution.
