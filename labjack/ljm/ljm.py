@@ -1060,7 +1060,7 @@ def eStreamRead(handle):
 
     Returns:
         A tuple containing:
-        (aData, numSkippedScans, deviceScanBacklog, ljmScanBackLog)
+        (aData, deviceScanBacklog, ljmScanBackLog)
 
         aData: Stream data list with all channels interleaved. It will
             contain scansPerRead*numAddresses values configured from
