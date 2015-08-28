@@ -1,6 +1,9 @@
 Version History
 ---------------
 
+1.0.0 (08/28/2015)
+ - Updated dio_ef_config_1_pwm_and_1_counter example.
+
 1.0.0 (06/30/2015)
  - Updated o_stream_run example.
 
