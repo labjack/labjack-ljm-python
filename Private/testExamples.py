@@ -65,7 +65,7 @@ exec(open("spi.py").read())
 
 os.chdir("../Stream")
 exec(open("stream_basic.py").read())
-exec(open("o_stream_run.py").read())
+exec(open("stream_basic_with_stream_out.py").read())
 exec(open("stream_sequential_ain.py").read())
 sys.path.append(".")
 exec(open("in_stream_with_non_looping_out_stream.py").read())

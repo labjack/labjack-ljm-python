@@ -1,5 +1,5 @@
 LJM Python
-08/28/2015
+12/03/2015
 support@labjack.com
 
 
@@ -10,7 +10,7 @@ library.
 Installation Requirements:
 
 * Windows, Mac OS X, or Linux
-* LJM library: http://labjack.com/support/ljm
+* LJM library: https://labjack.com/support/software/installers/ljm
 * Python 2.5, 2.6, 2.7 and 3.x.
   
 
@@ -40,13 +40,13 @@ module for documentation. For example:
     >>> import labjack.ljm
     >>> help(labjack.ljm.ljm)
 
-LJM library documentation can be found in the LJM User's Guide:
+LJM library documentation can be found here:
 
-    http://labjack.com/support/ljm/users-guide
+    https://labjack.com/support/software/api/ljm
 
-T7 documentation can be found in the T7 datasheet:
+T7 documentation can be found here:
 
-    http://labjack.com/support/datasheets/t7
+    https://labjack.com/support/datasheets/t7
 
 
 License:

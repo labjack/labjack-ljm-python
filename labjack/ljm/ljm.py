@@ -6,6 +6,7 @@ Cross-platform wrapper for the LJM library.
 from labjack.ljm import constants
 from labjack.ljm import errorcodes
 import ctypes
+import sys
 
 
 class LJMError(Exception):
@@ -47,8 +48,6 @@ class LJMError(Exception):
 
 def _loadLibrary():
     """Returns a ctypes pointer to the LJM library."""
-    import sys
-
     try:
         libraryName = None
         try:
@@ -265,6 +264,54 @@ def listAllExtended(deviceType, connectionType, numAddresses, aAddresses, aNumRe
     return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound]), _convertCtypeArrayToList(cBytes[0:(numFound*sumNumRegs*constants.BYTES_PER_REGISTER)])
 
 
+def openAll(deviceType=constants.dtANY, connectionType=constants.ctANY):
+    """Opens zero to labjack.ljm.constants.LIST_ALL_SIZE device
+    connections.
+       
+    Args:
+        deviceType: Filters which devices will be returned
+            (labjack.ljm.constants.dtT7, labjack.ljm.constants.dtDIGIT,
+            etc.). labjack.ljm.constants.dtANY is allowed.
+        connectionType: Filters by connection type
+            (labjack.ljm.constants.ctUSB or
+            labjack.ljm.constants.ctTCP). labjack.ljm.constants.ctANY is
+            allowed.
+
+    Returns:
+        A tuple containing:
+        (numOpened, aHandles, numErrors, aErrors)
+
+        numOpened: The number of devices opened. This will be updated to
+            be between 0 and labjack.ljm.constants.LIST_ALL_SIZE.
+        aHandles: The device connection handles list for which each
+            entry aHandles[i] represents the device connection handle of
+            an opened device. List size is numOpened.
+        numErrors: The number of errors that occurred when attempting to
+            open devices. This will be updated to be between 0 and
+            labjack.ljm.constants.LIST_ALL_SIZE.
+        aErrors: Errors list that occurred when attempting to open
+            devices. List size is numErrors.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cDeviceType = ctypes.c_int32(deviceType)
+    cConnectionType = ctypes.c_int32(connectionType)
+    cNumOpened = ctypes.c_int32(0)
+    cHandles = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+    cNumErrors = ctypes.c_int32(0)
+    cErrors = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
+
+    error = _staticLib.LJM_OpenAll(cDeviceType, cConnectionType, ctypes.byref(cNumOpened), ctypes.byref(cHandles), ctypes.byref(cNumErrors), ctypes.byref(cErrors));
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    numOpened = cNumOpened.value
+    numErrors = cNumErrors.value
+    return numOpened, _convertCtypeArrayToList(cHandles[0:numOpened]), numErrors, _convertCtypeArrayToList(cErrors[0:numErrors])
+
+
 def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
@@ -305,7 +352,7 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     return cHandle.value
 
 
-def open(deviceType=0, connectionType=0, identifier="ANY"):
+def open(deviceType=constants.ctANY, connectionType=constants.ctANY, identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
     Args:
@@ -1112,6 +1159,57 @@ def eStreamStop(handle):
         raise LJMError(error)
     if handle in _g_eStreamDataSize:
         _g_eStreamDataSize[handle]
+
+
+def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
+    """Initializes a stream burst and collects data. This function
+    combines eStreamStart, eStreamRead, and eStreamStop, as well as some
+    other device initialization.
+
+    Args:
+        handle: A valid handle to an open device.
+        numAddresses: The size of aScanList. The number of addresses to
+            scan.
+        aScanList: A list of Modbus addresses to collect samples from,
+            per scan.
+        scanRate: Sets the desired number of scans per second.
+            Upon successful return of this function, gets updated to
+            the actual scan rate that the device scanned at.
+        numScans: The number of scans to collect. This is how many burst
+            scans are collected and may not be zero.
+
+    Returns:
+        A tuple containing:
+        (scanRate, aData)
+
+        scanRate: The actual scan rate that the device scanned at.
+        aData: List of streamed data. Returns all addresses
+            interleaved. This will hold (numScans * numAddresses)
+            values.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        Address configuration such as range, resolution, and
+        differential voltages are handled by writing to the device.
+        Check your device's documentation for which addresses are valid
+        for aScanList and how many burst scans may be collected.
+        This function will block for (numScans / scanRate) seconds or
+        longer.
+
+    """
+    cNumAddresses = ctypes.c_int32(numAddresses)
+    cScanList_p = _convertListToCtypeArray(aScanList, ctypes.c_int32)
+    cScanRate = ctypes.c_double(scanRate)
+    cNumScans = ctypes.c_uint32(numScans)
+    cData = (ctypes.c_double*(numScans*numAddresses))()
+
+    error = _staticLib.LJM_StreamBurst(handle, cNumAddresses, ctypes.byref(cScanList_p), ctypes.byref(cScanRate), cNumScans, ctypes.byref(cData))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cScanRate.value, _convertCtypeArrayToList(cData)
 
 
 def writeRaw(handle, data, numBytes=None):

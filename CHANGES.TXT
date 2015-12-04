@@ -1,6 +1,11 @@
 Version History
 ---------------
 
+1.1.0 (12/03/2015)
+ - Updated functions, constants and errorcodes to LJM v1.9.0.
+ - Updated links in the README.txt and setup.py file.
+ - Renamed o_stream_run example to stream_basic_with_stream_out.
+
 1.0.0 (08/28/2015)
  - Updated dio_ef_config_1_pwm_and_1_counter example.
 

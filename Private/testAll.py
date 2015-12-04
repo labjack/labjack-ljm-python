@@ -36,6 +36,21 @@ for i in range(res[0]):
     print(str((x[i*6]<<24) + (x[i*6 + 1]<<16) + (x[i*6 + 2]<<8) + x[i*6 + 3]) + " " + str((x[i*6 + 4]<<8) + x[i*6 + 5]) + ","),  
 print("")
 
+print("openAll")
+numOpened, aHandles, numErrors, aErrors = ljm.openAll(ljm.constants.ctANY, ljm.constants.ctUSB)
+print("  numOpened = " + str(numOpened) + ", numErrors = " + str(numErrors))
+print("  handles = "),
+for x in aHandles:
+    print(str(x) + ", "),
+print("")
+print("  errors = "),
+for x in aErrors:
+    print(str(x) + ", "),
+print("")
+print("")
+
+ljm.closeAll()
+
 print("open")
 print("")
 h = ljm.open(dev, con)
@@ -151,6 +166,8 @@ print("eNames: " + str(ljm.eNames(h, 3, ["AIN0", "AIN1", "AIN3"], [ljm.constants
 
 print("\n--- Stream tests --------------\n")
 #setStreamCallback(handle, callback, arg)
+print("streamBurst: ")
+print("  " + str(ljm.streamBurst(h, 2, [0, 2], 50, 20)))
 
 print("\n--- Other tests --------------\n")
 
