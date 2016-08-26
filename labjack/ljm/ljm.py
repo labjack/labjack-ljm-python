@@ -264,61 +264,13 @@ def listAllExtended(deviceType, connectionType, numAddresses, aAddresses, aNumRe
     return numFound, _convertCtypeArrayToList(cDevTypes[0:numFound]), _convertCtypeArrayToList(cConnTypes[0:numFound]), _convertCtypeArrayToList(cSerNums[0:numFound]), _convertCtypeArrayToList(cIPAddrs[0:numFound]), _convertCtypeArrayToList(cBytes[0:(numFound*sumNumRegs*constants.BYTES_PER_REGISTER)])
 
 
-def openAll(deviceType=constants.dtANY, connectionType=constants.ctANY):
-    """Opens zero to labjack.ljm.constants.LIST_ALL_SIZE device
-    connections.
-       
-    Args:
-        deviceType: Filters which devices will be returned
-            (labjack.ljm.constants.dtT7, labjack.ljm.constants.dtDIGIT,
-            etc.). labjack.ljm.constants.dtANY is allowed.
-        connectionType: Filters by connection type
-            (labjack.ljm.constants.ctUSB or
-            labjack.ljm.constants.ctTCP). labjack.ljm.constants.ctANY is
-            allowed.
-
-    Returns:
-        A tuple containing:
-        (numOpened, aHandles, numErrors, aErrors)
-
-        numOpened: The number of devices opened. This will be updated to
-            be between 0 and labjack.ljm.constants.LIST_ALL_SIZE.
-        aHandles: The device connection handles list for which each
-            entry aHandles[i] represents the device connection handle of
-            an opened device. List size is numOpened.
-        numErrors: The number of errors that occurred when attempting to
-            open devices. This will be updated to be between 0 and
-            labjack.ljm.constants.LIST_ALL_SIZE.
-        aErrors: Errors list that occurred when attempting to open
-            devices. List size is numErrors.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    """
-    cDeviceType = ctypes.c_int32(deviceType)
-    cConnectionType = ctypes.c_int32(connectionType)
-    cNumOpened = ctypes.c_int32(0)
-    cHandles = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-    cNumErrors = ctypes.c_int32(0)
-    cErrors = (ctypes.c_int32*constants.LIST_ALL_SIZE)()
-
-    error = _staticLib.LJM_OpenAll(cDeviceType, cConnectionType, ctypes.byref(cNumOpened), ctypes.byref(cHandles), ctypes.byref(cNumErrors), ctypes.byref(cErrors));
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
-
-    numOpened = cNumOpened.value
-    numErrors = cNumErrors.value
-    return numOpened, _convertCtypeArrayToList(cHandles[0:numOpened]), numErrors, _convertCtypeArrayToList(cErrors[0:numErrors])
-
-
 def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     """Opens a LabJack device, and returns the device handle.
 
     Args:
         deviceType: A string containing the type of the device to be
             connected, optionally prepended by "LJM_dt". Possible values
-            include "ANY", "T7", and "DIGIT".
+            include "ANY", "T4", "T7", and "DIGIT".
         connectionType: A string containing the type of the connection
             desired, optionally prepended by "LJM_ct". Possible values
             include "ANY", "USB", "TCP", "ETHERNET", and "WIFI".
@@ -357,8 +309,9 @@ def open(deviceType=constants.ctANY, connectionType=constants.ctANY, identifier=
 
     Args:
         deviceType: An integer containing the type of the device to be
-            connected (labjack.ljm.constants.dtT7,
-            labjack.ljm.constants.dtANY, etc.).
+            connected (labjack.ljm.constants.dtT4,
+            labjack.ljm.constants.dtT7, labjack.ljm.constants.dtANY,
+            etc.).
         connectionType: An integer containing the type of connection
             desired (labjack.ljm.constants.ctUSB,
             labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,
@@ -467,6 +420,26 @@ def closeAll():
 
     """
     error = _staticLib.LJM_CloseAll()
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def cleanInfo(infoHandle):
+    """Cleans/deallocates an infoHandle.
+
+    Args:
+        infoHandle: The info handle to clean/deallocate.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Note:
+        Calling cleanInfo on the same handle twice will cause error
+        INVALID_INFO_HANDLE.
+
+    """
+    cInfo = ctypes.c_int32(infoHandle)
+    error = _staticLib.LJM_CleanInfo(cInfo)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -831,6 +804,45 @@ def eWriteNameArray(handle, name, numValues, aValues):
             errAddr = None
         raise LJMError(error, errAddr)
 
+
+### Todo: Implement these ###
+'''
+// Easy Functions: Reading and writing using bytes
+/**
+ * Name: LJM_eReadAddressByteArray, LJM_eReadNameByteArray
+ *       LJM_eWriteAddressByteArray, LJM_eWriteNameByteArray
+ * Desc: Performs a Modbus operation to either read or write a byte array.
+ * Para: Handle, a valid handle to an open device.
+ *       (Address), the address to read an array from or write a byte array to.
+ *       (Name), the register name to read an array from or write a byte array
+ *           to.
+ *       NumBytes, the size of the byte array to read or write.
+ *       aBytes, a byte array of size NumBytes that represents the values to
+ *           write from or read to.
+ *       ErrorAddress, a pointer to an integer, which in the case of a relevant
+ *           error, gets updated to contain the device-reported address that
+ *           caused an error.
+ * Note: These functions will append a 0x00 byte to aBytes for odd-numbered
+ *       NumBytes.
+ * Note: If NumBytes is large enough, these functions will automatically split
+ *       writes and reads into multiple packets based on:
+ *       1. The current device's effective data packet size
+ *       2. Whether Address/Name is a buffer register or not
+ * Note: These functions will treat all of aBytes as either buffer data or
+ *       as non-buffer data based on whether Address/Name is a buffer register.
+ *       This means that you cannot begin writing to a non-buffer register and
+ *       write into a buffer register.
+**/
+LJM_ERROR_RETURN LJM_eReadAddressByteArray(int Handle, int Address,
+	int NumBytes, char * aBytes, int * ErrorAddress);
+LJM_ERROR_RETURN LJM_eReadNameByteArray(int Handle, const char * Name,
+	int NumBytes, char * aBytes, int * ErrorAddress);
+
+LJM_ERROR_RETURN LJM_eWriteAddressByteArray(int Handle, int Address,
+	int NumBytes, const char * aBytes, int * ErrorAddress);
+LJM_ERROR_RETURN LJM_eWriteNameByteArray(int Handle, const char * Name,
+	int NumBytes, const char * aBytes, int * ErrorAddress);
+'''
 
 def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
     """Performs Modbus operations that reads/writes values to a device.
@@ -1705,6 +1717,11 @@ def tcVoltsToTemp(tcType, tcVolts, cjTempK):
     Raises:
         LJMError: An error was returned from the LJM library call.
 
+    Notes:
+        B-type measurements below ~373 degrees Kelvin or ~0.04
+        millivolts (at a cold junction junction temperature of 273.15
+        degrees Kelvin) may be inaccurate.
+
     """
     cTCType = ctypes.c_int32(tcType)
     cTCVolts = ctypes.c_double(tcVolts)
@@ -1719,8 +1736,8 @@ def tcVoltsToTemp(tcType, tcVolts, cjTempK):
 
 
 def float32ToByteArray(aFLOAT32, registerOffset=0, numFLOAT32=None, aBytes=None):
-    """Converts a list of values from 32-bit floats to bytes, performing
-    automatic endian conversions if necessary.
+    """Converts a list of values from 32-bit floats to bytes
+    (big-endian).
 
     Args:
         aFLOAT32: The list of 32-bit float values to be converted.
@@ -1752,8 +1769,8 @@ def float32ToByteArray(aFLOAT32, registerOffset=0, numFLOAT32=None, aBytes=None)
 
 
 def byteArrayToFLOAT32(aBytes, registerOffset=0, numFLOAT32=None, aFLOAT32=None):
-    """Converts a list of values from bytes to 32-bit floats, performing
-    automatic endian conversions if necessary.
+    """Converts a list of values from bytes (big-endian) to 32-bit
+    floats.
 
     Args:
         aBytes: The bytes to be converted.
@@ -1786,8 +1803,8 @@ def byteArrayToFLOAT32(aBytes, registerOffset=0, numFLOAT32=None, aFLOAT32=None)
 
 
 def uint16ToByteArray(aUINT16, registerOffset=0, numUINT16=None, aBytes=None):
-    """Converts a list of values from 16-bit unsigned integers to bytes,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from 16-bit unsigned integers to bytes
+    (big-endian).
 
     Args:
         aUINT16: The list of 16-bit unsigned integer values to be
@@ -1820,8 +1837,8 @@ def uint16ToByteArray(aUINT16, registerOffset=0, numUINT16=None, aBytes=None):
 
 
 def byteArrayToUINT16(aBytes, registerOffset=0, numUINT16=None, aUINT16=None):
-    """Converts a list of values from bytes to 16-bit unsigned integers,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from bytes (big-endian) to 16-bit
+    unsigned integers.
 
     Args:
         aBytes: The bytes to be converted.
@@ -1854,8 +1871,8 @@ def byteArrayToUINT16(aBytes, registerOffset=0, numUINT16=None, aUINT16=None):
 
 
 def uint32ToByteArray(aUINT32, registerOffset=0, numUINT32=None, aBytes=None):
-    """Converts a list of values from 32-bit unsigned integers to bytes,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from 32-bit unsigned integers to bytes
+    (big-endian).
 
     Args:
         aUINT32: The list of 32-bit unsigned integer values to be
@@ -1889,8 +1906,8 @@ def uint32ToByteArray(aUINT32, registerOffset=0, numUINT32=None, aBytes=None):
 
 
 def byteArrayToUINT32(aBytes, registerOffset=0, numUINT32=None, aUINT32=None):
-    """Converts a list of values from bytes to 32-bit unsigned integers,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from bytes (big-endian) to 32-bit
+    unsigned integers.
 
     Args:
         aBytes: The bytes to be converted.
@@ -1924,8 +1941,8 @@ def byteArrayToUINT32(aBytes, registerOffset=0, numUINT32=None, aUINT32=None):
 
 
 def int32ToByteArray(aINT32, registerOffset=0, numINT32=None, aBytes=None):
-    """Converts a list of values from 32-bit signed integers to bytes,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from 32-bit signed integers to bytes
+    (big-endian).
 
     Args:
         aINT32: The list of 32-bit signed integer values to be
@@ -1959,8 +1976,8 @@ def int32ToByteArray(aINT32, registerOffset=0, numINT32=None, aBytes=None):
 
 
 def byteArrayToINT32(aBytes, registerOffset=0, numINT32=None, aINT32=None):
-    """Converts a list of values from bytes to 32-bit signed integers,
-    performing automatic endian conversions if necessary.
+    """Converts a list of values from bytes (big-endian) to 32-bit
+    signed integers.
 
     Args:
         aBytes: The bytes to be converted.
@@ -2221,6 +2238,29 @@ def loadConfigurationFile(fileName):
         raise LJMError(error)
 
 
+### Todo: Implement this ###
+'''
+/**
+ * Desc: Get information about whether the specific IPs file was parsed
+ *       successfully. (See LJM_SPECIFIC_IPS_FILE)
+ * Para: InfoHandle, a handle to Info that should be passed to LJM_CleanInfo
+ *           after Info has been read.
+ *       Info, a pointer to a JSON char * (allocated by LJM) describing the
+ *           state of the specific IPs. Semantics:
+ *           {
+ *               "errorCode": Integer LJME_ error code. 0 indicates no error
+ *               "IPs": Array of strings - the presentation-format IPs
+ *               "message": Human-readable string description of success/failure
+ *               "filePath": String absolute or relative file path
+ *               "invalidIPs": Array of strings - the unparsable lines
+ *           }
+ * Retr: An error code indicating whether or not the Specific IP file was parsed
+ *       successfully. This may be LJME_CONFIG_PARSING_ERROR even if some
+ *       addresses in the Specific IP file were parsed without error.
+**/
+LJM_ERROR_RETURN LJM_GetSpecificIPsInfo(int * InfoHandle, const char ** Info);
+'''
+
 def log(level, string):
     """Sends a message of the specified level to the LJM debug logger.
 
@@ -2266,3 +2306,22 @@ def _convertListToCtypeArray(li, cType):
 def _convertCtypeArrayToList(listCtype):
     """Returns a normal list from a ctypes list."""
     return [i for i in listCtype]
+
+
+### Todo: Maybe implement ###
+'''
+typedef void (*LJM_DeviceReconnectCallback)(int);
+
+/**
+ * Desc: Associate a callback function to a device handle that will be called
+ *       after 2 conditions are met:
+ *       1. The device is found to be disconnected, resulting in a read/write
+ *          error
+ *       2. The device is found to be reconnected
+ * Para: Handle, a valid handle to an open device.
+ *       Callback, the callback function which will receive the device Handle
+ *           as a parameter.
+**/
+LJM_ERROR_RETURN LJM_RegisterDeviceReconnectCallback(int Handle,
+	LJM_DeviceReconnectCallback Callback);
+'''
