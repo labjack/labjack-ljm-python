@@ -2,7 +2,6 @@
 Cross-platform wrapper for the LJM library.
 
 """
-
 from labjack.ljm import constants
 from labjack.ljm import errorcodes
 import ctypes
@@ -52,15 +51,15 @@ def _loadLibrary():
         libraryName = None
         try:
             if(sys.platform.startswith("win32") or sys.platform.startswith("cygwin")):
-                #Windows
+                # Windows
                 libraryName = "LabJackM.dll"
             if(sys.platform.startswith("linux")):
-                #Linux
+                # Linux
                 libraryName = "libLabJackM.so"
             if(sys.platform.startswith("darwin")):
-                #Mac OS X
+                # Mac OS X
                 libraryName = "libLabJackM.dylib"
-            
+
             if libraryName is not None:
                 if libraryName == "LabJackM.dll" and sys.platform.startswith("win32"):
                     return ctypes.WinDLL(libraryName)
@@ -68,10 +67,10 @@ def _loadLibrary():
                     return ctypes.CDLL(libraryName)
         except Exception:
             e = sys.exc_info()[1]
-            raise LJMError(errorString = "Cannot load the LJM library " + str(libraryName) + ". " + str(e))
+            raise LJMError(errorString="Cannot load the LJM library "+str(libraryName)+". "+str(e))
 
-        #Unsupported operating system
-        raise LJMError(errorString = "Cannot load the LJM library. Unsupported platform " + sys.platform + ".")
+        # Unsupported operating system
+        raise LJMError(errorString="Cannot load the LJM library. Unsupported platform "+sys.platform+".")
     except LJMError:
         ljme = sys.exc_info()[1]
         print(str(type(ljme)) + ": " + str(ljme))
@@ -211,7 +210,7 @@ def listAllExtended(deviceType, connectionType, numAddresses, aAddresses, aNumRe
         aNumRegs: List of the number of registers to query for each
             address. Each aNumRegs[i] corresponds to aAddresses[i].
         maxNumFound: The maximum number of devices to find.
- 
+
     Returns:
         A tuple containing:
         (numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers,
@@ -299,7 +298,7 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
 
     error = _staticLib.LJM_OpenS(deviceType.encode("ascii"), connectionType.encode("ascii"), identifier.encode("ascii"), ctypes.byref(cHandle))
     if error != errorcodes.NOERROR:
-       raise LJMError(error)
+        raise LJMError(error)
 
     return cHandle.value
 
@@ -339,7 +338,7 @@ def open(deviceType=constants.ctANY, connectionType=constants.ctANY, identifier=
 
     error = _staticLib.LJM_Open(cDev, cConn, identifier.encode("ascii"), ctypes.byref(cHandle))
     if error != errorcodes.NOERROR:
-       raise LJMError(error)
+        raise LJMError(error)
 
     return cHandle.value
 
@@ -603,7 +602,7 @@ def eReadNames(handle, numFrames, aNames):
             raise TypeError("Expected a string list but found an item " + str(type(x)) + ".")
         asciiNames.append(x.encode("ascii"))
     cNames = _convertListToCtypeArray(asciiNames, ctypes.c_char_p)
-    cVals =  (ctypes.c_double*numFrames)()
+    cVals = (ctypes.c_double*numFrames)()
     cErrorAddr = ctypes.c_int32(-1)
 
     error = _staticLib.LJM_eReadNames(handle, cNumFrames, cNames, ctypes.byref(cVals), ctypes.byref(cErrorAddr))
@@ -685,7 +684,7 @@ def eWriteNames(handle, numFrames, aNames, aValues):
 
 def eReadAddressArray(handle, address, dataType, numValues):
     """Performs Modbus operations that reads values from a device.
-    
+
     Args:
         handle: A valid handle to an open device.
         address: The address to read an array from.
@@ -717,7 +716,7 @@ def eReadAddressArray(handle, address, dataType, numValues):
 
 def eReadNameArray(handle, name, numValues):
     """Performs Modbus operations that reads values from a device.
-    
+
     Args:
         handle: A valid handle to an open device.
         name: The register name to read an array from.
@@ -749,7 +748,7 @@ def eReadNameArray(handle, name, numValues):
 
 def eWriteAddressArray(handle, address, dataType, numValues, aValues):
     """Performs Modbus operations that writes values to a device.
-    
+
     Args:
         handle: A valid handle to an open device.
         address: The address to write an array to.
@@ -778,7 +777,7 @@ def eWriteAddressArray(handle, address, dataType, numValues, aValues):
 
 def eWriteNameArray(handle, name, numValues, aValues):
     """Performs Modbus operations that writes values to a device.
-    
+
     Args:
         handle: A valid handle to an open device.
         name: The register name to write an array to.
@@ -834,15 +833,16 @@ def eWriteNameArray(handle, name, numValues, aValues):
  *       write into a buffer register.
 **/
 LJM_ERROR_RETURN LJM_eReadAddressByteArray(int Handle, int Address,
-	int NumBytes, char * aBytes, int * ErrorAddress);
+    int NumBytes, char * aBytes, int * ErrorAddress);
 LJM_ERROR_RETURN LJM_eReadNameByteArray(int Handle, const char * Name,
-	int NumBytes, char * aBytes, int * ErrorAddress);
+    int NumBytes, char * aBytes, int * ErrorAddress);
 
 LJM_ERROR_RETURN LJM_eWriteAddressByteArray(int Handle, int Address,
-	int NumBytes, const char * aBytes, int * ErrorAddress);
+    int NumBytes, const char * aBytes, int * ErrorAddress);
 LJM_ERROR_RETURN LJM_eWriteNameByteArray(int Handle, const char * Name,
-	int NumBytes, const char * aBytes, int * ErrorAddress);
+    int NumBytes, const char * aBytes, int * ErrorAddress);
 '''
+
 
 def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
     """Performs Modbus operations that reads/writes values to a device.
@@ -987,7 +987,7 @@ def eReadNameString(handle, name):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
 
-    error = _staticLib.LJM_eReadNameString(handle, name.encode("ascii"), outStr);
+    error = _staticLib.LJM_eReadNameString(handle, name.encode("ascii"), outStr)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1013,7 +1013,7 @@ def eReadAddressString(handle, address):
     cAddr = ctypes.c_int32(address)
     outStr = ("\0"*constants.STRING_ALLOCATION_SIZE).encode("ascii")
 
-    error = _staticLib.LJM_eReadAddressString(handle, cAddr, outStr);
+    error = _staticLib.LJM_eReadAddressString(handle, cAddr, outStr)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1040,7 +1040,7 @@ def eWriteNameString(handle, name, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_eWriteNameString(handle, name.encode("ascii"), string.encode("ascii"));
+    error = _staticLib.LJM_eWriteNameString(handle, name.encode("ascii"), string.encode("ascii"))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1064,12 +1064,14 @@ def eWriteAddressString(handle, address, string):
     if not isinstance(string, str):
         raise TypeError("Expected a string instead of " + str(type(string)) + ".")
 
-    error = _staticLib.LJM_eWriteAddressString(handle, cAddr, string.encode("ascii"));
+    error = _staticLib.LJM_eWriteAddressString(handle, cAddr, string.encode("ascii"))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
 
 _g_eStreamDataSize = {}
+
+
 def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
     """Initializes a stream object and begins streaming. This includes
        creating a buffer in LJM that collects data from the device.
@@ -1140,14 +1142,14 @@ def eStreamRead(handle):
             the aData size cannot be determined.
 
     """
-    #May need to change to optimize
+    # May need to change to optimize
     if handle not in _g_eStreamDataSize:
-        raise LJMError(errorString = "Streaming has not been started for the given handle. Please call eStreamStart first.")
+        raise LJMError(errorString="Streaming has not been started for the given handle. Please call eStreamStart first.")
     cData = (ctypes.c_double*_g_eStreamDataSize[handle])()
     cD_SBL = ctypes.c_int32(0)
     cLJM_SBL = ctypes.c_int32(0)
 
-    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL));
+    error = _staticLib.LJM_eStreamRead(handle, ctypes.byref(cData), ctypes.byref(cD_SBL), ctypes.byref(cLJM_SBL))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1529,7 +1531,7 @@ def addressesToTypes(numAddresses, aAddresses):
     cAddrs = _convertListToCtypeArray(aAddresses, ctypes.c_int32)
     cTypes = (ctypes.c_int32*numAddresses)()
 
-    error = _staticLib.LJM_AddressesToTypes(cNumAddrs, ctypes.byref(cAddrs), ctypes.byref(cTypes));
+    error = _staticLib.LJM_AddressesToTypes(cNumAddrs, ctypes.byref(cAddrs), ctypes.byref(cTypes))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -1608,7 +1610,7 @@ def lookupConstantName(scope, constantValue):
         raise TypeError("Expected a string instead of " + str(type(scope)) + ".")
     cConstVal = ctypes.c_double(constantValue)
     cConstName = ("\0"*constants.MAX_NAME_SIZE).encode("ascii")
-    
+
     error = _staticLib.LJM_LookupConstantName(scope.encode("ascii"), cConstVal, cConstName)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
@@ -2056,7 +2058,7 @@ def ipToNumber(ipv4String):
         ipv4String += "\0"*(constants.IPv4_STRING_SIZE-len(ipv4String))
     cNum = ctypes.c_uint32(0)
 
-    error = _staticLib.LJM_IPToNumber(ipv4String.encode("ascii"), ctypes.byref(cNum));
+    error = _staticLib.LJM_IPToNumber(ipv4String.encode("ascii"), ctypes.byref(cNum))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
@@ -2232,7 +2234,7 @@ def loadConfigurationFile(fileName):
     """
     if not isinstance(fileName, str):
         raise TypeError("Expected a string instead of " + str(type(fileName)) + ".")
-    
+
     error = _staticLib.LJM_LoadConfigurationFile(fileName.encode("ascii"))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
@@ -2260,6 +2262,7 @@ def loadConfigurationFile(fileName):
 **/
 LJM_ERROR_RETURN LJM_GetSpecificIPsInfo(int * InfoHandle, const char ** Info);
 '''
+
 
 def log(level, string):
     """Sends a message of the specified level to the LJM debug logger.
