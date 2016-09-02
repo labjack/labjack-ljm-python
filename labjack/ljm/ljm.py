@@ -284,7 +284,7 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
         TypeError: deviceType or connectionType are not strings.
         LJMError: An error was returned from the LJM library call.
 
-    Notes:
+    Note:
         Args are not case-sensitive, and empty strings indicate the
         same thing as "LJM_xxANY".
 
@@ -804,44 +804,170 @@ def eWriteNameArray(handle, name, numValues, aValues):
         raise LJMError(error, errAddr)
 
 
-### Todo: Implement these ###
-'''
-// Easy Functions: Reading and writing using bytes
-/**
- * Name: LJM_eReadAddressByteArray, LJM_eReadNameByteArray
- *       LJM_eWriteAddressByteArray, LJM_eWriteNameByteArray
- * Desc: Performs a Modbus operation to either read or write a byte array.
- * Para: Handle, a valid handle to an open device.
- *       (Address), the address to read an array from or write a byte array to.
- *       (Name), the register name to read an array from or write a byte array
- *           to.
- *       NumBytes, the size of the byte array to read or write.
- *       aBytes, a byte array of size NumBytes that represents the values to
- *           write from or read to.
- *       ErrorAddress, a pointer to an integer, which in the case of a relevant
- *           error, gets updated to contain the device-reported address that
- *           caused an error.
- * Note: These functions will append a 0x00 byte to aBytes for odd-numbered
- *       NumBytes.
- * Note: If NumBytes is large enough, these functions will automatically split
- *       writes and reads into multiple packets based on:
- *       1. The current device's effective data packet size
- *       2. Whether Address/Name is a buffer register or not
- * Note: These functions will treat all of aBytes as either buffer data or
- *       as non-buffer data based on whether Address/Name is a buffer register.
- *       This means that you cannot begin writing to a non-buffer register and
- *       write into a buffer register.
-**/
-LJM_ERROR_RETURN LJM_eReadAddressByteArray(int Handle, int Address,
-    int NumBytes, char * aBytes, int * ErrorAddress);
-LJM_ERROR_RETURN LJM_eReadNameByteArray(int Handle, const char * Name,
-    int NumBytes, char * aBytes, int * ErrorAddress);
+def eReadAddressByteArray(handle, address, numBytes):
+    """Performs a Modbus operation to read a byte array.
 
-LJM_ERROR_RETURN LJM_eWriteAddressByteArray(int Handle, int Address,
-    int NumBytes, const char * aBytes, int * ErrorAddress);
-LJM_ERROR_RETURN LJM_eWriteNameByteArray(int Handle, const char * Name,
-    int NumBytes, const char * aBytes, int * ErrorAddress);
-'''
+    Args:
+        handle: A valid handle to an open device.
+        address: The address to read an array from.
+        numValues: The size of the array to read.
+
+    Returns:
+        A list of size numValues with the read byte values.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        This function will append a 0x00 byte to aBytes for
+        odd-numbered numBytes.
+        If numBytes is large enough, this function will automatically
+        split reads into multiple packets based on:
+            1. The current device's effective data packet size.
+            2. Whether address/name is a buffer register or not.
+        This function will treat all of aBytes as either buffer data or
+        as non-buffer data based on whether address/name is a buffer
+        register. This means that you cannot begin writing to a
+        non-buffer register and write into a buffer register.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cNumBytes = ctypes.c_int32(numBytes)
+    cBytes = (ctypes.c_ubyte*numBytes)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadAddressByteArray(handle, cAddr, cNumBytes, ctypes.byref(cBytes), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cBytes)
+
+
+def eReadNameByteArray(handle, name, numBytes):
+    """Performs a Modbus operation to read a byte array.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: The register name to read an array from.
+        numValues: The size of the array to read.
+
+    Returns:
+        A list of size numValues with the read byte values.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        This function will append a 0x00 byte to aBytes for
+        odd-numbered numBytes.
+        If numBytes is large enough, this function will automatically
+        split reads into multiple packets based on:
+            1. The current device's effective data packet size
+            2. Whether address/name is a buffer register or not
+        This function will treat all of aBytes as either buffer data or
+        as non-buffer data based on whether address/name is a buffer
+        register. This means that you cannot begin writing to a
+        non-buffer register and write into a buffer register.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cNumBytes = ctypes.c_int32(numBytes)
+    cBytes = (ctypes.c_ubyte*numBytes)()
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eReadNameByteArray(handle, name.encode("ascii"), cNumBytes, ctypes.byref(cBytes), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+    return _convertCtypeArrayToList(cBytes)
+
+
+def eWriteAddressByteArray(handle, address, numBytes, aBytes):
+    """Performs a Modbus operation to write a byte array.
+
+    Args:
+        handle: A valid handle to an open device.
+        address: The register address to write a byte array to.
+        numValues: The size of the array to write.
+        aBytes: List of byte values to write. This list needs to be at
+            least size numValues.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        This function will append a 0x00 byte to aBytes for
+        odd-numbered numBytes.
+        If numBytes is large enough, this function will automatically
+        split writes into multiple packets based on:
+            1. The current device's effective data packet size.
+            2. Whether address/name is a buffer register or not.
+        This function will treat all of aBytes as either buffer data or
+        as non-buffer data based on whether address/name is a buffer
+        register. This means that you cannot begin writing to a
+        non-buffer register and write into a buffer register.
+
+    """
+    cAddr = ctypes.c_int32(address)
+    cNumBytes = ctypes.c_int32(numBytes)
+    cBytes = _convertListToCtypeArray(aBytes, ctypes.c_ubyte)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteAddressByteArray(handle, cAddr, cNumBytes, ctypes.byref(cBytes), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
+
+
+def eWriteNameByteArray(handle, name, numBytes, aBytes):
+    """Performs a Modbus operation to write a byte array.
+
+    Args:
+        handle: A valid handle to an open device.
+        name: The register name to write an array to.
+        numValues: The size of the array to write.
+        aBytes: List of byte values to write. This list needs to be at
+            least size numValues.
+
+    Raises:
+        TypeError: name is not a string.
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        This function will append a 0x00 byte to aBytes for
+        odd-numbered numBytes.
+        If numBytes is large enough, this function will automatically
+        split writes into multiple packets based on:
+            1. The current device's effective data packet size
+            2. Whether address/name is a buffer register or not
+        This function will treat all of aBytes as either buffer data or
+        as non-buffer data based on whether address/name is a buffer
+        register. This means that you cannot begin writing to a
+        non-buffer register and write into a buffer register.
+
+    """
+    if not isinstance(name, str):
+        raise TypeError("Expected a string instead of " + str(type(name)) + ".")
+    cNumBytes = ctypes.c_int32(numBytes)
+    cBytes = _convertListToCtypeArray(aBytes, ctypes.c_ubyte)
+    cErrorAddr = ctypes.c_int32(-1)
+
+    error = _staticLib.LJM_eWriteNameByteArray(handle, name.encode("ascii"), cNumBytes, ctypes.byref(cBytes), ctypes.byref(cErrorAddr))
+    if error != errorcodes.NOERROR:
+        errAddr = cErrorAddr.value
+        if errAddr == -1:
+            errAddr = None
+        raise LJMError(error, errAddr)
 
 
 def eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues):
