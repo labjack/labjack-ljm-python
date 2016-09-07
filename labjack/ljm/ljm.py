@@ -2,10 +2,11 @@
 Cross-platform wrapper for the LJM library.
 
 """
-from labjack.ljm import constants
-from labjack.ljm import errorcodes
 import ctypes
 import sys
+
+from labjack.ljm import constants
+from labjack.ljm import errorcodes
 
 
 class LJMError(Exception):
@@ -2366,28 +2367,40 @@ def loadConfigurationFile(fileName):
         raise LJMError(error)
 
 
-### Todo: Implement this ###
-'''
-/**
- * Desc: Get information about whether the specific IPs file was parsed
- *       successfully. (See LJM_SPECIFIC_IPS_FILE)
- * Para: InfoHandle, a handle to Info that should be passed to LJM_CleanInfo
- *           after Info has been read.
- *       Info, a pointer to a JSON char * (allocated by LJM) describing the
- *           state of the specific IPs. Semantics:
- *           {
- *               "errorCode": Integer LJME_ error code. 0 indicates no error
- *               "IPs": Array of strings - the presentation-format IPs
- *               "message": Human-readable string description of success/failure
- *               "filePath": String absolute or relative file path
- *               "invalidIPs": Array of strings - the unparsable lines
- *           }
- * Retr: An error code indicating whether or not the Specific IP file was parsed
- *       successfully. This may be LJME_CONFIG_PARSING_ERROR even if some
- *       addresses in the Specific IP file were parsed without error.
-**/
-LJM_ERROR_RETURN LJM_GetSpecificIPsInfo(int * InfoHandle, const char ** Info);
-'''
+def getSpecificIPsInfo():
+    """Get information about whether the specific IPs file was parsed
+    successfully.
+
+    Returns:
+        A tuple containing:
+        (infoHandle, info)
+
+        infoHandle: A handle to info that should be passed to cleanInfo
+            after info has been read.
+        info: A JSON string (allocated by LJM) describing the state of
+            of the specific IPs. Semantics:
+            {
+                "errorCode": Integer LJME_ error code. 0 indicates no
+                    error.
+                "IPs": Array of strings - the presentation-format IPs.
+                "message": Human-readable string description of
+                    success/failure.
+                "filePath": String absolute or relative file path.
+                "invalidIPs": Array of strings - the unparsable lines.
+            }
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cInfoHandle = ctypes.c_int32(0)
+    cInfo = ctypes.c_char_p()
+
+    error = _staticLib.LJM_GetSpecificIPsInfo(ctypes.byref(cInfoHandle), ctypes.byref(cInfo))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cInfoHandle.value, cInfo.value.decode("ascii")
 
 
 def log(level, string):
@@ -2435,22 +2448,3 @@ def _convertListToCtypeArray(li, cType):
 def _convertCtypeArrayToList(listCtype):
     """Returns a normal list from a ctypes list."""
     return [i for i in listCtype]
-
-
-### Todo: Maybe implement ###
-'''
-typedef void (*LJM_DeviceReconnectCallback)(int);
-
-/**
- * Desc: Associate a callback function to a device handle that will be called
- *       after 2 conditions are met:
- *       1. The device is found to be disconnected, resulting in a read/write
- *          error
- *       2. The device is found to be reconnected
- * Para: Handle, a valid handle to an open device.
- *       Callback, the callback function which will receive the device Handle
- *           as a parameter.
-**/
-LJM_ERROR_RETURN LJM_RegisterDeviceReconnectCallback(int Handle,
-	LJM_DeviceReconnectCallback Callback);
-'''

@@ -36,21 +36,6 @@ for i in range(res[0]):
     print(str((x[i*6]<<24) + (x[i*6 + 1]<<16) + (x[i*6 + 2]<<8) + x[i*6 + 3]) + " " + str((x[i*6 + 4]<<8) + x[i*6 + 5]) + ","),  
 print("")
 
-print("openAll")
-numOpened, aHandles, numErrors, aErrors = ljm.openAll(ljm.constants.ctANY, ljm.constants.ctUSB)
-print("  numOpened = " + str(numOpened) + ", numErrors = " + str(numErrors))
-print("  handles = "),
-for x in aHandles:
-    print(str(x) + ", "),
-print("")
-print("  errors = "),
-for x in aErrors:
-    print(str(x) + ", "),
-print("")
-print("")
-
-ljm.closeAll()
-
 print("open")
 print("")
 h = ljm.open(dev, con)
@@ -164,6 +149,19 @@ print("eWriteNames (" + str(aNam) + " " + str(aVal1) + "): " + str(ljm.eWriteNam
 print("eReadNames:" + str(ljm.eReadNames(h, 2, ["AIN0", "AIN1"])))
 print("eNames: " + str(ljm.eNames(h, 3, ["AIN0", "AIN1", "AIN3"], [ljm.constants.READ, ljm.constants.READ, ljm.constants.READ], [1, 2, 1], [0, 0, 0, 0])))
 
+print("\n--- Byte Array tests --------------\n")
+
+address = 55120
+name = "TEST_UINT32"
+arr = [1, 2, 3, 8]
+print("eWriteAddressByteArray: " + str(address) + " " + str(arr))
+ljm.eWriteAddressByteArray(h, address, 4, arr)
+print("eReadAddressByteArray: " + str(address) + " " + str(ljm.eReadAddressByteArray(h, address, 4)))
+arr = [5, 8, 9, 55]
+print("eWriteNameByteArray: " + name + " " + str(arr))
+ljm.eWriteNameByteArray(h, name, 4, arr)
+print("eReadNameByteArray: " + name + " " + str(ljm.eReadNameByteArray(h, name, 4)))
+
 print("\n--- Stream tests --------------\n")
 #setStreamCallback(handle, callback, arg)
 print("streamBurst: ")
@@ -249,4 +247,13 @@ jsonStr = "{\"address\":0, \"name\":\"AIN#(0:254)\", \"type\":\"FLOAT32\", \"dev
    "{\"address\":1000, \"name\":\"DAC#(0:1)\", \"type\":\"FLOAT32\", \"devices\":[\"U3\", \"U6\", \"T7\", \"UE9\"], \"readwrite\":\"RW\", \"tags\":[\"DAC\"], \"displayname\":[\"Analog Out #\"], \"description\":\"Pass a voltage for the specified analog output.\"},\n";
 print("\nloadConstantsFromString \n" + jsonStr)
 ljm.loadConstantsFromString(jsonStr)
+
+
+print("getSpecificIPsInfo:")
+(infoHandle, info) = ljm.getSpecificIPsInfo()
+print("  " + str(infoHandle))
+print("  " + str(info))
+print("cleanInfo")
+ljm.cleanInfo(infoHandle)
+
 print("\n----- Test End ----------------\n")
