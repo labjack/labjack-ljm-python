@@ -153,11 +153,11 @@ print("\n--- Byte Array tests --------------\n")
 
 address = 55120
 name = "TEST_UINT32"
-arr = [1, 2, 3, 8]
+arr = [1, 255, 80, 233]
 print("eWriteAddressByteArray: " + str(address) + " " + str(arr))
 ljm.eWriteAddressByteArray(h, address, 4, arr)
 print("eReadAddressByteArray: " + str(address) + " " + str(ljm.eReadAddressByteArray(h, address, 4)))
-arr = [5, 8, 9, 55]
+arr = [200, 8, 500, 55]
 print("eWriteNameByteArray: " + name + " " + str(arr))
 ljm.eWriteNameByteArray(h, name, 4, arr)
 print("eReadNameByteArray: " + name + " " + str(ljm.eReadNameByteArray(h, name, 4)))
