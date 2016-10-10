@@ -2,8 +2,8 @@ Version History
 ---------------
 
 1.14.0 (XX/XX/XXXX)
- - Updated functions, constants and errorcodes to LJM v1.14.0.
- - Matching Java wrapper version with the LJM version.
+ - Updated functions, constants and errorcodes to LJM v1.14.01.
+ - Matching Python wrapper version with the LJM version.
  - Added T4 examples.
 
 1.1.0 (12/03/2015)
