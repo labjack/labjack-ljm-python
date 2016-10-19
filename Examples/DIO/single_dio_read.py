@@ -2,8 +2,8 @@
 Demonstrates how to read a single digital input/output.
 
 """
-
 from labjack import ljm
+
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier

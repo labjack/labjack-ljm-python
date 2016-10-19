@@ -2,9 +2,11 @@
 Demonstrates reading 2 analog inputs (AINs) in a loop from a LabJack.
 
 """
-from labjack import ljm
 import sys
 import time
+
+from labjack import ljm
+
 
 loopMessage = ""
 if len(sys.argv) > 1:

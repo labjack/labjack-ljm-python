@@ -4,6 +4,7 @@ Demonstrates how to use the labjack.ljm.eAddresses (LJM_eAddresses) function.
 """
 from labjack import ljm
 
+
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier

@@ -2,8 +2,10 @@
 Demonstrates how to read the ethernet MAC from a LabJack.
 
 """
-from labjack import ljm
 import struct
+
+from labjack import ljm
+
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
