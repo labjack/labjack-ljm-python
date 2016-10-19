@@ -1118,7 +1118,7 @@ def eReadNameString(handle, name):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(outStr.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(outStr)
 
 
 def eReadAddressString(handle, address):
@@ -1144,7 +1144,7 @@ def eReadAddressString(handle, address):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(outStr.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(outStr)
 
 
 def eWriteNameString(handle, name, string):
@@ -1742,7 +1742,7 @@ def lookupConstantName(scope, constantValue):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(cConstName.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(cConstName)
 
 
 def errorToString(errorCode):
@@ -1766,7 +1766,7 @@ def errorToString(errorCode):
 
     _staticLib.LJM_ErrorToString(cErr, errStr)
 
-    return str(errStr.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(errStr)
 
 
 def loadConstants():
@@ -2160,7 +2160,7 @@ def numberToIP(number):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(ipv4String.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(ipv4String)
 
 
 def ipToNumber(ipv4String):
@@ -2216,7 +2216,7 @@ def numberToMAC(number):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(macString.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(macString)
 
 
 def macToNumber(macString):
@@ -2343,7 +2343,7 @@ def readLibraryConfigStringS(parameter):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return str(outStr.decode("ascii").split("\0", 1)[0])
+    return _decodeASCII(outStr)
 
 
 def loadConfigurationFile(fileName):
@@ -2400,7 +2400,7 @@ def getSpecificIPsInfo():
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    return cInfoHandle.value, cInfo.value.decode("ascii")
+    return cInfoHandle.value, _decodeASCII(cInfo.value)
 
 
 def log(level, string):
@@ -2448,3 +2448,9 @@ def _convertListToCtypeArray(li, cType):
 def _convertCtypeArrayToList(listCtype):
     """Returns a normal list from a ctypes list."""
     return [i for i in listCtype]
+
+
+def _decodeASCII(string):
+    """Returns an ASCII decoded version of the null terminated string.
+    Non ASCII characters are ignored."""
+    return str(string.decode("ascii", "ignore").split("\0", 1)[0])
