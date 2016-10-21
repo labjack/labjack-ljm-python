@@ -3,40 +3,54 @@ Demonstrates SPI communication.
 
 You can short MOSI to MISO for testing.
 
-MOSI    FIO2
-MISO    FIO3
-CLK     FIO0
-CS      FIO1
+T7:
+    MOSI    FIO2
+    MISO    FIO3
+    CLK     FIO0
+    CS      FIO1
+
+T4:
+    MOSI    FIO6
+    MISO    FIO7
+    CLK     FIO4
+    CS      FIO5
 
 If you short MISO to MOSI, then you will read back the same bytes that you
 write.  If you short MISO to GND, then you will read back zeros.  If you
 short MISO to VS or leave it unconnected, you will read back 255s.
 
 """
-
-from labjack import ljm
 from random import randrange
 
+from labjack import ljm
+
+
 # Open first found LabJack
-handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-#handle = ljm.openS("ANY", "ANY", "ANY")
+handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
+#handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
+#handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
 
 info = ljm.getHandleInfo(handle)
-print("Opened a LabJack with Device type: %i, Connection type: %i,\n" \
-    "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" % \
-    (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
+print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
+      "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
+      (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-# CS is FIO1
-ljm.eWriteName(handle, "SPI_CS_DIONUM", 1)
+deviceType = info[0]
 
-# CLK is FIO0
-ljm.eWriteName(handle, "SPI_CLK_DIONUM", 0)
-
-# MISO is FIO3
-ljm.eWriteName(handle, "SPI_MISO_DIONUM", 3)
-
-# MOSI is FIO2
-ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 2)
+if deviceType == ljm.constants.dtT4:
+    # Setting CS, CLK, MISO, and MOSI lines for the T4. FIO0 to FIO3 are
+    # reserved for analog inputs, and SPI requires digital lines.
+    ljm.eWriteName(handle, "SPI_CS_DIONUM", 5)  # CS is FIO5
+    ljm.eWriteName(handle, "SPI_CLK_DIONUM", 4)  # CLK is FIO4
+    ljm.eWriteName(handle, "SPI_MISO_DIONUM", 7)  # MISO is FIO7
+    ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 6)  # MOSI is FIO6
+else:
+    # Setting CS, CLK, MISO, and MOSI lines for the T7 and other devices.
+    ljm.eWriteName(handle, "SPI_CS_DIONUM", 1)  # CS is FIO1
+    ljm.eWriteName(handle, "SPI_CLK_DIONUM", 0)  # CLK is FIO0
+    ljm.eWriteName(handle, "SPI_MISO_DIONUM", 3)  # MISO is FIO3
+    ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 2)  # MOSI is FIO2
 
 # Selecting Mode CPHA=1 (bit 1), CPOL=1 (bit 2)
 ljm.eWriteName(handle, "SPI_MODE", 3)
@@ -70,33 +84,30 @@ print("SPI Configuration:")
 for i in range(numFrames):
     print("  %s = %0.0f" % (aNames[i],  aValues[i]))
 
-
 # Write(TX)/Read(RX) 4 bytes
-numBytes = 4;
+numBytes = 4
 ljm.eWriteName(handle, "SPI_NUM_BYTES", numBytes)
-
 
 # Write the bytes
 dataWrite = []
 dataWrite.extend([randrange(0, 256) for _ in range(numBytes)])
 aNames = ["SPI_DATA_TX"]
 aWrites = [ljm.constants.WRITE]
-aNumValues = [numBytes];
+aNumValues = [numBytes]
 dataWrite = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataWrite)
 
-ljm.eWriteName(handle, "SPI_GO", 1) # Do the SPI communications
+ljm.eWriteName(handle, "SPI_GO", 1)  # Do the SPI communications
 
 # Display the bytes written
-print("");
+print("")
 for i in range(numBytes):
     print("dataWrite[%i] = %0.0f" % (i, dataWrite[i]))
-
 
 # Read the bytes
 dataRead = [0]*numBytes
 aNames = ["SPI_DATA_RX"]
 aWrites = [ljm.constants.READ]
-aNumValues = [numBytes];
+aNumValues = [numBytes]
 dataRead = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataRead)
 ljm.eWriteName(handle, "SPI_GO", 1)
 
