@@ -45,6 +45,9 @@ resolutionAIN = 1
 readDigital = False
 writeDigital = False
 
+# Analog output settings
+writeDACs = False
+
 # Device specific configuration
 if deviceType == ljm.constants.dtT4:
     # T4 analog input configuration
@@ -52,19 +55,21 @@ if deviceType == ljm.constants.dtT4:
     rangeAINLV = 2.4  # LV channels range
 
     # Configure the channels to analog input or digital I/O
-    # Update all digital I/O channels. b1 = Ignored. b = Affected.
+    # Update all digital I/O channels. b1 = Ignored. b0 = Affected.
     dioInhibit = 0x00000  # (b00000000000000000000)
     # Set AIN 0 to numAIN-1 as analog inputs (b1), the rest as digital I/O (b0).
     dioAnalogEnable = (2 ** numAIN) - 1
-    ljm.eWriteNames(handle,
+    ljm.eWriteNames(handle, 2,
                     ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
                     [dioInhibit, dioAnalogEnable])
+    if writeDigital is True:
+        # Update only digital I/O channels in future digital write calls.
+        # b1 = Ignored. b0 = Affected.
+        dioInhibit = dioAnalogEnable
+        ljm.eWriteName(handle, "DIO_INHIBIT", dioInhibit)
 else:
     # T7 and other devices analog input configuration
     rangeAIN = 10.0
-
-# Analog output settings
-writeDACs = False
 
 if numAIN > 0:
     # Configure analog input settings
@@ -75,14 +80,14 @@ if numAIN > 0:
         numFrames += 2
         names.append("AIN%i_RANGE" % i)
         if deviceType == ljm.constants.dtT4:
-            aValues.append(rangeAIN)
-        else:
             if i < 4:
                 # Set the HV range
                 aValues.append(rangeAINHV)
             else:
                 # Set the LV range
                 aValues.append(rangeAINLV)
+        else:
+            aValues.append(rangeAIN)
         names.append("AIN%i_RESOLUTION_INDEX" % i)
         aValues.append(resolutionAIN)
     ljm.eWriteNames(handle, numFrames, names, aValues)
