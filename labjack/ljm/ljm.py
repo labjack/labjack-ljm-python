@@ -1230,12 +1230,12 @@ def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
     cNumAddrs = ctypes.c_int32(numAddresses)
     cSL_p = _convertListToCtypeArray(aScanList, ctypes.c_int32)
     cScanRate = ctypes.c_double(scanRate)
+    _g_eStreamDataSize[handle] = scansPerRead*numAddresses
 
     error = _staticLib.LJM_eStreamStart(handle, cSPR, cNumAddrs, ctypes.byref(cSL_p), ctypes.byref(cScanRate))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-    _g_eStreamDataSize[handle] = scansPerRead*numAddresses
     return cScanRate.value
 
 
@@ -1295,11 +1295,11 @@ def eStreamStop(handle):
         LJMError: An error was returned from the LJM library call.
 
     """
+    if handle in _g_eStreamDataSize:
+        del _g_eStreamDataSize[handle]
     error = _staticLib.LJM_eStreamStop(handle)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
-    if handle in _g_eStreamDataSize:
-        _g_eStreamDataSize[handle]
 
 
 def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
