@@ -15,9 +15,10 @@ a program to suit your needs, the primary things you need to do are:
 You may also need to configure AIN, etc.
 
 """
-
 import sys
+
 from labjack import ljm
+
 import ljm_stream_util
 
 
