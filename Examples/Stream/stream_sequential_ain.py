@@ -109,18 +109,18 @@ try:
             ainStr += "%s = %0.5f, " % (aScanListNames[j], aData[j])
         print("  1st scan out of %i: %s" % (scans, ainStr))
         print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-              "%i" % (curSkip/numAddresses, ret[1], ret[2]))
+              "%i" % (curSkip / numAddresses, ret[1], ret[2]))
         i += 1
 
     end = datetime.now()
 
     print("\nTotal scans = %i" % (totScans))
-    tt = (end-start).seconds + float((end-start).microseconds)/1000000
+    tt = (end - start).seconds + float((end - start).microseconds) / 1000000
     print("Time taken = %f seconds" % (tt))
     print("LJM Scan Rate = %f scans/second" % (scanRate))
-    print("Timed Scan Rate = %f scans/second" % (totScans/tt))
-    print("Timed Sample Rate = %f samples/second" % (totScans*numAddresses/tt))
-    print("Skipped scans = %0.0f" % (totSkip/numAddresses))
+    print("Timed Scan Rate = %f scans/second" % (totScans / tt))
+    print("Timed Sample Rate = %f samples/second" % (totScans * numAddresses / tt))
+    print("Skipped scans = %0.0f" % (totSkip / numAddresses))
 except ljm.LJMError:
     ljme = sys.exc_info()[1]
     print(ljme)

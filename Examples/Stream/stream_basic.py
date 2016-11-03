@@ -64,7 +64,7 @@ try:
         ret = ljm.eStreamRead(handle)
 
         aData = ret[0]
-        scans = len(aData)/numAddresses
+        scans = len(aData) / numAddresses
         totScans += scans
 
         # Count the skipped samples which are indicated by -9999 values. Missed
@@ -85,12 +85,12 @@ try:
     end = datetime.now()
 
     print("\nTotal scans = %i" % (totScans))
-    tt = (end-start).seconds + float((end-start).microseconds)/1000000
+    tt = (end - start).seconds + float((end - start).microseconds) / 1000000
     print("Time taken = %f seconds" % (tt))
     print("LJM Scan Rate = %f scans/second" % (scanRate))
-    print("Timed Scan Rate = %f scans/second" % (totScans/tt))
-    print("Timed Sample Rate = %f samples/second" % (totScans*numAddresses/tt))
-    print("Skipped scans = %0.0f" % (totSkip/numAddresses))
+    print("Timed Scan Rate = %f scans/second" % (totScans / tt))
+    print("Timed Sample Rate = %f samples/second" % (totScans * numAddresses / tt))
+    print("Skipped scans = %0.0f" % (totSkip / numAddresses))
 except ljm.LJMError:
     ljme = sys.exc_info()[1]
     print(ljme)

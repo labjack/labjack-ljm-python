@@ -74,28 +74,30 @@ def print_register_value(handle, register_name):
     value = ljm.eReadName(handle, register_name)
     print("%s = %f" % (register_name, value))
 
+
 def open_ljm_device(device_type, connection_type, identifier):
     try:
         handle = ljm.open(device_type, connection_type, identifier)
-
     except ljm.LJMError:
         print(
-            "Error calling ljm.open(" + \
-            "device_type=" + str(device_type) + ", " + \
-            "connection_type=" + str(connection_type) + ", " + \
+            "Error calling ljm.open(" +
+            "device_type=" + str(device_type) + ", " +
+            "connection_type=" + str(connection_type) + ", " +
             "identifier=" + identifier + ")"
         )
         raise
 
     return handle
 
+
 def print_device_info(handle):
     info = ljm.getHandleInfo(handle)
     print(
-        "Opened a LabJack with Device type: %i, Connection type: %i,\n" \
-        "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i\n" % \
+        "Opened a LabJack with Device type: %i, Connection type: %i,\n"
+        "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i\n" %
         (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
     )
+
 
 def main(
     initial_scan_rate_hz=INITIAL_SCAN_RATE_HZ,
@@ -135,14 +137,13 @@ def main(
         print("scans_per_read: " + str(scans_per_read))
 
         scan_rate = ljm.eStreamStart(handle, scans_per_read, len(scan_list),
-            scan_list, initial_scan_rate_hz)
+                                     scan_list, initial_scan_rate_hz)
         print("\nStream started with a scan rate of %0.0f Hz." % scan_rate)
         print("\nPerforming %i buffer updates." % num_cycles)
 
         iteration = 0
         total_num_skipped_scans = 0
         while iteration < num_cycles:
-
             buffer_statuses = [0]
             infinity_preventer = 0
             while max(buffer_statuses) < out_context["state_size"]:
@@ -154,7 +155,7 @@ def main(
                 infinity_preventer = infinity_preventer + 1
                 if infinity_preventer > scan_rate:
                     raise ValueError(
-                        "Buffer statuses don't appear to be updating:" + \
+                        "Buffer statuses don't appear to be updating:" +
                         str(buffer_status_names) + str(buffer_statuses)
                     )
 
@@ -174,11 +175,9 @@ def main(
             total_num_skipped_scans += num_skipped_scans
 
             iteration = iteration + 1
-
     except ljm.LJMError:
         ljm_stream_util.prepare_for_exit(handle)
         raise
-
     except Exception:
         ljm_stream_util.prepare_for_exit(handle)
         raise

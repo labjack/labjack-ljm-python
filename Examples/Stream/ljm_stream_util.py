@@ -1,8 +1,10 @@
 
 from labjack import ljm
 
+
 def convert_name_to_int_type(name):
     return ljm.nameToAddress(name)[1]
+
 
 def convert_name_to_out_buffer_type_str(target_name):
     OUT_BUFFER_TYPE_STRINGS = {
@@ -14,8 +16,10 @@ def convert_name_to_out_buffer_type_str(target_name):
     int_type = convert_name_to_int_type(target_name)
     return OUT_BUFFER_TYPE_STRINGS[int_type]
 
+
 def convert_name_to_address(name):
     return ljm.nameToAddress(name)[0]
+
 
 def convert_names_to_addresses(names, length_limit=None):
     """Convert a list of names to a list of addresses using LJM.
@@ -38,6 +42,7 @@ def convert_names_to_addresses(names, length_limit=None):
     # types. The list of addresses is indexed at 0 of that tuple.
     return addresses_and_types[0]
 
+
 def create_scan_list(in_names=[], out_contexts=[]):
     """Creates a list of integer addresses from lists of in and out names."""
     in_addresses = []
@@ -56,6 +61,7 @@ def create_scan_list(in_names=[], out_contexts=[]):
 
     return in_addresses + out_addresses
 
+
 def generate_state(start, diff, state_size, state_name):
     """Generates a dict that contains a state_name and a list of values."""
     values = []
@@ -69,6 +75,7 @@ def generate_state(start, diff, state_size, state_name):
         "state_name": state_name,
         "values": values
     }
+
 
 def create_out_context(stream_out):
     """Create an object wich describes some stream-out buffer states.
@@ -141,6 +148,7 @@ def create_out_context(stream_out):
 
     return out_context
 
+
 def create_stream_out_names(out_context):
     return {
         "stream_out":
@@ -167,6 +175,7 @@ def create_stream_out_names(out_context):
         "buffer":
             "STREAM_OUT%(stream_out_index)d_BUFFER_%(target_type_str)s" % out_context
     }
+
 
 def update_stream_out_buffer(handle, out_context):
     # Write values to the stream-out buffer. Note that once a set of values have
@@ -210,14 +219,15 @@ def update_stream_out_buffer(handle, out_context):
 
     ljm.eWriteName(handle, out_names["set_loop"], out_context["set_loop"])
 
-    print("  Wrote " + \
-        out_context["names"]["stream_out"] + \
-        " state: " + \
-        current_state["state_name"]
-    )
+    print("  Wrote " +
+          out_context["names"]["stream_out"] +
+          " state: " +
+          current_state["state_name"]
+          )
 
     # Increment the state and wrap it back to zero
     out_context["current_index"] = (state_index + 1) % len(out_context["states"])
+
 
 def initialize_stream_out(handle, out_context):
     # Allocate memory on the T7 for the stream-out buffer
@@ -228,6 +238,7 @@ def initialize_stream_out(handle, out_context):
     ljm.eWriteName(handle, names["enable"], 1)
 
     update_stream_out_buffer(handle, out_context)
+
 
 def process_stream_results(
     iteration,
@@ -268,8 +279,10 @@ def process_stream_results(
     #     print_if_not_equiv_floats(index, data[index], data[index + 1])
 
     if num_skipped_samples:
-        "**** Samples skipped = %i (of %i) ****" % \
+        print(
+            "  **** Samples skipped = %i (of %i) ****" %
             (num_skipped_samples, len(data))
+        )
 
     status_strs = []
     if device_num_backlog_scans > device_threshold:
@@ -282,6 +295,7 @@ def process_stream_results(
         print(status_str)
 
     return num_skipped_samples
+
 
 def prepare_for_exit(handle, stop_stream=True):
     if stop_stream:

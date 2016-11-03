@@ -58,7 +58,7 @@ try:
 
     skipped = aData.count(-9999.0)
     print("\nSkipped scans = %0.0f" % (skipped / numAddresses))
-    tt = (end-start).seconds + float((end-start).microseconds) / 1000000
+    tt = (end - start).seconds + float((end - start).microseconds) / 1000000
     print("Time taken = %f seconds" % (tt))
 
     ainStr1 = ""
