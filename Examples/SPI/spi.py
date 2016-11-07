@@ -55,7 +55,9 @@ else:
 # Selecting Mode CPHA=1 (bit 1), CPOL=1 (bit 2)
 ljm.eWriteName(handle, "SPI_MODE", 3)
 
-# Speed Throttle: Max. Speed (~ 1 MHz) = 0
+# Speed Throttle:
+# Valid speed throttle values are 1 to 65536 where 0 = 65536.
+# Configuring Max. Speed (~800 kHz) = 0
 ljm.eWriteName(handle, "SPI_SPEED_THROTTLE", 0)
 
 # Options
@@ -80,7 +82,7 @@ aValues = [0]*len(aNames)
 numFrames = len(aNames)
 aValues = ljm.eReadNames(handle, numFrames, aNames)
 
-print("SPI Configuration:")
+print("\nSPI Configuration:")
 for i in range(numFrames):
     print("  %s = %0.0f" % (aNames[i],  aValues[i]))
 
