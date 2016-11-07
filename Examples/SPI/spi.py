@@ -52,7 +52,7 @@ else:
     ljm.eWriteName(handle, "SPI_MISO_DIONUM", 3)  # MISO is FIO3
     ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 2)  # MOSI is FIO2
 
-# Selecting Mode CPHA=1 (bit 1), CPOL=1 (bit 2)
+# Selecting Mode CPHA=1 (bit 0), CPOL=1 (bit 1)
 ljm.eWriteName(handle, "SPI_MODE", 3)
 
 # Speed Throttle:
