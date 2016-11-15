@@ -29,13 +29,13 @@ deviceType = info[0]
 try:
     # Note when streaming, negative channels and ranges can be configured for
     # individual analog inputs, but the stream has only one settling time and
-    # resolution as demonstrated.
+    # resolution.
     if deviceType == ljm.constants.dtT4:
         # T4 configuration
 
         # Configure the channels to analog input or digital I/O
         # Update all digital I/O channels. b1 = Ignored. b0 = Affected.
-        dioInhibit = 0x00000  # (b00000000000000000000)
+        dioInhibit = 0x00000  # b00000000000000000000
         # Set AIN0-AIN3 and AIN FIRST_AIN_CHANNEL to
         # FIRST_AIN_CHANNEL+NUMBER_OF_AINS-1 as analog inputs (b1), the rest as
         # digital I/O (b0).
@@ -43,7 +43,7 @@ try:
         ljm.eWriteNames(handle, 2,
                         ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
                         [dioInhibit, dioAnalogEnable])
-        print(dioInhibit, dioAnalogEnable)
+
         # Configure the analog input ranges.
         rangeAINHV = 10.0  # HV channels range (AIN0-AIN3)
         rangeAINLV = 2.4  # LV channels range (AIN4+)
@@ -54,7 +54,7 @@ try:
         # and stream settling time.
         aNames = ["AIN_ALL_NEGATIVE_CH", "STREAM_SETTLING_US",
                   "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 0]  # single-ended, 0 (default), 0 (default)
+        aValues = [ljm.constants.GND, 0, 0]  # single-ended, 0 (default), 0 (default)
         ljm.eWriteNames(handle, len(aNames), aNames, aValues)
     else:
         # T7 and other devices configuration

@@ -22,7 +22,7 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
       (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
 # Stream Configuration
-aScanListNames = ["AIN0", "AIN1", "AIN2", "AIN3"]  # Scan list names to stream
+aScanListNames = ["AIN0", "AIN1"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
 scanRate = 1000
@@ -38,9 +38,9 @@ try:
     # Configuration is all negative channels are single-ended, AIN0-AIN3 range
     # is +/-10 V, stream settling is 0 (default) and stream resolution index is
     # 0 (default).
-    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE", "AIN2_RANGE",
-              "AIN3_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-    aValues = [ljm.constants.GND, 10.0, 10.0, 10.0, 10.0, 0, 0]
+    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
+              "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+    aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
     ljm.eWriteNames(handle, len(aNames), aNames, aValues)
 
     # Configure and start stream
