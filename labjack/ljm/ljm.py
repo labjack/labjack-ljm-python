@@ -698,6 +698,12 @@ def eReadAddressArray(handle, address, dataType, numValues):
     Raises:
         LJMError: An error was returned from the LJM library call.
 
+    Note:
+        If numValues is large enough, this functions will automatically
+        split reads into multiple packets based on the current device's
+        effective data packet size. Using both non-buffer and buffer
+        registers in one function call is not supported.
+
     """
     cAddr = ctypes.c_int32(address)
     cType = ctypes.c_int32(dataType)
@@ -730,6 +736,12 @@ def eReadNameArray(handle, name, numValues):
         TypeError: name is not a string.
         LJMError: An error was returned from the LJM library call.
 
+    Note:
+        If numValues is large enough, this functions will automatically
+        split reads into multiple packets based on the current device's
+        effective data packet size. Using both non-buffer and buffer
+        registers in one function call is not supported.
+
     """
     if not isinstance(name, str):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
@@ -761,6 +773,12 @@ def eWriteAddressArray(handle, address, dataType, numValues, aValues):
     Raises:
         LJMError: An error was returned from the LJM library call.
 
+    Note:
+        If numValues is large enough, this functions will automatically
+        split writes into multiple packets based on the current
+        device's effective data packet size. Using both non-buffer and
+        buffer registers in one function call is not supported.
+
     """
     cAddr = ctypes.c_int32(address)
     cType = ctypes.c_int32(dataType)
@@ -790,6 +808,12 @@ def eWriteNameArray(handle, name, numValues, aValues):
         TypeError: name is not a string.
         LJMError: An error was returned from the LJM library call.
 
+    Note:
+        If numValues is large enough, this functions will automatically
+        split writes into multiple packets based on the current
+        device's effective data packet size. Using both non-buffer and
+        buffer registers in one function call is not supported.
+
     """
     if not isinstance(name, str):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
@@ -811,10 +835,10 @@ def eReadAddressByteArray(handle, address, numBytes):
     Args:
         handle: A valid handle to an open device.
         address: The address to read an array from.
-        numValues: The size of the array to read.
+        numBytes: The size of the byte array to read.
 
     Returns:
-        A list of size numValues with the read byte values.
+        A list of size numBytes with the read byte values.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -822,14 +846,10 @@ def eReadAddressByteArray(handle, address, numBytes):
     Notes:
         This function will append a 0x00 byte to aBytes for
         odd-numbered numBytes.
-        If numBytes is large enough, this function will automatically
-        split reads into multiple packets based on:
-            1. The current device's effective data packet size.
-            2. Whether address/name is a buffer register or not.
-        This function will treat all of aBytes as either buffer data or
-        as non-buffer data based on whether address/name is a buffer
-        register. This means that you cannot begin writing to a
-        non-buffer register and write into a buffer register.
+        If numBytes is large enough, this functions will automatically
+        split reads into multiple packets based on the current device's
+        effective data packet size. Using both non-buffer and buffer
+        registers in one function call is not supported.
 
     """
     cAddr = ctypes.c_int32(address)
@@ -853,10 +873,10 @@ def eReadNameByteArray(handle, name, numBytes):
     Args:
         handle: A valid handle to an open device.
         name: The register name to read an array from.
-        numValues: The size of the array to read.
+        numBytes: The size of the byte array to read.
 
     Returns:
-        A list of size numValues with the read byte values.
+        A list of size numBytes with the read byte values.
 
     Raises:
         TypeError: name is not a string.
@@ -865,14 +885,10 @@ def eReadNameByteArray(handle, name, numBytes):
     Notes:
         This function will append a 0x00 byte to aBytes for
         odd-numbered numBytes.
-        If numBytes is large enough, this function will automatically
-        split reads into multiple packets based on:
-            1. The current device's effective data packet size
-            2. Whether address/name is a buffer register or not
-        This function will treat all of aBytes as either buffer data or
-        as non-buffer data based on whether address/name is a buffer
-        register. This means that you cannot begin writing to a
-        non-buffer register and write into a buffer register.
+        If numBytes is large enough, this functions will automatically
+        split reads into multiple packets based on the current device's
+        effective data packet size. Using both non-buffer and buffer
+        registers in one function call is not supported.
 
     """
     if not isinstance(name, str):
@@ -897,9 +913,9 @@ def eWriteAddressByteArray(handle, address, numBytes, aBytes):
     Args:
         handle: A valid handle to an open device.
         address: The register address to write a byte array to.
-        numValues: The size of the array to write.
+        numBytes: The size of the byte array to write.
         aBytes: List of byte values to write. This list needs to be at
-            least size numValues.
+            least size numBytes.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -907,14 +923,10 @@ def eWriteAddressByteArray(handle, address, numBytes, aBytes):
     Notes:
         This function will append a 0x00 byte to aBytes for
         odd-numbered numBytes.
-        If numBytes is large enough, this function will automatically
-        split writes into multiple packets based on:
-            1. The current device's effective data packet size.
-            2. Whether address/name is a buffer register or not.
-        This function will treat all of aBytes as either buffer data or
-        as non-buffer data based on whether address/name is a buffer
-        register. This means that you cannot begin writing to a
-        non-buffer register and write into a buffer register.
+        If numBytes is large enough, this functions will automatically
+        split writes into multiple packets based on the current
+        device's effective data packet size. Using both non-buffer and
+        buffer registers in one function call is not supported.
 
     """
     cAddr = ctypes.c_int32(address)
@@ -936,9 +948,9 @@ def eWriteNameByteArray(handle, name, numBytes, aBytes):
     Args:
         handle: A valid handle to an open device.
         name: The register name to write an array to.
-        numValues: The size of the array to write.
+        numBytes: The size of the byte array to write.
         aBytes: List of byte values to write. This list needs to be at
-            least size numValues.
+            least size numBytes.
 
     Raises:
         TypeError: name is not a string.
@@ -947,14 +959,10 @@ def eWriteNameByteArray(handle, name, numBytes, aBytes):
     Notes:
         This function will append a 0x00 byte to aBytes for
         odd-numbered numBytes.
-        If numBytes is large enough, this function will automatically
-        split writes into multiple packets based on:
-            1. The current device's effective data packet size
-            2. Whether address/name is a buffer register or not
-        This function will treat all of aBytes as either buffer data or
-        as non-buffer data based on whether address/name is a buffer
-        register. This means that you cannot begin writing to a
-        non-buffer register and write into a buffer register.
+        If numBytes is large enough, this functions will automatically
+        split writes into multiple packets based on the current
+        device's effective data packet size. Using both non-buffer and
+        buffer registers in one function call is not supported.
 
     """
     if not isinstance(name, str):

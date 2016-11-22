@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='LJMPython',
-      version='1.14.0',
+      version='1.14.03',
       description='The LJM Python package.',
       url='https://labjack.com/support/software/examples/ljm/python',
       author='LabJack Corporation',
