@@ -26,7 +26,7 @@ if deviceType == ljm.constants.dtT4:
     # If the FIO/EIO line is an analog input, it needs to first be changed to a
     # digital I/O by reading from the line or setting it to digital I/O with the
     # DIO_ANALOG_ENABLE register.
-    # For exanple:
+    # For example:
     #ljm.eReadName(handle, name)
 else:
     # Setting FIO0 on the LabJack T7 and other devices.
