@@ -10,7 +10,7 @@ import timeit
 from labjack import ljm
 
 
-def eNamesIteration(handle, numFrames, names, aWrites, aNumValues, aValues,
+def eNamesIteration(handle, numFrames, aNames, aWrites, aNumValues, aValues,
                     results):
     """Function for timit.Timer. Performs an eNames call to do LabJack
     operations. Takes eNames parameters and a list for results which
@@ -18,7 +18,20 @@ def eNamesIteration(handle, numFrames, names, aWrites, aNumValues, aValues,
 
     """
     del results[:]
-    r = ljm.eNames(handle, numFrames, names, aWrites, aNumValues, aValues)
+    r = ljm.eNames(handle, numFrames, aNames, aWrites, aNumValues, aValues)
+    results.extend(r)
+
+
+def eAddressesIteration(handle, numFrames, aAddresses, aTypes, aWrites,
+                        aNumValues, aValues, results):
+    """Function for timit.Timer. Performs an eAddresses call to do
+    LabJack operations. Takes eAddresses parameters and a list for
+    results which will be filled.
+
+    """
+    del results[:]
+    r = ljm.eAddresses(handle, numFrames, aAddresses, aTypes, aWrites,
+                       aNumValues, aValues)
     results.extend(r)
 
 
@@ -48,6 +61,10 @@ writeDigital = False
 # Analog output settings
 writeDACs = False
 
+# Use eAddresses (True) or eNames (False) in the operations loop. eAddresses
+# is faster than eNames.
+useAddresses = True
+
 # Device specific configuration
 if deviceType == ljm.constants.dtT4:
     # T4 analog input configuration
@@ -74,11 +91,11 @@ else:
 if numAIN > 0:
     # Configure analog input settings
     numFrames = 0
-    names = []
+    aNames = []
     aValues = []
     for i in range(numAIN):
         numFrames += 2
-        names.append("AIN%i_RANGE" % i)
+        aNames.append("AIN%i_RANGE" % i)
         if deviceType == ljm.constants.dtT4:
             if i < 4:
                 # Set the HV range
@@ -88,13 +105,13 @@ if numAIN > 0:
                 aValues.append(rangeAINLV)
         else:
             aValues.append(rangeAIN)
-        names.append("AIN%i_RESOLUTION_INDEX" % i)
+        aNames.append("AIN%i_RESOLUTION_INDEX" % i)
         aValues.append(resolutionAIN)
-    ljm.eWriteNames(handle, numFrames, names, aValues)
+    ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
 # Initialize and configure eNames parameters for loop's eNames call
 numFrames = 0
-names = []
+aNames = []
 aWrites = []
 aNumValues = []
 aValues = []
@@ -102,7 +119,7 @@ aValues = []
 # Add analog input reads (AIN 0 to numAIN-1)
 for i in range(numAIN):
     numFrames += 1
-    names.append("AIN%i" % i)
+    aNames.append("AIN%i" % i)
     aWrites.append(ljm.constants.READ)
     aNumValues.append(1)
     aValues.append(0)
@@ -110,7 +127,7 @@ for i in range(numAIN):
 if readDigital is True:
     # Add digital read
     numFrames += 1
-    names.append("DIO_STATE")
+    aNames.append("DIO_STATE")
     aWrites.append(ljm.constants.READ)
     aNumValues.append(1)
     aValues.append(0)
@@ -118,7 +135,7 @@ if readDigital is True:
 if writeDigital is True:
     # Add digital write
     numFrames += 1
-    names.append("DIO_STATE")
+    aNames.append("DIO_STATE")
     aWrites.append(ljm.constants.WRITE)
     aNumValues.append(1)
     aValues.append(0)  # output-low
@@ -127,10 +144,13 @@ if writeDACs is True:
     # Add analog output writes (DAC0-1)
     for i in range(2):
         numFrames += 1
-        names.append("DAC%i" % i)
+        aNames.append("DAC%i" % i)
         aWrites.append(ljm.constants.WRITE)
         aNumValues.append(1)
         aValues.append(0.0)  # 0.0 V
+
+# Make lists of addresses and data types for eAddresses.
+aAddresses, aTypes = ljm.namesToAddresses(numFrames, aNames)
 
 print("\nTest frames:")
 for i in range(numFrames):
@@ -138,7 +158,7 @@ for i in range(numFrames):
         wrStr = "READ"
     else:
         wrStr = "WRITE"
-    print("    %s %s" % (wrStr, names[i]))
+    print("    %s %s (%s)" % (wrStr, aNames[i], aAddresses[i]))
 
 print("\nBeginning %i iterations..." % numIterations)
 
@@ -147,10 +167,17 @@ maxMS = 0
 minMS = 0
 totalMS = 0
 results = []
-t = timeit.Timer(functools.partial(eNamesIteration, handle, numFrames, names,
-                                   aWrites, aNumValues, aValues, results))
+t = None
+if useAddresses:
+    t = timeit.Timer(functools.partial(eAddressesIteration, handle, numFrames,
+                                       aAddresses, aTypes, aWrites, aNumValues,
+                                       aValues, results))
+else:
+    t = timeit.Timer(functools.partial(eNamesIteration, handle, numFrames,
+                                       aNames, aWrites, aNumValues, aValues,
+                                       results))
 
-# eNames loop
+# eAddresses or eNames loop
 for i in range(numIterations):
     ttMS = t.timeit(number=1)
     if minMS == 0:
@@ -165,13 +192,17 @@ print("    Average time per iteration: %.3f ms" %
       (totalMS / numIterations * 1000))
 print("    Min / Max time for one iteration: %.3f ms / %.3f ms" %
       (minMS * 1000, maxMS * 1000))
-print("\nLast eNames results: ")
+if useAddresses:
+    print("\nLast eAddresses results: ")
+else:
+    print("\nLast eNames results: ")
 for i in range(numFrames):
     if aWrites[i] == ljm.constants.READ:
         wrStr = "READ"
     else:
         wrStr = "WRITE"
-    print("    %s %s value : %f" % (names[i], wrStr, results[i]))
+    print("    %s (%s) %s value : %f" % (aNames[i], aAddresses[i], wrStr,
+                                         results[i]))
 
 # Close handle
 ljm.close(handle)
