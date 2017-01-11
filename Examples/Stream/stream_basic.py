@@ -30,10 +30,10 @@ scansPerRead = int(scanRate / 2)
 
 try:
     # Ensure triggered stream is disabled.
-    ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0);
+    ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
 
     # Enabling internally-clocked stream.
-    ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0);
+    ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
     # Configure the analog inputs' negative channel, range, settling time and
     # resolution.

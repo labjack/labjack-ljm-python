@@ -31,19 +31,20 @@ UINT32 = ljm.constants.UINT32
 # read product ID,
 # and read firmware version.
 numFrames = 6
-aAddresses = [   1000,       55110,       55110,         60028,      60000,            60004]
-           # [   DAC0, TEST_UINT16, TEST_UINT16, SERIAL_NUMBER, PRODUCT_ID, FIRMWARE_VERSION]
-aDataTypes = [FLOAT32,      UINT16,      UINT16,        UINT32,    FLOAT32,          FLOAT32]
-aWrites =    [  WRITE,       WRITE,        READ,          READ,       READ,             READ]
-aNumValues = [      1,           1,           1,             1,          1,                1]
-aValues =    [    2.5,       12345,           0,             0,          0,                0]
-results = ljm.eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites, aNumValues, aValues)
+# [DAC0, TEST_UINT16, TEST_UINT16, SERIAL_NUMBER, PRODUCT_ID, FIRMWARE_VERSION]
+aAddresses = [1000, 55110, 55110, 60028, 60000, 60004]
+aDataTypes = [FLOAT32, UINT16, UINT16, UINT32, FLOAT32, FLOAT32]
+aWrites = [WRITE, WRITE, READ, READ, READ, READ]
+aNumValues = [1, 1, 1, 1, 1, 1]
+aValues = [2.5, 12345, 0, 0, 0, 0]
+results = ljm.eAddresses(handle, numFrames, aAddresses, aDataTypes, aWrites,
+                         aNumValues, aValues)
 
 print("\neAddresses results: ")
 start = 0
 for i in range(numFrames):
     end = start + aNumValues[i]
-    print("    Address - % 6i, data type - %i, write - %i, values: %s" %
+    print("    Address - %5i, data type - %i, write - %i, values: %s" %
           (aAddresses[i], aDataTypes[i], aWrites[i], str(results[start:end])))
     start = end
 
