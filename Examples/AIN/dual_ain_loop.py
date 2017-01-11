@@ -34,8 +34,6 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
       "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
       (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-deviceType = info[0]
-
 # Setup and call eWriteNames to configure AIN0 and AIN1 on the LabJack.
 numFrames = 8
 # AIN0 and AIN1:

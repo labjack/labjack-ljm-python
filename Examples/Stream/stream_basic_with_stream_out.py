@@ -69,6 +69,12 @@ aScanList.extend([4800])  # STREAM_OUT0
 #aScanList.extend([4803])  # STREAM_OUT3
 
 try:
+    # Ensure triggered stream is disabled.
+    ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0);
+
+    # Enabling internally-clocked stream.
+    ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0);
+
     # Configure the analog inputs' negative channel, range, settling time and
     # resolution.
     # Note when streaming, negative channels and ranges can be configured for

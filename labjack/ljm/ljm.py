@@ -42,7 +42,12 @@ class LJMError(Exception):
         if self._errorAddress is not None:
             addrStr = "Address " + str(self._errorAddress) + ", "
         if self._errorCode is not None:
-            errorCodeStr = "LJM library error code " + str(self._errorCode) + " "
+            errorCodeStr = "LJM library "
+            if errorcodes.WARNINGS_BEGIN <= self._errorCode <= errorcodes.WARNINGS_END:
+                errorCodeStr += "warning"
+            else:
+                errorCodeStr += "error"
+            errorCodeStr += " code " + str(self._errorCode) + " "
         return addrStr + errorCodeStr + self._errorString
 
 

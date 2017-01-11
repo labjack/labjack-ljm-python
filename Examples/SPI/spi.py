@@ -60,7 +60,7 @@ ljm.eWriteName(handle, "SPI_MODE", 3)
 # Configuring Max. Speed (~800 kHz) = 0
 ljm.eWriteName(handle, "SPI_SPEED_THROTTLE", 0)
 
-# Options
+# SPI_OPTIONS:
 # bit 0:
 #     0 = Active low clock select enabled
 #     1 = Active low clock select disabled.
@@ -93,11 +93,7 @@ ljm.eWriteName(handle, "SPI_NUM_BYTES", numBytes)
 # Write the bytes
 dataWrite = []
 dataWrite.extend([randrange(0, 256) for _ in range(numBytes)])
-aNames = ["SPI_DATA_TX"]
-aWrites = [ljm.constants.WRITE]
-aNumValues = [numBytes]
-dataWrite = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataWrite)
-
+ljm.eWriteNameByteArray(handle, "SPI_DATA_TX", len(dataWrite), dataWrite)
 ljm.eWriteName(handle, "SPI_GO", 1)  # Do the SPI communications
 
 # Display the bytes written
@@ -106,17 +102,13 @@ for i in range(numBytes):
     print("dataWrite[%i] = %0.0f" % (i, dataWrite[i]))
 
 # Read the bytes
-dataRead = [0]*numBytes
-aNames = ["SPI_DATA_RX"]
-aWrites = [ljm.constants.READ]
-aNumValues = [numBytes]
-dataRead = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, dataRead)
+dataRead = ljm.eReadNameByteArray(handle, "SPI_DATA_RX", numBytes)
 ljm.eWriteName(handle, "SPI_GO", 1)
 
 # Display the bytes read
 print("")
 for i in range(numBytes):
-    print("dataRead[%i] = %0.0f" % (i, dataRead[i]))
+    print("dataRead[%i]  = %0.0f" % (i, dataRead[i]))
 
 # Close handle
 ljm.close(handle)

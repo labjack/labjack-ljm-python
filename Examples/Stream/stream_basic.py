@@ -29,9 +29,15 @@ scanRate = 1000
 scansPerRead = int(scanRate / 2)
 
 try:
+    # Ensure triggered stream is disabled.
+    ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0);
+
+    # Enabling internally-clocked stream.
+    ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0);
+
     # Configure the analog inputs' negative channel, range, settling time and
     # resolution.
-    # Note when streaming, negative channels and ranges can be configured for
+    # Note: when streaming, negative channels and ranges can be configured for
     # individual analog inputs, but the stream has only one settling time and
     # resolution.
 
@@ -44,13 +50,12 @@ try:
     ljm.eWriteNames(handle, len(aNames), aNames, aValues)
 
     # Configure and start stream
-    # Todo: Remove the try/except
     try:
         scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
     except ljm.LJMError:
         ljme = sys.exc_info()[1]
         print(ljme)
-        if ljme.errorCode != 203:
+        if ljme.errorCode != ljm.errorcodes.USING_DEFAULT_CALIBRATION:
             raise ljme
     print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
 
