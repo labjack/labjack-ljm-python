@@ -52,24 +52,20 @@ ljm.eWriteName(handle, "I2C_NUM_BYTES_TX", 1)  # Set the number of bytes to tran
 ljm.eWriteName(handle, "I2C_NUM_BYTES_RX", 4)  # Set the number of bytes to receive
 
 # Set the TX bytes. We are sending 1 byte for the address.
-aNames = ["I2C_DATA_TX"]
-aWrites = [ljm.constants.WRITE]  # Indicates we are writing the values.
-aNumValues = [1]  # The number of bytes
-aValues = [0]  # Byte 0: Memory pointer = 0
-ljm.eNames(handle, len(aNames), aNames, aWrites, aNumValues, aValues)
+numBytes = 1
+aBytes = [0]  # Byte 0: Memory pointer = 0
+ljm.eWriteNameByteArray(handle, "I2C_DATA_TX", numBytes, aBytes)
 
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
 
 # Read the RX bytes.
-aNames = ["I2C_DATA_RX"]
-aWrites = [ljm.constants.READ]  # Indicates we are reading the values.
-aNumValues = [4]  # The number of bytes
-# aValues[0] to aValues[3] will contain the data
-aValues = [0]*4
-aValues = ljm.eNames(handle, len(aNames), aNames, aWrites, aNumValues, aValues)
+numBytes = 4
+# aBytes[0] to aBytes[3] will contain the data
+aBytes = [0]*4
+aBytes = ljm.eReadNameByteArray(handle, "I2C_DATA_RX", numBytes)
 
 print("\nRead User Memory [0-3] = %s" %
-      " ".join([("%.0f" % val) for val in aValues]))
+      " ".join([("%.0f" % val) for val in aBytes]))
 
 # Write EEPROM bytes 0-3 in the user memory area, using the page write
 # technique.  Note that page writes are limited to 16 bytes max, and must be
@@ -80,18 +76,16 @@ ljm.eWriteName(handle, "I2C_NUM_BYTES_TX", 5)  # Set the number of bytes to tran
 ljm.eWriteName(handle, "I2C_NUM_BYTES_RX", 0)  # Set the number of bytes to receive
 
 # Set the TX bytes.
-aNames = ["I2C_DATA_TX"]
-aWrites = [ljm.constants.WRITE]  # Indicates we are writing the values.
-aNumValues = [5]  # The number of bytes
-aValues = [0]  # Byte 0: Memory pointer = 0
-# Create 4 new random numbers to write (aValues[1-4]).
-aValues.extend([randrange(0, 256) for _ in range(4)])
-ljm.eNames(handle, len(aNames), aNames, aWrites, aNumValues, aValues)
+numBytes = 5
+aBytes = [0]  # Byte 0: Memory pointer = 0
+# Create 4 new random numbers to write (aBytes[1-4]).
+aBytes.extend([randrange(0, 256) for _ in range(4)])
+ljm.eWriteNameByteArray(handle, "I2C_DATA_TX", numBytes, aBytes)
 
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
 
 print("Write User Memory [0-3] = %s" %
-      " ".join([("%.0f" % val) for val in aValues[1:]]))
+      " ".join([("%.0f" % val) for val in aBytes[1:]]))
 
 # Final read of EEPROM bytes 0-3 in the user memory area. We need a single I2C
 # transmission that writes the address and then reads the data.
@@ -99,24 +93,20 @@ ljm.eWriteName(handle, "I2C_NUM_BYTES_TX", 1)  # Set the number of bytes to tran
 ljm.eWriteName(handle, "I2C_NUM_BYTES_RX", 4)  # Set the number of bytes to receive
 
 # Set the TX bytes. We are sending 1 byte for the address.
-aNames = ["I2C_DATA_TX"]
-aWrites = [ljm.constants.WRITE]  # Indicates we are writing the values.
-aNumValues = [1]  # The number of bytes
-aValues = [0]  # Byte 0: Memory pointer = 0
-ljm.eNames(handle, len(aNames), aNames, aWrites, aNumValues, aValues)
+numBytes = 1
+aBytes = [0]  # Byte 0: Memory pointer = 0
+ljm.eWriteNameByteArray(handle, "I2C_DATA_TX", numBytes, aBytes)
 
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
 
 # Read the RX bytes.
-aNames = ["I2C_DATA_RX"]
-aWrites = [ljm.constants.READ]  # Indicates we are reading the values.
-aNumValues = [4]  # The number of bytes
-# aValues[0] to aValues[3] will contain the data
-aValues = [0]*4
-aValues = ljm.eNames(handle, 1, aNames, aWrites, aNumValues, aValues)
+numBytes = 4
+# aBytes[0] to aBytes[3] will contain the data
+aBytes = [0]*4
+aBytes = ljm.eReadNameByteArray(handle, "I2C_DATA_RX", numBytes)
 
 print("Read User Memory [0-3] = %s" %
-      " ".join([("%.0f" % val) for val in aValues]))
+      " ".join([("%.0f" % val) for val in aBytes]))
 
 # Close handle
 ljm.close(handle)
