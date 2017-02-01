@@ -49,6 +49,7 @@ try:
         rangeAINLV = 2.4  # LV channels range (AIN4+)
         aNames = ["AIN%i_RANGE" % i for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL + NUMBER_OF_AINS)]
         aValues = [rangeAINHV if i < 4 else rangeAINLV for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL + NUMBER_OF_AINS)]
+        ljm.eWriteNames(handle, len(aNames), aNames, aValues)
 
         # Configure the analog input negative channels, stream settling times
         # and stream settling time.
