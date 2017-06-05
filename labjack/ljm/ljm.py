@@ -72,6 +72,13 @@ def _loadLibrary():
                 else:
                     return ctypes.CDLL(libraryName)
         except Exception:
+            if(sys.platform.startswith("darwin")):
+                # Mac OS X load failed. Try with absolute path.
+                try:
+                    libraryName = "/usr/local/lib/libLabJackM.dylib"
+                    return ctypes.CDLL(libraryName)
+                except Exception:
+                    pass
             e = sys.exc_info()[1]
             raise LJMError(errorString="Cannot load the LJM library "+str(libraryName)+". "+str(e))
 
