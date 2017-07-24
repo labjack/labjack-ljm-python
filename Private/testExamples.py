@@ -14,11 +14,11 @@ TEST_WRITES = False
 #exec(open(fileName).read())
 
 os.chdir("../Examples/")
-os.chdir("List_All")
+os.chdir("More/List_All")
 
 exec(open("list_all.py").read())
 
-os.chdir("..")
+os.chdir("../../Basic")
 exec(open("eWriteName.py").read())
 exec(open("eReadName.py").read())
 exec(open("eWriteNames.py").read())
@@ -31,7 +31,7 @@ exec(open("eWriteAddresses.py").read())
 exec(open("eReadAddresses.py").read())
 exec(open("eAddresses.py").read())
 
-os.chdir("AIN")
+os.chdir("../More/AIN")
 exec(open("single_ain.py").read())
 exec(open("single_ain_with_config.py").read())
 sys.argv = ["dual_ain_loop.py", "5"]
@@ -53,9 +53,10 @@ os.chdir("../DIO_EF")
 exec(open("dio_ef_config_1_pwm_and_1_counter.py").read())
 
 os.chdir("../Ethernet")
+if TEST_WRITES:
+    exec(open("write_ethernet_config.py").read())
 exec(open("read_ethernet_config.py").read())
 exec(open("read_ethernet_mac.py").read())
-exec(open("write_ethernet_config.py").read())
 
 os.chdir("../I2C")
 exec(open("i2c_eeprom.py").read())
