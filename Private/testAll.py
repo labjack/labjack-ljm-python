@@ -18,13 +18,13 @@ print("\n--- Function tests ----------------------\n")
 print("loadConstants")
 ljm.loadConstants()
 
-#ljm.loadConstants()
 dev = ljm.constants.dtT7
 devS = 'T7'
 con = ljm.constants.ctUSB
 conS = 'USB'
 
 print("errorToString: " + ljm.errorToString(0))
+
 #print(type(ljm.errorToString(0))) #"")
 print(ljm.listAll(dev, con))
 print(ljm.listAllS(devS, conS))
