@@ -2,6 +2,8 @@ from labjack import ljm
 import timeit
 import functools
 import sys
+import time
+
 
 def timeoutTest(h):
     try:
@@ -219,17 +221,31 @@ ljm.loadConfigurationFile("default")
 pStr = ljm.readLibraryConfigStringS(ljm.constants.MODBUS_MAP_CONSTANTS_FILE)
 #pStr = str(pStr.replace("ljm_constants.json", ""))
 
+
 print("loadConstantsFromFile " + pStr)
 ljm.loadConstantsFromFile(pStr)
+
 
 to = 1500 #in ms
 ljm.writeLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS, to)
 print("\nwriteLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS: " + str(to))
 print("readLibraryConfigS LJM_SEND_RECEIVE_TIMEOUT_MS:" + str(ljm.readLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS)))
 
+
 print("writeLibraryConfigStringS")
 ljm.writeLibraryConfigStringS(ljm.constants.DEBUG_LOG_FILE, "ljlogfile0.txt")
 print("readLibraryConfigStringS: " + str(ljm.readLibraryConfigStringS(ljm.constants.DEBUG_LOG_FILE)))
+
+# Workaround to test ljm.log
+ljm.writeLibraryConfigS(ljm.constants.DEBUG_LOG_MODE, ljm.constants.DEBUG_LOG_MODE_CONTINUOUS)
+ljm.writeLibraryConfigS(ljm.constants.DEBUG_LOG_MODE, ljm.constants.DEBUG_LOG_MODE_CONTINUOUS)
+time.sleep(1) #May not be needed, but the above extra config is.
+print("\nlog (6, \"Python test 6\")")
+ljm.log(6, "Python test 6")
+
+#print("\nresetLog")
+#ljm.resetLog();
+
 
 t = timeit.Timer(lambda: timeoutTest(h)) #"timeoutTest("+ str(h) + ")", setup="from __main__ import timeoutTest")
 print("\nread timeout in sec = " + str(t.timeit(number = 1)))
