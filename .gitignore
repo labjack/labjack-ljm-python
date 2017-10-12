@@ -13,3 +13,4 @@ src/*.egg-info
 lib
 lib64
 build/
+ljlogfile0.txt
