@@ -1,7 +1,7 @@
 """
 Enables a 10 kHz PWM output on FIO0 for the T7 or FIO6 for the T4, enables a
 high-speed counter on CIO2 (DIO18), waits 1 second and reads the counter. Jumper
-FIO0/FIO6 to CIO2 and the read value. Should return around 10000.
+FIO0/FIO6 to CIO2 and the read value. Value should be close to 10000.
 
 DIO extended features, PWM output and high-speed counter documented here:
 
@@ -32,6 +32,11 @@ deviceType = info[0]
 if deviceType == ljm.constants.dtT4:
     # For the T4, use FIO6 (DIO6) for the PWM output
     pwmDIO = 6
+
+    # Set FIO and EIO lines to digital I/O.
+    ljm.eWriteNames(handle, 2,
+                    ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
+                    [0x0000, 0x0000])
 else:
     # For the T7 and other devices, use FIO0 (DIO0) for the PWM output
     pwmDIO = 0

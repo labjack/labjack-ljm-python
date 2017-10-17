@@ -76,13 +76,7 @@ try:
     scansPerRead = int(scanRate / 2)
 
     # Configure and start stream
-    try:  # Remove try/except
-        scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
-    except ljm.LJMError:
-        ljme = sys.exc_info()[1]
-        print(ljme)
-        if ljme.errorCode != 203:
-            raise ljme
+    scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
     print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
 
     print("\nPerforming %i stream reads." % MAX_REQUESTS)
