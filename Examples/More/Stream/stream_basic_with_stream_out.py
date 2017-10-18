@@ -114,13 +114,14 @@ try:
         totSkip += curSkip
 
         print("\neStreamRead #%i, %i scans" % (i, scans))
+        readStr = "  "
         for j in range(0, scansPerRead):
-            ainStr = ""
             for k in range(0, NUM_IN_CHANNELS):
-                ainStr += "%s: %0.5f, " % (POS_IN_NAMES[k], data[j * NUM_IN_CHANNELS + k])
-            print("  %s" % (ainStr))
-        print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-              "%i" % (curSkip / NUM_IN_CHANNELS, ret[1], ret[2]))
+                readStr += "%s: %0.5f, " % (POS_IN_NAMES[k], data[j * NUM_IN_CHANNELS + k])
+            readStr += "\n  "
+        readStr += "Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = %i" % \
+                   (curSkip / NUM_IN_CHANNELS, ret[1], ret[2])
+        print(readStr)
         i += 1
 
     end = datetime.now()
