@@ -4,6 +4,8 @@ Version History
 1.16.0 (10/02/2017)
  - Updated functions, constants and errorcodes to LJM v1.16.
  - Changed Python wrapper version to the LJM version.
+ - Improved ctypes array to list conversion speed in the ljm module.
+ - Python 2.5 no longer supported.
  - Restructured the Examples directory and added more examples.
  - Updated examples to support the T4.
 

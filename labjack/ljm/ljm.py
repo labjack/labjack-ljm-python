@@ -2467,7 +2467,7 @@ def _convertListToCtypeArray(li, cType):
 
 def _convertCtypeArrayToList(listCtype):
     """Returns a normal list from a ctypes list."""
-    return [i for i in listCtype]
+    return listCtype[:]
 
 
 def _decodeASCII(string):
