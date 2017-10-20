@@ -19,6 +19,8 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
       "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
       (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
+deviceType = info[0]
+
 # Stream Configuration
 aScanListNames = ["AIN0", "AIN1"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
@@ -29,16 +31,27 @@ numScans = 20000  # Number of scans to perform
 try:
     # Configure the analog inputs' negative channel, range, settling time and
     # resolution.
-    # Note when streaming, negative channels and ranges can be configured for
+    # When streaming, negative channels and ranges can be configured for
     # individual analog inputs, but the stream has only one settling time and
     # resolution.
 
-    # Configuration is all negative channels are single-ended, AIN0-AIN3 range
-    # is +/-10 V, stream settling is 0 (default) and stream resolution index is
-    # 0 (default).
-    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-              "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-    aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
+    if deviceType == ljm.constants.dtT4:
+        # LabJack T4 configuration
+
+        # AIN0 and AIN1 range is +/-10 V, stream settling is 0 (default) and
+        # stream resolution index is 0 (default).
+        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
+                  "STREAM_RESOLUTION_INDEX"]
+        aValues = [10.0, 10.0, 0, 0]
+    else:
+        # LabJack T7 and other devices configuration
+
+        # All negative channels are single-ended, AIN0 and AIN1 range is
+        # +/-10 V, stream settling is 0 (default) and stream resolution index
+        # is 0 (default).
+        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
+                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+        aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
     ljm.eWriteNames(handle, len(aNames), aNames, aValues)
 
     print("\nScan list:")

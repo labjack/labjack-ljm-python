@@ -16,15 +16,29 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
       "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
       (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
+deviceType = info[0]
+
 # Setup and call eWriteNames to configure AIN0 on the LabJack.
-numFrames = 4
-# AIN0:
-#   Negative channel = single ended (199)
-#   Range: +/-10.0 V (10.0). T4 note: Only AIN0-AIN3 can support +/-10 V range.
-#   Resolution index = Default (0)
-#   Settling, in microseconds = Auto (0)
-names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
-aValues = [199, 10, 0, 0]
+if deviceType == ljm.constants.dtT4:
+    # LabJack T4 configuration
+
+    # AIN0:
+    #   Range: +/-10.0 V (10.0). Only AIN0-AIN3 support the +/-10 V range.
+    #   Resolution index = Default (0)
+    #   Settling, in microseconds = Auto (0)
+    names = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
+    aValues = [10, 0, 0]
+else:
+    # LabJack T7 and other devices configuration
+
+    # AIN0:
+    #   Negative channel = single ended (199)
+    #   Range: +/-10.0 V (10.0).
+    #   Resolution index = Default (0)
+    #   Settling, in microseconds = Auto (0)
+    names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
+    aValues = [199, 10, 0, 0]
+numFrames = len(names)
 ljm.eWriteNames(handle, numFrames, names, aValues)
 
 print("\nSet configuration:")

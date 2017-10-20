@@ -69,7 +69,7 @@ useAddresses = True
 if deviceType == ljm.constants.dtT4:
     # T4 analog input configuration
     rangeAINHV = 10.0  # HV channels range
-    rangeAINLV = 2.4  # LV channels range
+    rangeAINLV = 2.5  # LV channels range
 
     # Configure the channels to analog input or digital I/O
     # Update all digital I/O channels. b1 = Ignored. b0 = Affected.
