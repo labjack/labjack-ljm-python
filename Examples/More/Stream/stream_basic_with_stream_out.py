@@ -85,7 +85,7 @@ try:
     if deviceType == ljm.constants.dtT4:
         # LabJack T4 configuration
 
-        # AIN0 and AIN1 range is +/-10 V, stream settling is 0 (default) and
+        # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
         # stream resolution index is 0 (default).
         aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
                   "STREAM_RESOLUTION_INDEX"]
@@ -93,7 +93,7 @@ try:
     else:
         # LabJack T7 and other devices configuration
 
-        # All negative channels are single-ended, AIN0 and AIN1 range is
+        # All negative channels are single-ended, AIN0 and AIN1 ranges are
         # +/-10 V, stream settling is 0 (default) and stream resolution index
         # is 0 (default).
         aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
