@@ -59,6 +59,12 @@ try:
     else:
         # T7 and other devices configuration
 
+        # Ensure triggered stream is disabled.
+        ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
+
+        # Enabling internally-clocked stream.
+        ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
+
         # Configure the analog input negative channels, ranges, stream settling
         # times and stream resolution index.
         aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US",

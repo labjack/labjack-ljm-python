@@ -163,7 +163,9 @@ def main(
                 ljm_stream_util.update_stream_out_buffer(handle, out_context)
 
             # ljm.eStreamRead will sleep until data has arrived
+            print("before")
             stream_read = ljm.eStreamRead(handle)
+            print("after")
 
             num_skipped_scans = ljm_stream_util.process_stream_results(
                 iteration,

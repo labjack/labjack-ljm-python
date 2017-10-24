@@ -29,8 +29,6 @@ scanRate = 10000  # Scans per second
 numScans = 20000  # Number of scans to perform
 
 try:
-    # Configure the analog inputs' negative channel, range, settling time and
-    # resolution.
     # When streaming, negative channels and ranges can be configured for
     # individual analog inputs, but the stream has only one settling time and
     # resolution.
@@ -46,13 +44,22 @@ try:
     else:
         # LabJack T7 and other devices configuration
 
+        # Ensure triggered stream is disabled.
+        ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
+
+        # Enabling internally-clocked stream.
+        ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
+
         # All negative channels are single-ended, AIN0 and AIN1 ranges are
         # +/-10 V, stream settling is 0 (default) and stream resolution index
         # is 0 (default).
         aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
                   "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
         aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
-    ljm.eWriteNames(handle, len(aNames), aNames, aValues)
+    # Write the analog inputs' negative channels (when applicable), ranges,
+    # stream settling time and stream resolution configuration.
+    numFrames = len(aNames)
+    ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
     print("\nScan list:")
     for chan in aScanListNames:
