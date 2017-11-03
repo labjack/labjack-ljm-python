@@ -39,6 +39,10 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 if deviceType == ljm.constants.dtT4:
+    # Configure FIO4 to FIO7 as digital I/O.
+    ljm.eWriteName(handle, "DIO_INHIBIT", 0xFFF0F)
+    ljm.eWriteName(handle, "DIO_ANALOG_ENABLE", 0x00000)
+
     # Setting CS, CLK, MISO, and MOSI lines for the T4. FIO0 to FIO3 are
     # reserved for analog inputs, and SPI requires digital lines.
     ljm.eWriteName(handle, "SPI_CS_DIONUM", 5)  # CS is FIO5

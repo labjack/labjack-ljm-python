@@ -25,6 +25,10 @@ deviceType = info[0]
 
 # Configure the I2C communication.
 if deviceType == ljm.constants.dtT4:
+    # Configure FIO4 and FIO5 as digital I/O.
+    ljm.eWriteName(handle, "DIO_INHIBIT", 0xFFFCF)
+    ljm.eWriteName(handle, "DIO_ANALOG_ENABLE", 0x00000)
+
     # For the T4, using FIO4 and FIO5 for SCL and SDA pins. FIO0 to FIO3 are
     # reserved for analog inputs, and digital lines are required.
     ljm.eWriteName(handle, "I2C_SDA_DIONUM", 5)  # SDA pin number = 5 (FIO5)
