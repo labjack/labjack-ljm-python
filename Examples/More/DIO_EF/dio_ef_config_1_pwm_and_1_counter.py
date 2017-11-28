@@ -5,9 +5,9 @@ FIO0/FIO6 to CIO2 and the read value. Value should be close to 10000.
 
 DIO extended features, PWM output and high-speed counter documented here:
 
-https://labjack.com/support/datasheets/t7/digital-io/extended-features
-https://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
-https://labjack.com/support/datasheets/t7/digital-io/extended-features/high-speed-counter
+https://labjack.com/support/datasheets/t-series/digital-io/extended-features
+https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pwm-out
+https://labjack.com/support/datasheets/t-series/digital-io/extended-features/high-speed-counter
 
 """
 import time

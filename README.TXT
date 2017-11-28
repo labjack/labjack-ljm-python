@@ -1,5 +1,5 @@
 LJM Python
-10/02/2017
+11/10/2017
 support@labjack.com
 
 
@@ -12,7 +12,7 @@ Installation Requirements:
 * Windows, Mac OS X, or Linux
 * LJM library: https://labjack.com/support/software/installers/ljm
 * Python 2.6, 2.7 and 3.x.
-  
+
 
 Installation:
 
