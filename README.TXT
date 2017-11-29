@@ -44,9 +44,9 @@ LJM library documentation can be found here:
 
     https://labjack.com/support/software/api/ljm
 
-T7 documentation can be found here:
+T7 and T4 documentation can be found here:
 
-    https://labjack.com/support/datasheets/t7
+    https://labjack.com/support/datasheets/t-series
 
 
 License:
