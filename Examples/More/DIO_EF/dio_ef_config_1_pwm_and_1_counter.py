@@ -36,7 +36,7 @@ if deviceType == ljm.constants.dtT4:
     # Set FIO and EIO lines to digital I/O.
     ljm.eWriteNames(handle, 2,
                     ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
-                    [0x0000, 0x0000])
+                    [0xFBF, 0x000])
 else:
     # For the T7 and other devices, use FIO0 (DIO0) for the PWM output
     pwmDIO = 0
