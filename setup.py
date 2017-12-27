@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(name='LJMPython',
-      version='1.16.0',
-      description='The LJM Python package.',
+      version='1.17.0',
+      description='The LJM Python package for the LabJack T4 and T7.',
       url='https://labjack.com/support/software/examples/ljm/python',
       author='LabJack Corporation',
       author_email="support@labjack.com",

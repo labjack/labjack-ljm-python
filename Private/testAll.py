@@ -200,6 +200,20 @@ macnum = ljm.macToNumber(macstr)
 print("MACToNumber: " + macstr + " : " + str(macnum))
 print("numberToMAC: " + ljm.numberToMAC(macnum))
 
+intervalHandle = 4
+microseconds = 2*1000000
+print("\nstartInterval (handle = %s, seconds = %s):" % (intervalHandle, microseconds/1000000.0))
+ljm.startInterval(intervalHandle, microseconds)
+for m in range(10):
+    ljm.waitForNextInterval(intervalHandle)
+    if m < 5:
+        print("  waitForNextInterval (time   = %s)" % (ljm.getHostTick()/1000000.0))
+    else:
+        (up, low) = ljm.getHostTick32Bit()
+        print("  waitForNextInterval (time32 = %s)" % (((up << 32) + low)/1000000.0))
+print("cleanInterval")
+ljm.cleanInterval(intervalHandle)
+
 
 print("\naddressesToTypes (2, 4): " + str(ljm.addressesToTypes(2, [2, 4])))
 
