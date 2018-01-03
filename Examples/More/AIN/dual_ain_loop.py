@@ -72,13 +72,14 @@ numFrames = 2
 names = ["AIN0", "AIN1"]
 
 print("\nStarting %s read loops.%s\n" % (str(loopAmount), loopMessage))
-delay = 1.0  # Delay between readings (in seconds)
+intervalHandle = 1
+ljm.startInterval(intervalHandle, 1000000)  # Delay between readings (in microseconds)
 i = 0
 while True:
     try:
         results = ljm.eReadNames(handle, numFrames, names)
         print("AIN0 : %f V, AIN1 : %f V" % (results[0], results[1]))
-        time.sleep(delay)
+        ljm.waitForNextInterval(intervalHandle)
         if loopAmount is not "infinite":
             i = i + 1
             if i >= loopAmount:
@@ -90,5 +91,6 @@ while True:
         print(sys.exc_info()[1])
         break
 
-# Close handle
+# Close handles
+ljm.cleanInterval(intervalHandle)
 ljm.close(handle)
