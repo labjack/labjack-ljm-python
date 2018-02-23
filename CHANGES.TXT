@@ -1,8 +1,10 @@
 Version History
 ---------------
 
-1.17.0 (xx/xx/xxxx)
- - Updated functions, constants and errorcodes to LJM v1.17.
+1.18.0 (02/23/2018)
+ - Updated functions, constants and errorcodes to LJM v1.18.
+ - Added write_read_loop_with_config.py example.
+ - Updated dual_ain_loop.py.
 
 1.16.0 (12/04/2017)
  - Updated functions, constants and errorcodes to LJM v1.16.

@@ -6,4 +6,4 @@ Package for cross-platform wrapper for the LJM library.
 from labjack.ljm.ljm import *
 
 
-__version__ = "1.17.0"
+__version__ = "1.18.0"

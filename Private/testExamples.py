@@ -40,6 +40,9 @@ exec(open("eReadAddresses.py").read())
 print("------------")
 exec(open("eAddresses.py").read())
 print("------------")
+sys.argv = ["write_read_loop_with_config.py", "5"]
+exec(open("write_read_loop_with_config.py").read())
+print("------------")
 
 os.chdir("../More/AIN")
 exec(open("single_ain.py").read())

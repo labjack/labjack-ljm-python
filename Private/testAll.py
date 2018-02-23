@@ -286,4 +286,12 @@ print("  " + str(info))
 print("cleanInfo")
 ljm.cleanInfo(infoHandle)
 
+print("getDeepSearchInfo:")
+(infoHandle, info) = ljm.getDeepSearchInfo()
+print("  " + str(infoHandle))
+print("  " + str(info))
+print("cleanInfo")
+ljm.cleanInfo(infoHandle)
+
+
 print("\n----- Test End ----------------\n")

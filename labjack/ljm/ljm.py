@@ -2520,6 +2520,42 @@ def getSpecificIPsInfo():
     return cInfoHandle.value, _decodeASCII(cInfo.value)
 
 
+def getDeepSearchInfo():
+    """Get information about whether the Deep Search file was parsed
+    successfully.
+
+    Returns:
+        A tuple containing:
+        (infoHandle, info)
+
+        infoHandle: A handle to Info that should be passed to cleanInfo
+            after info has been read.
+        info: A JSON string (allocated by LJM) describing the state of
+            state of the Deep Search IPs. Semantics:
+            {
+                "errorCode": Integer LJME_ error code. 0 indicates no
+                    error.
+                "IPs": Array of strings - the presentation-format IPs.
+                "message": Human-readable string description of
+                    success/failure.
+                "filePath": String absolute or relative file path.
+                "invalidIPs": Array of strings - the unparsable lines.
+            }
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cInfoHandle = ctypes.c_int32(0)
+    cInfo = ctypes.c_char_p()
+
+    error = _staticLib.LJM_GetDeepSearchInfo(ctypes.byref(cInfoHandle), ctypes.byref(cInfo))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cInfoHandle.value, _decodeASCII(cInfo.value)
+
+
 def log(level, string):
     """Sends a message of the specified level to the LJM debug logger.
 
