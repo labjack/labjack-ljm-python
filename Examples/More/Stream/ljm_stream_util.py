@@ -1,5 +1,40 @@
 
+from time import sleep
+
 from labjack import ljm
+
+
+def calculate_sleep_factor(scans_per_read, ljm_scan_backlog):
+    """Calculates how much sleep should be done based on how far behind stream is.
+
+    @para scans_per_read: The number of scans returned by a eStreamRead call
+    @type scans_per_read: int
+    @para ljm_scan_backlog: The number of backlogged scans in the LJM buffer
+    @type ljm_scan_backlog: int
+    @return: A factor that should be multiplied the normal sleep time
+    @type: float
+    """
+    DECREASE_TOTAL = 0.9
+    portionScansReady = float(ljm_scan_backlog) / scans_per_read
+    if (portionScansReady > DECREASE_TOTAL):
+        return 0.0
+    return (1 - portionScansReady) * DECREASE_TOTAL
+
+
+def variable_stream_sleep(scans_per_read, scan_rate, ljm_scan_backlog):
+    """Sleeps for approximately the expected amount of time until the next scan
+    is ready to be read.
+
+    @para scans_per_read: The number of scans returned by a eStreamRead call
+    @type scans_per_read: int
+    @para scan_rate: The stream scan rate
+    @type scan_rate: numerical
+    @para ljm_scan_backlog: The number of backlogged scans in the LJM buffer
+    @type ljm_scan_backlog: int
+    """
+    sleep_factor = calculate_sleep_factor(scans_per_read, ljm_scan_backlog)
+    sleep_time = sleep_factor * scans_per_read / float(scan_rate)
+    sleep(sleep_time)
 
 
 def convert_name_to_int_type(name):
