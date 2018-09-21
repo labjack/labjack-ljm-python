@@ -1373,6 +1373,33 @@ def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
     return cScanRate.value, _convertCtypeArrayToList(cData)
 
 
+def setStreamCallback(handle, callback, arg):
+    """Sets a callback that is called by LJM when the stream has collected
+    scansPerRead scans (see eStreamStart) or if an error has occurred.
+
+    Args:
+        handle: A valid handle to an open device.
+        callback: The callback function for LJM's stream thread to call
+            when stream data is ready, which should call LJM_eStreamRead to
+            acquire data.
+        arg: The user-defined argument that is passed to callback when it is
+            invoked.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        setStreamCallback should be called after eStreamStart.
+        To disable the previous callback for stream reading, pass None as
+        callback.
+        setStreamCallback may not be called from within a callback.
+        callback may not use data stored in `threading.local`.
+    """
+    error = _staticLib.LJM_SetStreamCallback(handle, callback, arg)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
 def writeRaw(handle, data, numBytes=None):
     """Sends an unaltered data packet to a device.
 
