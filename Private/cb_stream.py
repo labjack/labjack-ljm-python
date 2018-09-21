@@ -6,7 +6,6 @@ import time
 import sys
 from datetime import datetime
 import traceback
-import ctypes
 
 #Class to hold our stream information
 class StreamInfo:
@@ -37,8 +36,8 @@ class StreamInfo:
 def myStreamReadCallback(arg):
     global si
 
-    if si.handle != arg[0]:
-        print("myStreamReadCallback - Unexpected argument: %d" % (arg[0]))
+    if si.handle != arg:
+        print("myStreamReadCallback - Unexpected argument: %d" % (arg))
         return
 
     # Check if stream is done so that we don't output the print statement below
@@ -102,15 +101,6 @@ si.numAddresses = len(si.aScanListNames)
 si.aScanList = ljm.namesToAddresses(si.numAddresses, si.aScanListNames)[0]
 si.aDataSize - si.numAddresses * si.scansPerRead
 
-STREAM_READ_CALLBACK = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int))
-si.callback = STREAM_READ_CALLBACK(myStreamReadCallback)
-si.argInner = ctypes.c_int(si.handle)
-si.arg = ctypes.byref(si.argInner)
-# We pass the handle as the arg because if we had multiple devices running with
-# setStreamCallback, we would want to check which handle had stream data ready.
-# We need to keep references to both callback and argInner for the duration that
-# stream is running. Otherwise, the garbage collector will delete them and a
-# segfault will occur when LJM tries to call our callback.
 
 try:
     t0 = datetime.now()
@@ -129,7 +119,7 @@ try:
     si.scanRate = scanRate #Actual scan rate
     print("\nStream started with a scan rate of %0.0f Hz." % si.scanRate)
 
-    ljm.setStreamCallback(si.handle, si.callback, si.arg)
+    ljm.setStreamCallback(si.handle, myStreamReadCallback)
 
     print("Stream running, callback set, sleeping for " + str(si.streamLengthMS) + " milliseconds\n", )
     time.sleep(si.streamLengthMS/1000.0)

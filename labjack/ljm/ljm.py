@@ -9,6 +9,22 @@ from labjack.ljm import constants
 from labjack.ljm import errorcodes
 
 
+STREAM_READ_CALLBACK = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int))
+
+class CallbackData:
+    def __init__(self, handle, callback):
+        self.callbackUser = callback
+        self.callbackWrapper = lambda arg: self.callbackUser(arg[0])
+        self.callbackLjm = STREAM_READ_CALLBACK(self.callbackWrapper)
+        self.argInner = ctypes.c_int(handle)
+        self.argRef = ctypes.byref(self.argInner)
+        # We need to keep references for the duration that stream is running.
+        # Otherwise, the garbage collector will delete them and a segfault will
+        # occur when LJM tries to call our callback.
+
+_g_callbackData = {}
+
+
 class LJMError(Exception):
     """Custom exception class for LJM specific errors."""
     def __init__(self, errorCode=None, errorAddress=None, errorString=None):
@@ -1317,6 +1333,8 @@ def eStreamStop(handle):
     """
     if handle in _g_eStreamDataSize:
         del _g_eStreamDataSize[handle]
+    if handle in _g_callbackData:
+        del _g_callbackData[handle]
     error = _staticLib.LJM_eStreamStop(handle)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
@@ -1373,7 +1391,7 @@ def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
     return cScanRate.value, _convertCtypeArrayToList(cData)
 
 
-def setStreamCallback(handle, callback, arg):
+def setStreamCallback(handle, callback):
     """Sets a callback that is called by LJM when the stream has collected
     scansPerRead scans (see eStreamStart) or if an error has occurred.
 
@@ -1381,9 +1399,7 @@ def setStreamCallback(handle, callback, arg):
         handle: A valid handle to an open device.
         callback: The callback function for LJM's stream thread to call
             when stream data is ready, which should call LJM_eStreamRead to
-            acquire data.
-        arg: The user-defined argument that is passed to callback when it is
-            invoked.
+            acquire data. Will be passed handle as the single argument.
 
     Raises:
         LJMError: An error was returned from the LJM library call.
@@ -1394,8 +1410,15 @@ def setStreamCallback(handle, callback, arg):
         callback.
         setStreamCallback may not be called from within a callback.
         callback may not use data stored in `threading.local`.
+        The handle is passed as the argument to callback because if you have
+        have multiple devices running with setStreamCallback, you might want to
+        check which handle had stream data ready.
     """
-    error = _staticLib.LJM_SetStreamCallback(handle, callback, arg)
+    cbData = CallbackData(handle, callback)
+    _g_callbackData[handle] = cbData
+    cbLjm = cbData.callbackLjm
+    cbArg = cbData.argRef
+    error = _staticLib.LJM_SetStreamCallback(handle, cbLjm, cbArg)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
