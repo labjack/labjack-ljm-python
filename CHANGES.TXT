@@ -1,6 +1,12 @@
 Version History
 ---------------
 
+1.19.0 (10/18/2018)
+ - Updated functions, constants and errorcodes to LJM v1.19.
+ - Added stream callback functionality.
+ - Added 1-Wire, stream_triggered, and stream_callback
+   examples.
+
 1.18.0 (02/23/2018)
  - Updated functions, constants and errorcodes to LJM v1.18.
  - Added write_read_loop_with_config.py example.

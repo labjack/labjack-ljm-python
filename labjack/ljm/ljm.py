@@ -18,9 +18,9 @@ class CallbackData:
         self.callbackLjm = STREAM_READ_CALLBACK(self.callbackWrapper)
         self.argInner = ctypes.c_int(handle)
         self.argRef = ctypes.byref(self.argInner)
-        # We need to keep references for the duration that stream is running.
-        # Otherwise, the garbage collector will delete them and a segfault will
-        # occur when LJM tries to call our callback.
+        # We need to keep references for the duration that stream is
+        # running, otherwise the garbage collector will delete them
+        # causing a segfault LJM tries to call our callback.
 
 _g_callbackData = {}
 
@@ -1242,8 +1242,8 @@ def eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate):
     Args:
         handle: A valid handle to an open device.
         scansPerRead: Number of scans returned by each call to the
-            eStreamRead function. This is not tied to the maximum packet
-            size for the device.
+            eStreamRead function. This is not tied to the maximum
+            packet size for the device.
         numAddresses: The size of aScanList. The number of addresses to
             scan.
         aScanList: List of Modbus addresses to collect samples from,
@@ -1319,6 +1319,42 @@ def eStreamRead(handle):
     return _convertCtypeArrayToList(cData), cD_SBL.value, cLJM_SBL.value
 
 
+def setStreamCallback(handle, callback):
+    """Sets a callback that is called by LJM when the stream has
+    collected scansPerRead scans (see eStreamStart) or if an error has
+    occurred.
+
+    Args:
+        handle: A valid handle to an open device.
+        callback: The callback function for LJM's stream thread to call
+            when stream data is ready, which should call
+            LJM_eStreamRead to acquire data. The handle will be the
+            single argument of the callback.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    Notes:
+        setStreamCallback should be called after eStreamStart.
+        To disable the previous callback for stream reading, pass None
+        as callback.
+        setStreamCallback may not be called from within a callback.
+        callback may not use data stored in `threading.local`.
+        The handle is passed as the argument to callback because if you
+        have multiple devices running with setStreamCallback, you might
+        want to check which handle had stream data ready.
+
+    """
+    cbData = CallbackData(handle, callback)
+    _g_callbackData[handle] = cbData
+    cbLjm = cbData.callbackLjm
+    cbArg = cbData.argRef
+
+    error = _staticLib.LJM_SetStreamCallback(handle, cbLjm, cbArg)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
 def eStreamStop(handle):
     """Stops the LJM library from streaming any more data from the
     device, while leaving any collected data in the LJM library's
@@ -1335,6 +1371,7 @@ def eStreamStop(handle):
         del _g_eStreamDataSize[handle]
     if handle in _g_callbackData:
         del _g_callbackData[handle]
+
     error = _staticLib.LJM_eStreamStop(handle)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
@@ -1389,38 +1426,6 @@ def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
         raise LJMError(error)
 
     return cScanRate.value, _convertCtypeArrayToList(cData)
-
-
-def setStreamCallback(handle, callback):
-    """Sets a callback that is called by LJM when the stream has collected
-    scansPerRead scans (see eStreamStart) or if an error has occurred.
-
-    Args:
-        handle: A valid handle to an open device.
-        callback: The callback function for LJM's stream thread to call
-            when stream data is ready, which should call LJM_eStreamRead to
-            acquire data. Will be passed handle as the single argument.
-
-    Raises:
-        LJMError: An error was returned from the LJM library call.
-
-    Notes:
-        setStreamCallback should be called after eStreamStart.
-        To disable the previous callback for stream reading, pass None as
-        callback.
-        setStreamCallback may not be called from within a callback.
-        callback may not use data stored in `threading.local`.
-        The handle is passed as the argument to callback because if you have
-        have multiple devices running with setStreamCallback, you might want to
-        check which handle had stream data ready.
-    """
-    cbData = CallbackData(handle, callback)
-    _g_callbackData[handle] = cbData
-    cbLjm = cbData.callbackLjm
-    cbArg = cbData.argRef
-    error = _staticLib.LJM_SetStreamCallback(handle, cbLjm, cbArg)
-    if error != errorcodes.NOERROR:
-        raise LJMError(error)
 
 
 def writeRaw(handle, data, numBytes=None):
