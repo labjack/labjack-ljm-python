@@ -41,12 +41,14 @@ else:
     # For the T7 and other devices, use FIO0 (DIO0) for the PWM output
     pwmDIO = 0
 aNames = ["DIO_EF_CLOCK0_DIVISOR", "DIO_EF_CLOCK0_ROLL_VALUE",
-          "DIO_EF_CLOCK0_ENABLE", "DIO%i_EF_INDEX" % pwmDIO,
-          "DIO%i_EF_CONFIG_A" % pwmDIO, "DIO%i_EF_ENABLE" % pwmDIO,
+          "DIO_EF_CLOCK0_ENABLE", "DIO%i_EF_ENABLE" % pwmDIO,
+          "DIO%i_EF_INDEX" % pwmDIO, "DIO%i_EF_CONFIG_A" % pwmDIO,
+          "DIO%i_EF_ENABLE" % pwmDIO, "DIO18_EF_ENABLE",
           "DIO18_EF_INDEX", "DIO18_EF_ENABLE"]
 aValues = [1, 8000,
            1, 0,
-           2000, 1,
+           0, 2000,
+           1, 0,
            7, 1]
 numFrames = len(aNames)
 results = ljm.eWriteNames(handle, numFrames, aNames, aValues)

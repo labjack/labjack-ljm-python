@@ -1,13 +1,15 @@
 """
-Shows how to stream using a callback to read stream, which is useful
+Demonstrates how to stream using a callback to read stream, which is useful
 for streaming in external clock stream mode.
 
 """
-from labjack import ljm
-import time
-import sys
 from datetime import datetime
+import sys
+import threading
+import time
 import traceback
+
+from labjack import ljm
 
 
 # Class to hold our stream information
@@ -17,22 +19,25 @@ class StreamInfo:
         self.scanRate = 0
         self.scansPerRead = 0
         self.streamLengthMS = 0
-        self.done = 0
+        self.done = False
 
         self.numAddresses = 0
         self.aScanList = 0
         self.aScanListNames = 0
         
         self.aDataSize = 0
-        self.aData = 0
+        self.aData = None
 
         self.streamRead = 0
         self.totSkip = 0
         self.totScans = 0
 
-        self.argInner = None
-        self.arg = None
-        self.callback = None
+
+printLock = threading.Lock()
+def printWithLock(string):
+    global printLock
+    with printLock:
+        print(string)
 
 
 # Function to pass to the callback function. This needs have one
@@ -41,14 +46,14 @@ def myStreamReadCallback(arg):
     global si
 
     if si.handle != arg:
-        print("myStreamReadCallback - Unexpected argument: %d" % (arg))
+        printWithLock("myStreamReadCallback - Unexpected argument: %d" % (arg))
         return
 
     # Check if stream is done so that we don't output the print statement below.
     if si.done:
         return
 
-    print("\niteration: % 3d    " % (si.streamRead))
+    string = "\niteration: %3d\n" % si.streamRead
     si.streamRead += 1
 
     try:
@@ -66,134 +71,121 @@ def myStreamReadCallback(arg):
         curSkip = aData.count(-9999.0)
         si.totSkip += curSkip
 
-        ainStr = ""
+        string += "  1st scan out of %i: " % scans
         for j in range(0, si.numAddresses):
-            ainStr += "%s = %0.5f, " % (si.aScanListNames[j], aData[j])
-        print("  1st scan out of %i: %s" % (scans, ainStr))
-        print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-              "%i" % (curSkip/si.numAddresses, deviceScanBacklog, ljmScanBackLog))
+            string += "%s = %0.5f, " % (si.aScanListNames[j], aData[j])
+        string += "\n  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = %i" % \
+                (curSkip/si.numAddresses, deviceScanBacklog, ljmScanBackLog)
+        printWithLock(string)
 
     # If LJM has called this callback, the data is valid, but LJM_eStreamRead
     # may return LJME_STREAM_NOT_RUNNING if another thread (such as the Python
     # main thread) has stopped stream.
     except ljm.LJMError as err:
         if err.errorCode == ljm.errorcodes.STREAM_NOT_RUNNING:
-            print("eStreamRead returned LJME_STREAM_NOT_RUNNING.")
+            printWithLock("eStreamRead returned LJME_STREAM_NOT_RUNNING.")
         else:
-            ljm.eStreamStop(si.handle)
+            printWithLock(err)
 
-
-# Main code
-
+# Create the global StreamInfo class which is used to pass information between
+# the callback and main code.
 si = StreamInfo()
 
-# Open first found LabJack
-handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
-#handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
-#handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
-#handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
 
-info = ljm.getHandleInfo(handle)
-print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
-      "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
-      (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
+if __name__ == "__main__":
+    # Open first found LabJack
+    handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+    #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
+    #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
+    #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
 
-# Stream Configuration
-si.aScanListNames = ["AIN0", "FIO_STATE", "SYSTEM_TIMER_20HZ",
-                     "STREAM_DATA_CAPTURE_16"]  # Scan list names to stream
-si.scanRate = 2000
-si.scansPerRead = si.scanRate / 2
-si.streamLengthMS = 5000
-si.done = False
-si.numAddresses = len(si.aScanListNames)
-si.aScanList = ljm.namesToAddresses(si.numAddresses, si.aScanListNames)[0]
-si.aDataSize - si.numAddresses * si.scansPerRead
+    info = ljm.getHandleInfo(handle)
+    print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
+          "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
+          (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-try:
-    # When streaming, negative channels and ranges can be configured for
-    # individual analog inputs, but the stream has only one settling time and
-    # resolution.
+    deviceType = info[0]
 
-    if deviceType == ljm.constants.dtT4:
-        # LabJack T4 configuration
+    # Stream Configuration
+    si.aScanListNames = ["AIN0", "FIO_STATE", "SYSTEM_TIMER_20HZ",
+                         "STREAM_DATA_CAPTURE_16"]  # Scan list names to stream
+    si.numAddresses = len(si.aScanListNames)
+    si.aScanList = ljm.namesToAddresses(si.numAddresses, si.aScanListNames)[0]
+    si.scanRate = 2000
+    si.scansPerRead = int(si.scanRate / 2)
 
-        # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
-        # stream resolution index is 0 (default).
-        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [10.0, 10.0, 0, 0]
-    else:
-        # LabJack T7 and other devices configuration
+    si.streamLengthMS = 10000
+    si.done = False
+    si.aDataSize - si.numAddresses * si.scansPerRead
+    si.handle = handle
 
-        # Ensure triggered stream is disabled.
-        ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
-
-        # Enabling internally-clocked stream.
-        ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
-
-        # All negative channels are single-ended, AIN0 and AIN1 ranges are
-        # +/-10 V, stream settling is 0 (default) and stream resolution index
-        # is 0 (default).
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
-    # Write the analog inputs' negative channels (when applicable), ranges,
-    # stream settling time and stream resolution configuration.
-    numFrames = len(aNames)
-    ljm.eWriteNames(handle, numFrames, aNames, aValues)
-
-
-    t0 = datetime.now()
-
-    # Configure and start stream
-    scanRate = si.scanRate
     try:
-        scanRate = ljm.eStreamStart(si.handle, si.scansPerRead, si.numAddresses, si.aScanList, si.scanRate)
-    except ljm.LJMError as excep:
-        if excep.errorCode == ljm.errorcodes.USING_DEFAULT_CALIBRATION:
-            print("Warning: Using default calibration:")
-            print("  - It's possible device recently booted or the device calibration is incorrect.")
-            print("  - Consider using Kipling to check the device calibration constants.")
+        # When streaming, negative channels and ranges can be configured for
+        # individual analog inputs, but the stream has only one settling time
+        # and resolution.
+
+        if deviceType == ljm.constants.dtT4:
+            # LabJack T4 configuration
+
+            # AIN0 range is +/-10 V, stream settling is 0 (default) and stream
+            # stream resolution index is 0 (default).
+            aNames = ["AIN0_RANGE", "STREAM_SETTLING_US",
+                      "STREAM_RESOLUTION_INDEX"]
+            aValues = [10.0, 0, 0]
         else:
-            raise
-    si.scanRate = scanRate  # Actual scan rate
-    print("\nStream started with a scan rate of %0.0f Hz." % si.scanRate)
+            # LabJack T7 and other devices configuration
 
-    ljm.setStreamCallback(si.handle, myStreamReadCallback)
+            # Ensure triggered stream is disabled.
+            ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
 
-    print("Stream running, callback set, sleeping for " + str(si.streamLengthMS) + " milliseconds\n", )
-    time.sleep(si.streamLengthMS/1000.0)
-except ljm.LJMError:
-    
-    #TODO: FIGURE OUT HOW TO PRINT THE STACKTRACE
-    ljme = sys.exc_info()[1]
-    st = sys.exc_info()[2]
-    #print("LJM Exception: " + str(ljme))
-    print("\nLJM Exception:\n" + "".join(i for i in traceback.format_exc()))
-    #print(st)
-    #traceback.print_stack()
+            # Enabling internally-clocked stream.
+            ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-except Exception:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-    print("\nException:\n" + "".join('  ' + i for i in lines))
-    #or
-    """
-    print("\nException:\n" + str(traceback.format_exc()))
-    #or
-    e = sys.exc_info()[1]
-    st = sys.exc_info()[2]
-    print("\nException:\n" + "".join(i for i in traceback.format_exc()))
-    """
-    
-print("\nStopping Stream...")
-si.done = True
-ljm.eStreamStop(si.handle)
-t1 = datetime.now()
+            # All negative channels are single-ended, AIN0 range is +/-10 V,
+            # stream settling is 0 (default) and stream resolution index
+            # is 0 (default).
+            aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE",
+                      "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+            aValues = [ljm.constants.GND, 10.0, 0, 0]
+        # Write the analog inputs' negative channels (when applicable), ranges,
+        # stream settling time and stream resolution configuration.
+        numFrames = len(aNames)
+        ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
-print("Stream stopped. " +
-      str((t1-t0).seconds*1000 + float((t1-t0).microseconds)/1000) +
-      " milliseconds have elapsed since eStreamStart\n")
+        t0 = datetime.now()
 
-# Close handle
-ljm.close(si.handle)
+        # Configure and start stream
+        si.scanRate = ljm.eStreamStart(handle, si.scansPerRead, si.numAddresses, si.aScanList, si.scanRate)
+        print("\nStream started with a scan rate of %0.0f Hz." % si.scanRate)
+
+        # Set the callback function.
+        ljm.setStreamCallback(handle, myStreamReadCallback)
+
+        printWithLock("Stream running, callback set, sleeping for %i milliseconds." % si.streamLengthMS)
+        time.sleep(si.streamLengthMS/1000.0)
+
+        si.done = True
+        t1 = datetime.now()
+
+        printWithLock("\nStreaming done. %.3f milliseconds have elapsed since eStreamStart" %
+              ((t1-t0).seconds*1000 + float((t1-t0).microseconds)/1000))
+    except ljm.LJMError:
+        ljme = sys.exc_info()[1]
+        printWithLock(ljme)
+    except Exception:
+        e = sys.exc_info()[1]
+        printWithLock(e)
+
+    try:
+        printWithLock("\nStop Stream")
+        si.done = True
+        ljm.eStreamStop(handle)
+    except ljm.LJMError:
+        ljme = sys.exc_info()[1]
+        print(ljme)
+    except Exception:
+        e = sys.exc_info()[1]
+        print(e)
+
+    # Close handle
+    ljm.close(handle)

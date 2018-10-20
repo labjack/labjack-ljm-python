@@ -25,6 +25,10 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 
 deviceType = info[0]
 
+if deviceType == ljm.constants.dtT4:
+    print("\nThe LabJack T4 does not support triggered stream.")
+    sys.exit()
+
 # Stream Configuration
 aScanListNames = ["AIN0", "AIN1"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
@@ -68,31 +72,21 @@ try:
     # individual analog inputs, but the stream has only one settling time and
     # resolution.
 
-    if deviceType == ljm.constants.dtT4:
-        # LabJack T4 configuration
+    # Ensure triggered stream is disabled.
+    ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
 
-        # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
-        # stream resolution index is 0 (default).
-        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [10.0, 10.0, 0, 0]
-    else:
-        # LabJack T7 and other devices configuration
+    # Enabling internally-clocked stream.
+    ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # Ensure triggered stream is disabled.
-        ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
+    # All negative channels are single-ended, AIN0 and AIN1 ranges are
+    # +/-10 V, stream settling is 0 (default) and stream resolution index
+    # is 0 (default).
+    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
+              "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+    aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
 
-        # Enabling internally-clocked stream.
-        ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
-
-        # All negative channels are single-ended, AIN0 and AIN1 ranges are
-        # +/-10 V, stream settling is 0 (default) and stream resolution index
-        # is 0 (default).
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
-    # Write the analog inputs' negative channels (when applicable), ranges,
-    # stream settling time and stream resolution configuration.
+    # Write the analog inputs' negative channels, ranges, stream settling time
+    # and stream resolution configuration.
     numFrames = len(aNames)
     ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
@@ -135,7 +129,6 @@ try:
             print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
                   "%i" % (curSkip/numAddresses, ret[1], ljmScanBacklog))
             i += 1
-
         except ljm.LJMError as err:
             if err.errorCode == ljm.errorcodes.NO_SCANS_RETURNED:
                 sys.stdout.write('.')

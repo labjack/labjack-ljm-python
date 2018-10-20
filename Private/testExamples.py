@@ -44,6 +44,8 @@ sys.argv = ["write_read_loop_with_config.py", "5"]
 exec(open("write_read_loop_with_config.py").read())
 print("------------")
 
+# Skipping 1-Wire test. Needs connections for testing.
+
 os.chdir("../More/AIN")
 exec(open("single_ain.py").read())
 print("------------")
@@ -93,6 +95,7 @@ exec(open("spi.py").read())
 print("------------")
 
 os.chdir("../Stream")
+sys.path.append(".")
 exec(open("stream_basic.py").read())
 print("------------")
 exec(open("stream_basic_with_stream_out.py").read())
@@ -101,7 +104,10 @@ exec(open("stream_burst.py").read())
 print("------------")
 exec(open("stream_sequential_ain.py").read())
 print("------------")
-sys.path.append(".")
+exec(open("stream_callback.py").read())
+print("------------")
+#exec(open("stream_triggered.py").read())
+#print("------------")
 exec(open("in_stream_with_non_looping_out_stream.py").read())
 print("------------")
 
