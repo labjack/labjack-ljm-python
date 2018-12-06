@@ -68,7 +68,7 @@ NO_IP_ADDRESS = 0
 NO_PORT = 0
 
 # Identifier types:
-DEMO_MODE = "-1"
+DEMO_MODE = "-2"
 idANY = 0
 
 # addressesToMBFB Constants
