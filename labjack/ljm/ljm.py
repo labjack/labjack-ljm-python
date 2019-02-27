@@ -959,6 +959,7 @@ def eWriteAddressByteArray(handle, address, numBytes, aBytes):
     """
     cAddr = ctypes.c_int32(address)
     cNumBytes = ctypes.c_int32(numBytes)
+    aBytes = _coerceToByteArrayIfString(aBytes)
     cBytes = _convertListToCtypeArray(aBytes, ctypes.c_ubyte)
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -996,6 +997,7 @@ def eWriteNameByteArray(handle, name, numBytes, aBytes):
     if not isinstance(name, str):
         raise TypeError("Expected a string instead of " + str(type(name)) + ".")
     cNumBytes = ctypes.c_int32(numBytes)
+    aBytes = _coerceToByteArrayIfString(aBytes)
     cBytes = _convertListToCtypeArray(aBytes, ctypes.c_ubyte)
     cErrorAddr = ctypes.c_int32(-1)
 
@@ -2646,6 +2648,13 @@ def resetLog():
     error = _staticLib.LJM_ResetLog()
     if error != errorcodes.NOERROR:
         raise LJMError(error)
+
+
+def _coerceToByteArrayIfString(aBytes):
+    """If aBytes is a string, change it into a bytearray."""
+    if isinstance(aBytes, str):
+        aBytes = bytearray(aBytes, 'ascii')
+    return aBytes
 
 
 def _convertListToCtypeArray(li, cType):
