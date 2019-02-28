@@ -21,7 +21,7 @@ def openDevice(quiet=QUIET_OPEN):
     """Open a device.
 
     This is defined in one place as a quick way to configure which device is
-    opened for of the scripts in the SD directory.
+    opened for all of the scripts in the SD directory.
     """
     # Open first found LabJack
     handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
