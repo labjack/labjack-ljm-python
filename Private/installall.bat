@@ -21,6 +21,8 @@ python36_32 setup.py install || goto :done
 ECHO.
 python36_64 setup.py install || goto :done
 ECHO.
+python37_64 setup.py install || goto :done
+ECHO.
 
 ECHO Success!
 

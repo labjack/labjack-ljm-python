@@ -164,6 +164,26 @@ print("eWriteNameByteArray: " + name + " " + str(arr))
 ljm.eWriteNameByteArray(h, name, 4, arr)
 print("eReadNameByteArray: " + name + " " + str(ljm.eReadNameByteArray(h, name, 4)))
 
+print("\n--- Byte Array String tests --------------\n")
+address = 55120
+string = "ROry"  # Needs to be 4 characters
+print("eWriteAddressByteArray: " + str(address) + " " + string)
+ljm.eWriteAddressByteArray(h, address, 4, string)
+ret = ljm.eReadAddressByteArray(h, address, 4)
+retS = ""
+for i in ret:
+    retS += chr(i)
+print("eReadAddressByteArray: " + str(address) + " " + retS + " " + str(ret))
+string = "DavE"
+print("eWriteNameByteArray: " + name + " " + string)
+ljm.eWriteNameByteArray(h, name, 4, string)
+ret = ljm.eReadNameByteArray(h, name, 4)
+retS = ""
+for i in ret:
+    retS += chr(i)
+print("eReadNameByteArray: " + name + " " + retS + " " + str(ret))
+
+
 print("\n--- Stream tests --------------\n")
 #setStreamCallback(handle, callback, arg)
 print("streamBurst: ")
