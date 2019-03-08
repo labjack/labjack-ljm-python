@@ -134,9 +134,7 @@ def readFile(handle, sdPath):
     path, filename = os.path.split(sdPath)
 
     if path:
-        raise ValueError(
-            'cannot accept a file path that is not in the cwd'
-        )
+        raise ValueError('cannot accept a file path that is not in the cwd')
 
         # path = sanitize_path(path)
         # goToPath(handle, path)
@@ -146,7 +144,10 @@ def readFile(handle, sdPath):
     dir_contents = getCurDirContents(handle)
 
     # Get file size from the directory contents
-    fileSize = dir_contents[filename][0]
+    try:
+        fileSize = dir_contents[filename][0]
+    except KeyError as excep:
+        raise ValueError('File not found: %s' % (sdPath))
 
     # 1) Write the length of the file name to FILE_IO_PATH_WRITE_LEN_BYTES (add
     #    1 for the null terminator);
