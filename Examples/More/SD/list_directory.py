@@ -2,9 +2,11 @@ import sys
 from labjack import ljm
 import sd_util
 
+
 def usage():
     print('Usage: %s [directory]' % (sys.argv[0]))
     exit()
+
 
 list_cwd = None
 if len(sys.argv) == 1:

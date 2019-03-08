@@ -31,8 +31,8 @@ def openDevice(quiet=QUIET_OPEN):
     info = ljm.getHandleInfo(handle)
 
     if not quiet:
-        print("Opened a LabJack with Device type: %i, Connection type: %i, \n"
-              "Serial number: %i, IP address: %s, Port: %i, \nMax bytes per MB: %i" %
+        print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
+              "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
               (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
     if info[0] == ljm.constants.dtT4:
@@ -46,9 +46,9 @@ def openDevice(quiet=QUIET_OPEN):
 def getCWD(handle):
     """Returns the SD card system's current working directory as a string.
     """
-    # 1) Write a value of 1 to FILE_IO_DIR_CURRENT. The error returned indicates
-    #    whether there is a directory loaded as current. No error (0) indicates
-    #    a valid directory.
+    # 1) Write a value of 1 to FILE_IO_DIR_CURRENT. The error returned
+    #    indicates whether there is a directory loaded as current. No error (0)
+    #    indicates a valid directory.
     ljm.eWriteName(handle, "FILE_IO_DIR_CURRENT", 1)
 
     # 2) Read  FILE_IO_PATH_READ_LEN_BYTES.
@@ -91,7 +91,7 @@ def getCurDirContents(handle):
     #    found. FILE_IO_NOT_FOUND (2960) indicates that nothing was found.
     ljm.eWriteName(handle, "FILE_IO_DIR_FIRST", 1)
 
-    #loop, reading name and properties of one file per iteration
+    # Loop reading name and properties of one file per iteration
     more_files = True
     dirContents = {}
     while more_files:
@@ -106,10 +106,10 @@ def getCurDirContents(handle):
         # 3) Read an array of size FILE_IO_PATH_READ_LEN_BYTES from
         #    FILE_IO_PATH_READ.
         file_name_as_bytes = ljm.eReadNameByteArray(handle, "FILE_IO_PATH_READ",
-            len_file_name_as_bytes)
+                                                    len_file_name_as_bytes)
 
         # convert to string
-        file_name_as_strings = "".join( chr(x) for x in file_name_as_bytes)
+        file_name_as_strings = "".join(chr(x) for x in file_name_as_bytes)
 
         dirContents[file_name_as_strings] = (size, attr)
 
@@ -134,9 +134,7 @@ def readFile(handle, sdPath):
     path, filename = os.path.split(sdPath)
 
     if path:
-        raise ValueError(
-            'cannot accept a file path that is not in the cwd'
-        )
+        raise ValueError('cannot accept a file path that is not in the cwd')
 
         # path = sanitize_path(path)
         # goToPath(handle, path)
@@ -150,13 +148,13 @@ def readFile(handle, sdPath):
 
     # 1) Write the length of the file name to FILE_IO_PATH_WRITE_LEN_BYTES (add
     #    1 for the null terminator);
-    filename_len = len(filename);
+    filename_len = len(filename)
     ljm.eWriteName(handle, "FILE_IO_PATH_WRITE_LEN_BYTES", filename_len)
 
     # 2) Write the name to FILE_IO_NAME_WRITE (with null terminator)
     filenameBytes = sdPath.encode()
     ljm.eWriteNameByteArray(handle, "FILE_IO_PATH_WRITE", filename_len,
-        filenameBytes)
+                            filenameBytes)
 
     # 3) Write any value to FILE_IO_OPEN
     ljm.eWriteName(handle, "FILE_IO_OPEN", 1)
@@ -167,8 +165,8 @@ def readFile(handle, sdPath):
     # 5) Write a value of 1 to FILE_IO_CLOSE
     ljm.eWriteName(handle, "FILE_IO_CLOSE", 1)
 
-    #convert data bytes to string
-    fileData = "".join( chr(x) for x in fileDataBytes)
+    # Convert data bytes to string
+    fileData = "".join(chr(x) for x in fileDataBytes)
     return fileData
 
 
@@ -176,8 +174,9 @@ def printDiskInfo(handle):
     """Prints disk info.
     """
     aNames = ["FILE_IO_DISK_SECTOR_SIZE_BYTES",
-        "FILE_IO_DISK_SECTORS_PER_CLUSTER", "FILE_IO_DISK_TOTAL_CLUSTERS",
-        "FILE_IO_DISK_FREE_CLUSTERS"]
+              "FILE_IO_DISK_SECTORS_PER_CLUSTER",
+              "FILE_IO_DISK_TOTAL_CLUSTERS",
+              "FILE_IO_DISK_FREE_CLUSTERS"]
     numFrames = len(aNames)
     results = ljm.eReadNames(handle, numFrames, aNames)
 
@@ -186,10 +185,10 @@ def printDiskInfo(handle):
     # freeSize = sector_size * sectors_per_cluster * free_clusters (in bytes)
     freeSize = results[0] * results[1] * results[3]
     print("%f megabytes free of %f total megabytes." %
-        (freeSize/1048576, totalSize/1048576))
+          (freeSize/1048576, totalSize/1048576))
 
 
-def listDirContents(handle, sdPath = "/\x00"):
+def listDirContents(handle, sdPath="/\x00"):
     """Prints the contents of the specified directory.
     """
     # Save starting directory to later return here.
@@ -202,7 +201,7 @@ def listDirContents(handle, sdPath = "/\x00"):
 
     # Get and print contents of the directory
     if sdPath == "/\x00":
-        print("Root Directory Contents:");
+        print("Root Directory Contents:")
     else:
         print("%s Directory Contents:" % (sdPath))
 
@@ -212,17 +211,17 @@ def listDirContents(handle, sdPath = "/\x00"):
     print("%40.40s  %9.9s  %9s" % ("Name\x00", "Type", "Size"))
     for key in dirContents.keys():
         # Check 4 or 5 bit
-        if dirContents[key][1] & (1<<5):
+        if dirContents[key][1] & (1 << 5):
             type = "File"
         else:
-            if dirContents[key][1] & (1<<4):
+            if dirContents[key][1] & (1 << 4):
                 type = "Folder"
             else:
                 type = "Other"
 
         if type == "File":
             print("%40.40s  %9.9s  %9d bytes" %
-                (key, type, dirContents[key][0]))
+                  (key, type, dirContents[key][0]))
         else:
             print("%40.40s  %9.9s" % (key, type))
 
@@ -243,7 +242,7 @@ def deleteFile(handle, sdPath):
 
     # 2) Write the name to FILE_IO_NAME_WRITE (with null terminator)
     ljm.eWriteNameByteArray(handle, "FILE_IO_PATH_WRITE", sdPathLen,
-        sdPathBytes)
+                            sdPathBytes)
 
     print("Deleting file at %s" % (sdPath))
     # 3) Write a value to FILE_IO_DELETE to delete the file at the specified
@@ -256,7 +255,7 @@ def deleteFile(handle, sdPath):
 def example_program():
     handle = openDevice(quiet=False)
     printDiskInfo(handle)
-    listDirContents(handle);
+    listDirContents(handle)
     ljm.close(handle)
 
 
