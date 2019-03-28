@@ -189,6 +189,11 @@ print("\n--- Stream tests --------------\n")
 print("streamBurst: ")
 print("  " + str(ljm.streamBurst(h, 2, [0, 2], 50, 20)))
 
+# Stream test using the example.
+
+#  getStreamTCPReceiveBufferStatus test in testGetStreamTCPReceiveBufferStatus.py.
+
+
 print("\n--- Other tests --------------\n")
 
 name = "DEVICE_NAME_DEFAULT"

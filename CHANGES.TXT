@@ -2,6 +2,7 @@ Version History
 ---------------
 
 x.xx.x (xx/xx/xxxx)
+ - Updated functions, constants and errorcodes to LJM v1.20.
  - Added string support to eWriteAddressByteArray and eWriteNameByteArray.
  - Added SD examples.
 

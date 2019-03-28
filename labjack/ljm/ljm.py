@@ -1430,6 +1430,36 @@ def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
     return cScanRate.value, _convertCtypeArrayToList(cData)
 
 
+def getStreamTCPReceiveBufferStatus(handle):
+    """Gets the backlog status of the TCP receive buffer.
+
+    Args:
+        handle: A valid handle to an open device running a TCP based
+            stream.
+
+    Returns:
+        A tuple containing:
+        (receiveBufferBytesSize, receiveBufferBytesBacklog)
+
+        receiveBufferBytesSize: The current maximum number of bytes
+            that can be stored in the receive buffer before it is full.
+        receiveBufferBytesBacklog: The current number of bytes stored
+            in the receive buffer.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cRecSize = ctypes.c_uint32(0)
+    cRecBacklog = ctypes.c_uint32(0)
+    
+    error = _staticLib.LJM_GetStreamTCPReceiveBufferStatus(handle, ctypes.byref(cRecSize), ctypes.byref(cRecBacklog))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cRecSize.value, cRecBacklog.value
+
+
 def writeRaw(handle, data, numBytes=None):
     """Sends an unaltered data packet to a device.
 
