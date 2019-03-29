@@ -23,9 +23,9 @@ CLASSIFIERS = [
     'Topic :: System :: Hardware'
     ]
 
-setup(name="LJMPython",
+setup(name="labjack-ljm",
       version='1.20.0',
-      description='Python wrapper for the LJM library, which supports the LabJack T4 and T7 devices.',
+      description='LJM library Python wrapper for LabJack T7 and T4.',
       url='https://labjack.com/support/software/examples/ljm/python',
       author='LabJack Corporation',
       author_email="support@labjack.com",

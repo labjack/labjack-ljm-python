@@ -1452,7 +1452,7 @@ def getStreamTCPReceiveBufferStatus(handle):
     """
     cRecSize = ctypes.c_uint32(0)
     cRecBacklog = ctypes.c_uint32(0)
-    
+
     error = _staticLib.LJM_GetStreamTCPReceiveBufferStatus(handle, ctypes.byref(cRecSize), ctypes.byref(cRecBacklog))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
