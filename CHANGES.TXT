@@ -1,7 +1,7 @@
 Version History
 ---------------
 
-1.20.0 (04/xx/2019)
+1.20.0 (04/03/2019)
  - Updated functions, constants and errorcodes to LJM v1.20.
  - Added string support to eWriteAddressByteArray and eWriteNameByteArray.
  - Changed distribution name from LJMPython to labjack-ljm for first PyPi
