@@ -46,7 +46,7 @@ labjack-ljm. The namespace, package and interface remain the same.
 Installation Troubleshooting:
 
 - If you have multiple versions of Python installed, make sure you install for
-  the Python version you will be using. For example, on Linux if both Python
+  the Python version you will be using. For example, on Linux if both
   Python 2.7 and 3.5 are installed, you can install to Python 3.5 with:
 
       $ python3.5 -m pip labjack-ljm install
