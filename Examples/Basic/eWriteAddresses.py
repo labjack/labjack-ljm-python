@@ -2,6 +2,26 @@
 Demonstrates how to use the labjack.ljm.eWriteAddresses (LJM_eWriteAddresses)
 function.
 
+Relevant Documentation:
+ 
+LJM Library:
+ 	LJM Library Installer:
+ 		https://labjack.com/support/software/installers/ljm
+ 	LJM Users Guide:
+ 		https://labjack.com/support/software/api/ljm
+ 	Opening and Closing:
+ 		https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+ 	eWriteAddresses:
+ 		https://labjack.com/support/software/api/ljm/function-reference/ljmewriteaddresses
+ 	Constants:
+ 		https://labjack.com/support/software/api/ljm/constants
+ 
+T-Series and I/O:
+ 	Modbus Map:
+ 		https://labjack.com/support/software/api/modbus/modbus-map
+ 	DAC:
+ 		https://labjack.com/support/datasheets/t-series/dac
+
 """
 from labjack import ljm
 

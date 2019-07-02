@@ -1,6 +1,27 @@
 """
 Demonstrates usage of the T7's SD card system.
 https://labjack.com/support/datasheets/t-series/sd-card
+
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer
+        https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+       https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   Multiple Value Functions(such as eWriteNameByteArray):
+       https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+   Single Value Functions(such as eReadName):
+       https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+ 
+T-Series and I/O:
+   Modbus Map:
+       https://labjack.com/support/software/api/modbus/modbus-map
+   SD Card(T7 Only):
+       https://labjack.com/support/datasheets/t-series/sd-card
+
 """
 import os
 

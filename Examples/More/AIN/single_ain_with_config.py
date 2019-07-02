@@ -1,6 +1,29 @@
 """
 Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
 
+  Name: single_ain_with_config.c
+  Desc: Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
+ 
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer:
+     https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+     https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   eReadName:
+     https://labjack.com/support/software/api/ljm/function-reference/ljmereadname
+   Multiple Value Functions(such as eWriteNames):
+     https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+ 
+T-Series and I/O:
+   Modbus Map:
+     https://labjack.com/support/software/api/modbus/modbus-map
+   Analog Inputs:
+     https://labjack.com/support/datasheets/t-series/ain
+     
 """
 from labjack import ljm
 

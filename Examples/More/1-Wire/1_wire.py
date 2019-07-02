@@ -5,6 +5,26 @@ demonstration:
     on EIO0.
   - Reads temperature from a DS1822 sensor.
 
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer
+      https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+     https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   Multiple Value Functions(such as eReadNames):
+     https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+ 
+T-Series and I/O:
+   1-Wire:
+     https://labjack.com/support/datasheets/t-series/digital-io/1-wire
+   Modbus Map:
+     https://labjack.com/support/software/api/modbus/modbus-map
+   Digital I/O:
+     https://labjack.com/support/datasheets/t-series/digital-io
+
 """
 from labjack import ljm
 
