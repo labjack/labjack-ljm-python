@@ -1,6 +1,36 @@
 """
 Demonstrates triggered stream on DIO0 / FIO0.
 
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer:
+       https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+       https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   NamesToAddresses:
+       https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
+   Stream Functions (eStreamRead, eStreamStart, etc.): 
+       https://labjack.com/support/software/api/ljm/function-reference/stream-functions
+   Single Value Functions (such as eReadName):
+       https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+   Library Configuration Functions:
+       https://labjack.com/support/software/api/ljm/function-reference/library-configuration-functions
+ 
+T-Series and I/O:
+   Modbus Map:
+       https://labjack.com/support/software/api/modbus/modbus-map
+   Stream Mode: 
+       https://labjack.com/support/datasheets/t-series/communication/stream-mode
+   Stream Mode (triggered):
+       https://labjack.com/support/datasheets/t-series/communication/stream-mode#triggered
+   Analog Inputs:
+       https://labjack.com/support/datasheets/t-series/ain
+   Digital I/O:
+       https://labjack.com/support/datasheets/t-series/digital-io
+
 """
 from datetime import datetime
 import sys

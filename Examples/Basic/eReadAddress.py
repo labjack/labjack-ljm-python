@@ -2,6 +2,24 @@
 Demonstrates how to use the labjack.ljm.eReadAddress (LJM_eReadAddress)
 function.
 
+Relevant Documentation:
+ 
+LJM Library:
+ 	LJM Library Installer:
+ 		https://labjack.com/support/software/installers/ljm
+ 	LJM Users Guide:
+ 		https://labjack.com/support/software/api/ljm
+ 	Opening and Closing:
+ 		https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+ 	eReadAddress:
+ 		https://labjack.com/support/software/api/ljm/function-reference/ljmereadaddress
+ 
+T-Series and I/O:
+ 	Modbus Map:
+ 		https://labjack.com/support/software/api/modbus/modbus-map
+ 	Hardware Overview(Device Information Registers):
+ 		https://labjack.com/support/datasheets/t-series/hardware-overview
+
 """
 from labjack import ljm
 

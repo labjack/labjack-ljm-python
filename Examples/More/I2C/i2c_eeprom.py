@@ -4,6 +4,30 @@ LJTick-DAC connected to FIO0/FIO1 for the T7 or FIO4/FIO5 for the T4, and
 configures the I2C settings. Then a read, write and again a read are performed
 on the LJTick-DAC EEPROM.
 
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer:
+     https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+     https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   eWriteName:
+     https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+   Multiple Value Functions(such as eWriteNameByteArray):
+     https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+ 
+T-Series and I/O:
+   Modbus Map:
+     https://labjack.com/support/software/api/modbus/modbus-map
+   Digital I/O:
+     https://labjack.com/support/datasheets/t-series/digital-io
+   I2C:
+     https://labjack.com/support/datasheets/t-series/digital-io/i2c
+   LJTick-DAC:
+     https://labjack.com/support/datasheets/accessories/ljtick-dac
+
 """
 from random import randrange
 

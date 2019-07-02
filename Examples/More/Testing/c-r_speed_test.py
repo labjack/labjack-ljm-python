@@ -2,6 +2,28 @@
 Performs LabJack operations in a loop and reports the timing statistics for the
 operations.
 
+Relevant Documentation:
+ 
+LJM Library:
+   LJM Library Installer:
+       https://labjack.com/support/software/installers/ljm
+   LJM Users Guide:
+       https://labjack.com/support/software/api/ljm
+   Opening and Closing:
+       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+   Single Value Functions(such as eReadName):
+       https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+   Raw Byte Functions:
+   https://labjack.com/support/software/api/ljm/function-reference/lowlevel-functions/raw-byte-functions
+ 
+T-Series and I/O:
+   Modbus Map:
+       https://labjack.com/support/software/api/modbus/modbus-map
+   Digital I/O:
+       https://labjack.com/support/datasheets/t-series/digital-io
+   Analog Inputs:
+       https://labjack.com/support/datasheets/t-series/ain
+
 """
 from datetime import datetime
 import functools
