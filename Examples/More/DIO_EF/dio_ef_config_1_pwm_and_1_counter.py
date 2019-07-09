@@ -6,26 +6,26 @@ FIO0/FIO6 to CIO2 and the read value. Value should be close to 10000.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-     https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-     https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   Multiple Value Functions(such as eWriteNames):
-     https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    Multiple Value Functions(such as eWriteNames):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
  
 T-Series and I/O:
-   Modbus Map:
-     https://labjack.com/support/software/api/modbus/modbus-map
-   Digital I/O:
-     https://labjack.com/support/datasheets/t-series/digital-io
-   Extended DIO Features:
-     https://labjack.com/support/datasheets/t-series/digital-io/extended-features
-   PWM Out:
-     https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pwm-out
-   High-Speed Counter:
-     https://labjack.com/support/datasheets/t-series/digital-io/extended-features/high-speed-counter
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
+    Extended DIO Features:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features
+    PWM Out:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pwm-out
+    High-Speed Counter:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/high-speed-counter
 
 """
 import time

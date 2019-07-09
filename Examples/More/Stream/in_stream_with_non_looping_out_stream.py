@@ -17,30 +17,30 @@ You may also need to configure AIN, etc.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-       https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-       https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   LJM Single Value Functions (like eReadName, eReadAddress): 
-       https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-   Stream Functions (eStreamRead, eStreamStart, etc.):
-       https://labjack.com/support/software/api/ljm/function-reference/stream-functions
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    LJM Single Value Functions (like eReadName, eReadAddress): 
+        https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+    Stream Functions (eStreamRead, eStreamStart, etc.):
+        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
  
 T-Series and I/O:
-   Modbus Map:
-       https://labjack.com/support/software/api/modbus/modbus-map
-   Stream Mode:
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode
-   Analog Inputs:
-       https://labjack.com/support/datasheets/t-series/ain
-   Stream-Out:
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
-   Digital I/O:
-       https://labjack.com/support/datasheets/t-series/digital-io
-   DAC:
-       https://labjack.com/support/datasheets/t-series/dac
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Stream Mode:
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Analog Inputs:
+        https://labjack.com/support/datasheets/t-series/ain
+    Stream-Out:
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
+    DAC:
+        https://labjack.com/support/datasheets/t-series/dac
 
 """
 import sys

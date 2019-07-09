@@ -5,28 +5,28 @@ calls eWriteNames and eReadNames repeatedly in a loop.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-       https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-       https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   Single Value Functions(such as eReadName):
-       https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-   Multiple Value Functions(such as eWriteNames):
-       https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
-   Timing Functions(such as StartInterval):
-       https://labjack.com/support/software/api/ljm/function-reference/timing-functions
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    Single Value Functions(such as eReadName):
+        https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+    Multiple Value Functions(such as eWriteNames):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+    Timing Functions(such as StartInterval):
+        https://labjack.com/support/software/api/ljm/function-reference/timing-functions
  
 T-Series and I/O:
-   Modbus Map:
-       https://labjack.com/support/software/api/modbus/modbus-map
-   Analog Inputs:
-       https://labjack.com/support/datasheets/t-series/ain
-   Digital I/O:
-       https://labjack.com/support/datasheets/t-series/digital-io
-   DAC:
-       https://labjack.com/support/datasheets/t-series/dac
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Analog Inputs:
+        https://labjack.com/support/datasheets/t-series/ain
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
+    DAC:
+        https://labjack.com/support/datasheets/t-series/dac
 
 """
 import sys

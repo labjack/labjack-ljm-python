@@ -4,20 +4,20 @@ Demonstrates how to configure the Watchdog on a LabJack.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-     https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-     https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   eWriteNames:
-     https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
  
 T-Series and I/O:
-   Modbus Map:
-     https://labjack.com/support/software/api/modbus/modbus-map
-   Watchdog:
-     https://labjack.com/support/datasheets/t-series/watchdog
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Watchdog:
+        https://labjack.com/support/datasheets/t-series/watchdog
 
 """
 from labjack import ljm

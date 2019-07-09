@@ -6,26 +6,26 @@ FIRST_AIN_CHANNEL to FIRST_AIN_CHANNEL + NUMBER_OF_AINS - 1.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-       https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-       https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   NamesToAddresses:
-       https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
-   Stream Functions (eStreamRead, eStreamStart, etc.): 
-       https://labjack.com/support/software/api/ljm/function-reference/stream-functions
-   eWriteName:
-       https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    NamesToAddresses:
+        https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
+    Stream Functions (eStreamRead, eStreamStart, etc.): 
+        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
  
 T-Series and I/O:
-   Modbus Map:
-       https://labjack.com/support/software/api/modbus/modbus-map
-   Stream Mode: 
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode
-   Analog Inputs:
-       https://labjack.com/support/datasheets/t-series/ain
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Stream Mode: 
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Analog Inputs:
+        https://labjack.com/support/datasheets/t-series/ain
 
 """
 from datetime import datetime

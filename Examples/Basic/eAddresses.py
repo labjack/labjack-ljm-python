@@ -4,18 +4,18 @@ Demonstrates how to use the labjack.ljm.eAddresses (LJM_eAddresses) function.
 Relevant Documentation:
  
 LJM Library:
- 	LJM Library Installer:
- 		https://labjack.com/support/software/installers/ljm
- 	LJM Users Guide:
- 		https://labjack.com/support/software/api/ljm
- 	Opening and Closing:
- 		https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
- 	eAddresses:
- 		https://labjack.com/support/software/api/ljm/function-reference/ljmeaddresses
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eAddresses:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmeaddresses
  
 T-Series and I/O:
- 	Modbus Map:
- 		https://labjack.com/support/software/api/modbus/modbus-map
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
 
 """
 from labjack import ljm

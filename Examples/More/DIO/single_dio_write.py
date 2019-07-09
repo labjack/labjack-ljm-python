@@ -4,20 +4,20 @@ Demonstrates how to set a single digital state on a LabJack.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-     https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-     https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   eWriteName:
-     https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
  
 T-Series and I/O:
-   Modbus Map:
-     https://labjack.com/support/software/api/modbus/modbus-map
-   Digital I/O:
-     https://labjack.com/support/datasheets/t-series/digital-io
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
 
 """
 from labjack import ljm

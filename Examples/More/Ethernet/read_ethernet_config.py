@@ -4,22 +4,22 @@ Demonstrates how to read the ethernet configuration settings from a LabJack.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-     https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-     https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-     https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   eReadNames:
-     https://labjack.com/support/software/api/ljm/function-reference/ljmereadnames
-   NumberToIP:
-     https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eReadNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmereadnames
+    NumberToIP:
+        https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
  
 T-Series and I/O:
-   Modbus Map:
-     https://labjack.com/support/software/api/modbus/modbus-map
-   Ethernet:
-     https://labjack.com/support/datasheets/t-series/ethernet
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Ethernet:
+        https://labjack.com/support/datasheets/t-series/ethernet
 
 """
 from labjack import ljm

@@ -5,32 +5,32 @@ for streaming in external clock stream mode.
 Relevant Documentation:
  
 LJM Library:
-   LJM Library Installer:
-       https://labjack.com/support/software/installers/ljm
-   LJM Users Guide:
-       https://labjack.com/support/software/api/ljm
-   Opening and Closing:
-       https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-   Utility Functions (such as NamesToAddresses):
-       https://labjack.com/support/software/api/ljm/function-reference/utility
-   Stream Functions:
-       https://labjack.com/support/software/api/ljm/function-reference/stream-functions
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    Utility Functions (such as NamesToAddresses):
+        https://labjack.com/support/software/api/ljm/function-reference/utility
+    Stream Functions:
+        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
  
 T-Series and I/O:
-   Modbus Map:
-       https://labjack.com/support/software/api/modbus/modbus-map
-   Stream Mode: 
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode
-   Analog Inputs:
-       https://labjack.com/support/datasheets/t-series/ain
-   Stream-Out: 
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
-   Digital I/O:
-       https://labjack.com/support/datasheets/t-series/digital-io
-   Pulse Out:
-       https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pulse-out
-   Stream Mode (externally clocked):
-       https://labjack.com/support/datasheets/t-series/communication/stream-mode#externally-clocked
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Stream Mode: 
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Analog Inputs:
+        https://labjack.com/support/datasheets/t-series/ain
+    Stream-Out: 
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
+    Pulse Out:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pulse-out
+    Stream Mode (externally clocked):
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode#externally-clocked
 
 """
 from datetime import datetime

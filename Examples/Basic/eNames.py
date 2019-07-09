@@ -4,20 +4,20 @@ Demonstrates how to use the labjack.ljm.eNames (LJM_eNames) function.
 Relevant Documentation:
  
 LJM Library:
- 	LJM Library Installer:
- 		https://labjack.com/support/software/installers/ljm
- 	LJM Users Guide:
- 		https://labjack.com/support/software/api/ljm
- 	Opening and Closing:
- 		https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
- 	eNames:
- 		https://labjack.com/support/software/api/ljm/function-reference/ljmenames
+    LJM Library Installer:
+        https://labjack.com/support/software/installers/ljm
+    LJM Users Guide:
+        https://labjack.com/support/software/api/ljm
+    Opening and Closing:
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmenames
  
 T-Series and I/O:
- 	Modbus Map:
- 		https://labjack.com/support/software/api/modbus/modbus-map
- 	Hardware Overview(Device Information Registers):
- 		https://labjack.com/support/datasheets/t-series/hardware-overview
+    Modbus Map:
+        https://labjack.com/support/software/api/modbus/modbus-map
+    Hardware Overview(Device Information Registers):
+        https://labjack.com/support/datasheets/t-series/hardware-overview
 
 """
 from labjack import ljm
