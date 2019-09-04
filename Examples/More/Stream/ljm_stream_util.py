@@ -113,7 +113,7 @@ def generate_state(start, diff, state_size, state_name):
 
 
 def create_out_context(stream_out):
-    """Create an object wich describes some stream-out buffer states.
+    """Create an object which describes some stream-out buffer states.
 
     Create dict which will look something like this:
     out_context = {
