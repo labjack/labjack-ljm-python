@@ -107,7 +107,6 @@ while True:
     except KeyboardInterrupt:
         break
     except Exception:
-        import sys
         print(sys.exc_info()[1])
         break
 
