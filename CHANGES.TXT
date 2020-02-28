@@ -1,6 +1,10 @@
 Version History
 ---------------
 
+1.20.1 (02/28/2020)
+ - Added device reconnect callback functionality and example.
+ - Updated stream callback functionality.
+
 1.20.0 (04/03/2019)
  - Updated functions, constants and errorcodes to LJM v1.20.
  - Added string support to eWriteAddressByteArray and eWriteNameByteArray.

@@ -9,20 +9,32 @@ from labjack.ljm import constants
 from labjack.ljm import errorcodes
 
 
-STREAM_READ_CALLBACK = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int))
-
-class CallbackData:
+class _StreamCallbackData:
+    """Class containing the stream callback information."""
     def __init__(self, handle, callback):
         self.callbackUser = callback
         self.callbackWrapper = lambda arg: self.callbackUser(arg[0])
-        self.callbackLjm = STREAM_READ_CALLBACK(self.callbackWrapper)
+        callbackC = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int))
+        self.callbackLjm = callbackC(self.callbackWrapper)
         self.argInner = ctypes.c_int(handle)
         self.argRef = ctypes.byref(self.argInner)
-        # We need to keep references for the duration that stream is
-        # running, otherwise the garbage collector will delete them
-        # causing a segfault LJM tries to call our callback.
 
-_g_callbackData = {}
+
+class _ReconnectCallbackData:
+    """Class containing the device reconnect callback information."""
+    def __init__(self, handle, callback):
+        self.callbackUser = callback
+        self.callbackWrapper = lambda arg: self.callbackUser(arg)
+        callbackC = ctypes.CFUNCTYPE(None, ctypes.c_int)
+        self.callbackLjm = callbackC(self.callbackWrapper)
+        self.argInner = ctypes.c_int(handle)
+
+
+# Dictionaries for maintaining callback data objects. References need to be kept
+# for the callback duration, otherwise the callback data collector will delete
+# them causing a segfault when LJM tries to call the callback.
+_g_streamCallbackData = {}
+_g_reconnectCallbackData = {}
 
 
 class LJMError(Exception):
@@ -1338,8 +1350,8 @@ def setStreamCallback(handle, callback):
 
     Notes:
         setStreamCallback should be called after eStreamStart.
-        To disable the previous callback for stream reading, pass None
-        as callback.
+        To disable the previous callback for stream reading, pass 0 or
+        None as the callback.
         setStreamCallback may not be called from within a callback.
         callback may not use data stored in `threading.local`.
         The handle is passed as the argument to callback because if you
@@ -1347,10 +1359,14 @@ def setStreamCallback(handle, callback):
         want to check which handle had stream data ready.
 
     """
-    cbData = CallbackData(handle, callback)
-    _g_callbackData[handle] = cbData
-    cbLjm = cbData.callbackLjm
-    cbArg = cbData.argRef
+    if callback is None or callback == 0:
+        cbLjm = 0
+        cbArg = 0
+    else:
+        cbData = _StreamCallbackData(handle, callback)
+        _g_streamCallbackData[handle] = cbData
+        cbLjm = cbData.callbackLjm
+        cbArg = cbData.argRef
 
     error = _staticLib.LJM_SetStreamCallback(handle, cbLjm, cbArg)
     if error != errorcodes.NOERROR:
@@ -1371,8 +1387,8 @@ def eStreamStop(handle):
     """
     if handle in _g_eStreamDataSize:
         del _g_eStreamDataSize[handle]
-    if handle in _g_callbackData:
-        del _g_callbackData[handle]
+    if handle in _g_streamCallbackData:
+        del _g_streamCallbackData[handle]
 
     error = _staticLib.LJM_eStreamStop(handle)
     if error != errorcodes.NOERROR:
@@ -1953,7 +1969,7 @@ def tcVoltsToTemp(tcType, tcVolts, cjTempK):
     Raises:
         LJMError: An error was returned from the LJM library call.
 
-    Notes:
+    Note:
         B-type measurements below ~373 degrees Kelvin or ~0.04
         millivolts (at a cold junction junction temperature of 273.15
         degrees Kelvin) may be inaccurate.
@@ -2676,6 +2692,37 @@ def resetLog():
 
     """
     error = _staticLib.LJM_ResetLog()
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+
+def registerDeviceReconnectCallback(handle, callback):
+    """Sets a callback that is called by LJM after the device is found
+    to be disconnected (resulting in a read/write error) and the device
+    is then reconnected.
+    
+    Args:
+        handle: A valid handle to an open device.
+        callback: The callback function which will receive the device
+            handle as a parameter.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+ 
+    Note: To disable the previous callback for reconnect, pass 0 or
+        None as the callback.
+        registerDeviceReconnectCallback may not be called from within a
+        callback.
+
+    """
+    if callback is None or callback == 0:
+        cbLjm = 0
+    else:
+        cbData = _ReconnectCallbackData(handle, callback)
+        _g_reconnectCallbackData[handle] = cbData
+        cbLjm = cbData.callbackLjm
+
+    error = _staticLib.LJM_RegisterDeviceReconnectCallback(handle, cbLjm)
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
