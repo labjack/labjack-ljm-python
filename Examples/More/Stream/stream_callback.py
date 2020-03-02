@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     si.streamLengthMS = 10000
     si.done = False
-    si.aDataSize - si.numAddresses * si.scansPerRead
+    si.aDataSize = si.numAddresses * si.scansPerRead
     si.handle = handle
 
     try:
