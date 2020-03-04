@@ -88,22 +88,22 @@ def myStreamReadCallback(arg):
 
     try:
         ret = ljm.eStreamRead(si.handle)
-        aData = ret[0]
+        si.aData = ret[0]
         deviceScanBacklog = ret[1]
         ljmScanBackLog = ret[2]
 
-        scans = len(aData) / si.numAddresses
+        scans = len(si.aData) / si.numAddresses
         si.totScans += scans
 
         # Count the skipped samples which are indicated by -9999 values. Missed
         # samples occur after a device's stream buffer overflows and are
         # reported after auto-recover mode ends.
-        curSkip = aData.count(-9999.0)
+        curSkip = si.aData.count(-9999.0)
         si.totSkip += curSkip
 
         string += "  1st scan out of %i: " % scans
         for j in range(0, si.numAddresses):
-            string += "%s = %0.5f, " % (si.aScanListNames[j], aData[j])
+            string += "%s = %0.5f, " % (si.aScanListNames[j], si.aData[j])
         string += "\n  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = %i" % \
                 (curSkip/si.numAddresses, deviceScanBacklog, ljmScanBackLog)
         printWithLock(string)
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     si.scanRate = 2000
     si.scansPerRead = int(si.scanRate / 2)
 
-    si.streamLengthMS = 10000
+    si.numberOfReadsToPerform = 20
     si.done = False
     si.aDataSize = si.numAddresses * si.scansPerRead
     si.handle = handle
@@ -191,10 +191,13 @@ if __name__ == "__main__":
         # Set the callback function.
         ljm.setStreamCallback(handle, myStreamReadCallback)
 
-        printWithLock("Stream running, callback set, sleeping for %i milliseconds." % si.streamLengthMS)
-        time.sleep(si.streamLengthMS/1000.0)
+        printWithLock("Stream running and callback set.")
+        printWithLock("Waiting until eStreamRead has been called %d times."
+            % si.numberOfReadsToPerform)
 
-        si.done = True
+        while (si.streamRead < si.numberOfReadsToPerform):
+            time.sleep(.1)
+
         t1 = datetime.now()
 
         printWithLock("\nStreaming done. %.3f milliseconds have elapsed since eStreamStart" %
