@@ -1445,6 +1445,87 @@ def streamBurst(handle, numAddresses, aScanList, scanRate, numScans):
 
     return cScanRate.value, _convertCtypeArrayToList(cData)
 
+def initializeAperiodicStreamOut(handle, streamOutIndex, targetAddr, scanRate):
+    """Initializes all device registers necessary to start a aperiodic 
+       stream-out.
+    Args:
+        handle: A valid handle to an open device running a TCP based
+            stream.
+        streamOutIndex: The index number of this stream-out.
+            Note: T-series devices support a maximum of 4 stream-outs.
+        targetAddr: The register to update during stream-out
+            stored in the receive buffer before it is full.
+        scanRate: The scan rate that the stream is initialized to.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cStreamIndex = ctypes.c_int32(streamOutIndex)
+    cTargetAddr = ctypes.c_int32(targetAddr)
+    cScanRate = ctypes.c_double(scanRate)
+
+    error = _staticLib.LJM_InitializeAperiodicStreamOut(handle, cStreamIndex, cTargetAddr, cScanRate)
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+def WriteAperiodicStreamOut(handle, streamOutIndex, numValues, aWriteData):
+    """Writes data to the buffer of the specified aperiodic stream-out
+
+    Args:
+        handle: A valid handle to an open device.
+        streamOutIndex: The index number of this stream-out.
+        numValues: The number of values to write to the stream-out buffer
+        aWriteData: The data array to be written to the stream-out buffer
+            Note: the size of the array should be equal to the buffer size
+            in bytes divided by 4 (BufferNumBytes / 4).
+
+    Returns:
+        LJMBufferStatus: The number of samples that can be written to the
+            stream-out queue.
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cStreamIndex = ctypes.c_int32(streamOutIndex)
+    cNumValues = ctypes.c_int32(numValues)
+    cWriteData_p = _convertListToCtypeArray(aWriteData, ctypes.c_double)
+    cLJMBufferStatus = ctypes.c_int32(0)
+
+    error = _staticLib.LJM_WriteAperiodicStreamOut(handle, cStreamIndex, cNumValues, ctypes.byref(cWriteData_p), ctypes.byref(cLJMBufferStatus))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
+
+    return cLJMBufferStatus.value
+
+def PeriodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, numValues, aWriteData):
+    """Initializes all registers necessary to start streaming out a periodic
+       waveform (looping over the values written to the function)
+
+    Args:
+        handle: A valid handle to an open device.
+        streamOutIndex: The index number of this stream-out.
+        targetAddr: The register to update during stream-out
+            stored in the receive buffer before it is full.
+        scanRate: The scan rate that the stream is initialized to.
+        numValues: The number of values to write to the stream-out buffer
+        aWriteData: The data array to be written to the stream-out buffer (this
+        should be one period of the waveform)
+
+    Raises:
+        LJMError: An error was returned from the LJM library call.
+
+    """
+    cStreamIndex = ctypes.c_int32(streamOutIndex)
+    cTargetAddr = ctypes.c_int32(targetAddr)
+    cScanRate = ctypes.c_double(scanRate)
+    cNumValues = ctypes.c_int32(numValues)
+    cWriteData_p = _convertListToCtypeArray(aWriteData, ctypes.c_double)
+
+    error = _staticLib.LJM_WriteAperiodicStreamOut(handle, cStreamIndex, cTargetAddr, cScanRate, cNumValues, ctypes.byref(cWriteData_p))
+    if error != errorcodes.NOERROR:
+        raise LJMError(error)
 
 def getStreamTCPReceiveBufferStatus(handle):
     """Gets the backlog status of the TCP receive buffer.
