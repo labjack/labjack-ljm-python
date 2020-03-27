@@ -1469,7 +1469,7 @@ def initializeAperiodicStreamOut(handle, streamOutIndex, targetAddr, scanRate):
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
-def WriteAperiodicStreamOut(handle, streamOutIndex, numValues, aWriteData):
+def writeAperiodicStreamOut(handle, streamOutIndex, numValues, aWriteData):
     """Writes data to the buffer of the specified aperiodic stream-out
 
     Args:
@@ -1499,7 +1499,7 @@ def WriteAperiodicStreamOut(handle, streamOutIndex, numValues, aWriteData):
 
     return cLJMBufferStatus.value
 
-def PeriodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, numValues, aWriteData):
+def periodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, numValues, aWriteData):
     """Initializes all registers necessary to start streaming out a periodic
        waveform (looping over the values written to the function)
 
@@ -1523,7 +1523,7 @@ def PeriodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, numValues, a
     cNumValues = ctypes.c_int32(numValues)
     cWriteData_p = _convertListToCtypeArray(aWriteData, ctypes.c_double)
 
-    error = _staticLib.LJM_WriteAperiodicStreamOut(handle, cStreamIndex, cTargetAddr, cScanRate, cNumValues, ctypes.byref(cWriteData_p))
+    error = _staticLib.LJM_PeriodicStreamOut(handle, cStreamIndex, cTargetAddr, cScanRate, cNumValues, ctypes.byref(cWriteData_p))
     if error != errorcodes.NOERROR:
         raise LJMError(error)
 
