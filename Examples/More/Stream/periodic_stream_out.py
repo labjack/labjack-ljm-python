@@ -63,24 +63,24 @@ def print_device_info(handle):
     )
 
 def main():
-    scanRate = 1000
-    scansPerRead = int(scanRate / 2)
+    scan_rate = 1000
+    scans_per_read = int(scan_rate / 2)
     # Number of seconds to stream out waveforms
-    runTime = 5
+    run_time = 5
     # The desired stream channels
     # Up to 4 out-streams can be ran at once
-    scanListNames = ["STREAM_OUT0"]
-    aScanList = ljm.namesToAddresses(len(scanListNames), scanListNames)[0]
+    scan_list_names = ["STREAM_OUT0"]
+    scan_list = ljm.namesToAddresses(len(scan_list_names), scan_list_names)[0]
     # Only stream out to DAC0
-    targetAddr = 1000
+    target_addr = 1000
     # Stream out index can only be a number between 0-3
-    streamOutIndex = 0
-    samplesToWrite = 512
+    stream_out_index = 0
+    samples_to_write = 512
     # Make an arbitrary waveform that increases voltage linearly from 0-2.5V
-    aWriteData = []
-    for i in range(samplesToWrite):
-        sample = 2.5*i/samplesToWrite
-        aWriteData.append(sample)
+    write_data = []
+    for i in range(samples_to_write):
+        sample = 2.5*i/samples_to_write
+        write_data.append(sample)
 
     print("Beginning...\n")
     handle = open_ljm_device(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
@@ -88,10 +88,10 @@ def main():
 
     try :
         print("\nInitializing stream out... \n")
-        ljm.periodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, len(aWriteData), aWriteData)
-        actualScanRate = ljm.eStreamStart(handle, scansPerRead, len(aScanList), aScanList, scanRate)
-        print("Stream started with scan rate of %f Hz\n Running for %d seconds\n" % (scanRate, runTime))
-        sleep(runTime)
+        ljm.periodicStreamOut(handle, stream_out_index, target_addr, scan_rate, len(write_data), write_data)
+        actual_scan_rate = ljm.eStreamStart(handle, scans_per_read, len(scan_list), scan_list, scan_rate)
+        print("Stream started with scan rate of %f Hz\n Running for %d seconds\n" % (scan_rate, run_time))
+        sleep(run_time)
 
     except ljm.LJMError:
         ljm_stream_util.prepare_for_exit(handle)
