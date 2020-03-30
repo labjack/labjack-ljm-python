@@ -1,6 +1,6 @@
 Version History
 ---------------
-1.20.2 (03/27/2020)
+1.21.0 (03/27/2020)
  - Added stream-out function support and examples
  
 1.20.1 (02/28/2020)
