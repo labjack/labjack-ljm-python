@@ -18,7 +18,7 @@ a program to suit your needs, the primary things you need to do are:
 You may also need to configure AIN, etc.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -30,7 +30,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -49,7 +49,6 @@ T-Series and I/O:
 import sys
 
 from labjack import ljm
-
 import ljm_stream_util
 
 

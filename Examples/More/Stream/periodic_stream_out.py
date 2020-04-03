@@ -1,11 +1,11 @@
 """
-Demonstrates usage of the periodic stream-out functions
+Demonstrates usage of the periodic stream-out functions.
 
 Streams out arbitrary values. These arbitrary values act on DAC0 to cyclically
 increase the voltage from 0 to 2.5.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -13,11 +13,11 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    LJM Single Value Functions (like eReadName, eReadAddress): 
+    LJM Single Value Functions (like eReadName, eReadAddress):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -32,12 +32,11 @@ T-Series and I/O:
 
 """
 import sys
-
 from time import sleep
 
 from labjack import ljm
-
 import ljm_stream_util
+
 
 def open_ljm_device(device_type, connection_type, identifier):
     try:
@@ -61,6 +60,7 @@ def print_device_info(handle):
         "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i\n" %
         (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
     )
+
 
 def main():
     scan_rate = 1000
