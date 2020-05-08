@@ -51,7 +51,7 @@ IN_NAMES = ["AIN0"]
 """
 STREAM_OUTS = [
     {
-        "target": str register name that stream-out write_data will be sent to,
+        "target": str register name that stream-out writeData will be sent to,
 
         "index": int STREAM_OUT# offset. 0 would generate names like
             "STREAM_OUT0_BUFFER_STATUS", etc.
@@ -80,14 +80,14 @@ def printRegisterValue(handle, register_name):
     print("%s = %f" % (register_name, value))
 
 
-def openLJMDevice(device_type, connection_type, identifier):
+def openLJMDevice(deviceType, connectionType, identifier):
     try:
-        handle = ljm.open(device_type, connection_type, identifier)
+        handle = ljm.open(deviceType, connectionType, identifier)
     except ljm.LJMError:
         print(
             "Error calling ljm.open(" +
-            "device_type=" + str(device_type) + ", " +
-            "connection_type=" + str(connection_type) + ", " +
+            "deviceType=" + str(deviceType) + ", " +
+            "connectionType=" + str(connectionType) + ", " +
             "identifier=" + identifier + ")"
         )
         raise
@@ -115,7 +115,7 @@ def makeScanList(in_names, stream_outs):
     return in_addresses + out_addresses
 
 def main(
-    initial_scan_rate_hz=INITIAL_SCAN_RATE_HZ,
+    initial_scanRate_hz=INITIAL_SCAN_RATE_HZ,
     in_names=IN_NAMES,
     stream_outs=STREAM_OUTS,
     num_cycles=NUM_WRITES
@@ -124,36 +124,36 @@ def main(
     handle = openLJMDevice(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
     printDeviceInfo(handle)
 
-    write_data = []
+    writeData = []
     for i in range(SAMPLES_TO_WRITE):
         sample = 2.5*i/SAMPLES_TO_WRITE
-        write_data.append(sample)
-    scans_per_read = int(initial_scan_rate_hz / 2)
+        writeData.append(sample)
+    scansPerRead = int(initial_scanRate_hz / 2)
 
     try:
         print("Initializing stream out buffers...")
         for stream_out in stream_outs:
-            ljm.initializeAperiodicStreamOut(handle, stream_out["index"], stream_out["target"], initial_scan_rate_hz)
+            ljm.initializeAperiodicStreamOut(handle, stream_out["index"], stream_out["target"], initial_scanRate_hz)
             # Write some data to the buffer before the stream starts
-            ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
-            ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
+            ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, writeData)
+            ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, writeData)
         print("")
-        scan_list = makeScanList(
+        scanList = makeScanList(
             in_names=in_names,
             stream_outs = stream_outs
         )
-        print("scan_list: " + str(scan_list))
-        print("scans_per_read: " + str(scans_per_read))
-        scan_rate = ljm.eStreamStart(handle, scans_per_read, len(scan_list),
-                                     scan_list, initial_scan_rate_hz)
+        print("scanList: " + str(scanList))
+        print("scansPerRead: " + str(scansPerRead))
+        scanRate = ljm.eStreamStart(handle, scansPerRead, len(scanList),
+                                     scanList, initial_scanRate_hz)
         start_time = ljm.getHostTick();
-        print("\nStream started with a scan rate of %0.0f Hz." % scan_rate)
+        print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
         print("\nPerforming %i buffer updates." % num_cycles)
         iteration = 0
         total_num_skipped_scans = 0
         while iteration < num_cycles:
             for stream_out in stream_outs:
-                ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
+                ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, writeData)
             # ljm.eStreamRead will sleep until data has arrived
             stream_read = ljm.eStreamRead(handle)
             num_skipped_scans = ljm_stream_util.processStreamResults(
@@ -168,12 +168,12 @@ def main(
         # out than it takes to call LJM_WriteAperiodicStreamOut and 
         # LJM_eStreamRead. some delay may be necessary if it is desired to write out
         # all data then immediately close the stream
-        run_time = (ljm.getHostTick() - start_time)/1000;
+        runTime = (ljm.getHostTick() - start_time)/1000;
         # 512 samples * 10 writes = 5120 samples. scan rate = 1000
         # samples/sec, so it should take 5.12 seconds to write all data out
-        stream_out_ms = 1000 * SAMPLES_TO_WRITE * (NUM_WRITES + 2) / scan_rate;
-        if (run_time < stream_out_ms):
-            sleep((stream_out_ms - run_time)/1000)
+        stream_out_ms = 1000 * SAMPLES_TO_WRITE * (NUM_WRITES + 2) / scanRate;
+        if (runTime < stream_out_ms):
+            sleep((stream_out_ms - runTime)/1000)
 
     except ljm.LJMError:
         ljm_stream_util.prepareForExit(handle)

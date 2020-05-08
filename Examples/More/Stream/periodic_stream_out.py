@@ -38,14 +38,14 @@ from labjack import ljm
 import ljm_stream_util
 
 
-def openLJMDevice(device_type, connection_type, identifier):
+def openLJMDevice(deviceType, connectionType, identifier):
     try:
-        handle = ljm.open(device_type, connection_type, identifier)
+        handle = ljm.open(deviceType, connectionType, identifier)
     except ljm.LJMError:
         print(
             "Error calling ljm.open(" +
-            "device_type=" + str(device_type) + ", " +
-            "connection_type=" + str(connection_type) + ", " +
+            "deviceType=" + str(deviceType) + ", " +
+            "connectionType=" + str(connectionType) + ", " +
             "identifier=" + identifier + ")"
         )
         raise
@@ -63,24 +63,24 @@ def printDeviceInfo(handle):
 
 
 def main():
-    scan_rate = 1000
-    scans_per_read = int(scan_rate / 2)
+    scanRate = 1000
+    scansPerRead = int(scanRate / 2)
     # Number of seconds to stream out waveforms
-    run_time = 5
+    runTime = 5
     # The desired stream channels
     # Up to 4 out-streams can be ran at once
-    scan_list_names = ["STREAM_OUT0"]
-    scan_list = ljm.namesToAddresses(len(scan_list_names), scan_list_names)[0]
+    scanListNames = ["STREAM_OUT0"]
+    scanList = ljm.namesToAddresses(len(scanListNames), scanListNames)[0]
     # Only stream out to DAC0
-    target_addr = 1000
+    targetAddr = 1000
     # Stream out index can only be a number between 0-3
-    stream_out_index = 0
-    samples_to_write = 512
+    streamOutIndex = 0
+    samplesToWrite = 512
     # Make an arbitrary waveform that increases voltage linearly from 0-2.5V
-    write_data = []
-    for i in range(samples_to_write):
-        sample = 2.5*i/samples_to_write
-        write_data.append(sample)
+    writeData = []
+    for i in range(samplesToWrite):
+        sample = 2.5*i/samplesToWrite
+        writeData.append(sample)
 
     print("Beginning...\n")
     handle = openLJMDevice(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
@@ -88,10 +88,10 @@ def main():
 
     try :
         print("\nInitializing stream out... \n")
-        ljm.periodicStreamOut(handle, stream_out_index, target_addr, scan_rate, len(write_data), write_data)
-        actual_scan_rate = ljm.eStreamStart(handle, scans_per_read, len(scan_list), scan_list, scan_rate)
-        print("Stream started with scan rate of %f Hz\n Running for %d seconds\n" % (scan_rate, run_time))
-        sleep(run_time)
+        ljm.periodicStreamOut(handle, streamOutIndex, targetAddr, scanRate, len(writeData), writeData)
+        actualScanRate = ljm.eStreamStart(handle, scansPerRead, len(scanList), scanList, scanRate)
+        print("Stream started with scan rate of %f Hz\n Running for %d seconds\n" % (scanRate, runTime))
+        sleep(runTime)
 
     except ljm.LJMError:
         ljm_stream_util.prepareForExit(handle)

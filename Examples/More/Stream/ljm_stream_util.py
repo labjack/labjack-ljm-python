@@ -4,215 +4,215 @@ from time import sleep
 from labjack import ljm
 
 
-def calculateSleepFactor(scans_per_read, ljm_scan_backlog):
+def calculateSleepFactor(scansPerRead, LJMScanBacklog):
     """Calculates how much sleep should be done based on how far behind stream is.
 
-    @para scans_per_read: The number of scans returned by a eStreamRead call
-    @type scans_per_read: int
-    @para ljm_scan_backlog: The number of backlogged scans in the LJM buffer
-    @type ljm_scan_backlog: int
+    @para scansPerRead: The number of scans returned by a eStreamRead call
+    @type scansPerRead: int
+    @para LJMScanBacklog: The number of backlogged scans in the LJM buffer
+    @type LJMScanBacklog: int
     @return: A factor that should be multiplied the normal sleep time
     @type: float
     """
     DECREASE_TOTAL = 0.9
-    portionScansReady = float(ljm_scan_backlog) / scans_per_read
+    portionScansReady = float(LJMScanBacklog) / scansPerRead
     if (portionScansReady > DECREASE_TOTAL):
         return 0.0
     return (1 - portionScansReady) * DECREASE_TOTAL
 
 
-def variableStreamSleep(scans_per_read, scan_rate, ljm_scan_backlog):
+def variableStreamSleep(scansPerRead, scanRate, LJMScanBacklog):
     """Sleeps for approximately the expected amount of time until the next scan
     is ready to be read.
 
-    @para scans_per_read: The number of scans returned by a eStreamRead call
-    @type scans_per_read: int
-    @para scan_rate: The stream scan rate
-    @type scan_rate: numerical
-    @para ljm_scan_backlog: The number of backlogged scans in the LJM buffer
-    @type ljm_scan_backlog: int
+    @para scansPerRead: The number of scans returned by a eStreamRead call
+    @type scansPerRead: int
+    @para scanRate: The stream scan rate
+    @type scanRate: numerical
+    @para LJMScanBacklog: The number of backlogged scans in the LJM buffer
+    @type LJMScanBacklog: int
     """
-    sleep_factor = calculateSleepFactor(scans_per_read, ljm_scan_backlog)
-    sleep_time = sleep_factor * scans_per_read / float(scan_rate)
-    sleep(sleep_time)
+    sleepFactor = calculateSleepFactor(scansPerRead, LJMScanBacklog)
+    sleepTime = sleepFactor * scansPerRead / float(scanRate)
+    sleep(sleepTime)
 
 
 def convertNameToIntType(name):
     return ljm.nameToAddress(name)[1]
 
 
-def convertNameToOutBufferTypeStr(target_name):
+def convertNameToOutBufferTypeStr(targetName):
     OUT_BUFFER_TYPE_STRINGS = {
         ljm.constants.UINT16: "U16",
         ljm.constants.UINT32: "U32",
         # Note that there is no STREAM_OUT#(0:3)_BUFFER_I32
         ljm.constants.FLOAT32: "F32"
     }
-    int_type = convertNameToIntType(target_name)
-    return OUT_BUFFER_TYPE_STRINGS[int_type]
+    intType = convertNameToIntType(targetName)
+    return OUT_BUFFER_TYPE_STRINGS[intType]
 
 
 def convertNameToAddress(name):
     return ljm.nameToAddress(name)[0]
 
 
-def convertNamesToAddresses(names, length_limit=None):
+def convertNamesToAddresses(names, lengthLimit=None):
     """Convert a list of names to a list of addresses using LJM.
 
     @para names: Names to be converted to addresses.
     @type names: iterable over str
-    @para length_limit: Limit the number of names to read from the name array
+    @para lengthLimit: Limit the number of names to read from the name array
         also limit the size of the returned addresses.
-    @type length_limit: int
+    @type lengthLimit: int
     @return: The given names converted to addresses.
     @rtype: iterable over str
     """
     length = len(names)
-    if length_limit:
-        length = length_limit
+    if lengthLimit:
+        length = lengthLimit
 
-    addresses_and_types = ljm.namesToAddresses(length, names)
+    addressesAndTypes = ljm.namesToAddresses(length, names)
 
     # ljm.namesToAddresses returns a tuple of a list of addresses and a list of
     # types. The list of addresses is indexed at 0 of that tuple.
-    return addresses_and_types[0]
+    return addressesAndTypes[0]
 
 
-def createScanList(in_names=[], out_contexts=[]):
+def createScanList(inNames=[], outContexts=[]):
     """Creates a list of integer addresses from lists of in and out names."""
-    in_addresses = []
-    out_addresses = []
+    inAddresses = []
+    outAddresses = []
 
-    if len(out_contexts) > 4:
+    if len(outContexts) > 4:
         raise ValueError("The T7 only has 4 stream-out buffers")
 
-    for out_context in out_contexts:
-        stream_out_name = out_context["names"]["stream_out"]
-        stream_out_address = convertNameToAddress(stream_out_name)
-        out_addresses.append(stream_out_address)
+    for outContext in outContexts:
+        streamOutName = outContext["names"]["streamOut"]
+        streamOutAddress = convertNameToAddress(streamOutName)
+        outAddresses.append(streamOutAddress)
 
-    if in_names:
-        in_addresses = convertNamesToAddresses(in_names)
+    if inNames:
+        inAddresses = convertNamesToAddresses(inNames)
 
-    return in_addresses + out_addresses
+    return inAddresses + outAddresses
 
 
-def generateState(start, diff, state_size, state_name):
-    """Generates a dict that contains a state_name and a list of values."""
+def generateState(start, diff, stateSize, stateName):
+    """Generates a dict that contains a stateName and a list of values."""
     values = []
-    increment = float(1) / state_size
-    for iteration in range(int(state_size)):
+    increment = float(1) / stateSize
+    for iteration in range(int(stateSize)):
         # Get a value between start + diff
         sample = start + diff * increment * iteration
         values.append(sample)
 
     return {
-        "state_name": state_name,
+        "stateName": stateName,
         "values": values
     }
 
 
-def createOutContext(stream_out):
+def createOutContext(streamOut):
     """Create an object which describes some stream-out buffer states.
 
     Create dict which will look something like this:
-    out_context = {
-        "current_index": int tracking which is the current state,
+    outContext = {
+        "currentIndex": int tracking which is the current state,
         "states": [
             {
-                "state_name": str describing this state,
+                "stateName": str describing this state,
                 "values": iterable over float values
             },
             ...
         ],
-        "state_size": int describing how big each state's "values" list is,
-        "target_type_str": str used to generate this dict's "names" list,
+        "stateSize": int describing how big each state's "values" list is,
+        "targetTypeStr": str used to generate this dict's "names" list,
         "target": str name of the register to update during stream-out,
-        "buffer_num_bytes": int number of bytes of this stream-out buffer,
-        "stream_out_index": int number of this stream-out,
-        "set_loop": int number to be written to to STREAM_OUT#(0:3)_SET_LOOP,
+        "bufferNumBytes": int number of bytes of this stream-out buffer,
+        "streamOutIndex": int number of this stream-out,
+        "setLoop": int number to be written to to STREAM_OUT#(0:3)_SET_LOOP,
         "names": dict of STREAM_OUT# register names. For example, if
-            "stream_out_index" is 0 and "target_type_str" is "F32", this would be
+            "streamOutIndex" is 0 and "targetTypeStr" is "F32", this would be
         {
-            "stream_out": "STREAM_OUT0",
+            "streamOut": "STREAM_OUT0",
             "target": "STREAM_OUT0_TARGET",
-            "buffer_size": "STREAM_OUT0_BUFFER_SIZE",
-            "loop_size": "STREAM_OUT0_LOOP_SIZE",
-            "set_loop": "STREAM_OUT0_SET_LOOP",
-            "buffer_status": "STREAM_OUT0_BUFFER_STATUS",
+            "bufferSize": "STREAM_OUT0_BUFFER_SIZE",
+            "loopSize": "STREAM_OUT0_LOOP_SIZE",
+            "setLoop": "STREAM_OUT0_SET_LOOP",
+            "bufferStatus": "STREAM_OUT0_BUFFER_STATUS",
             "enable": "STREAM_OUT0_ENABLE",
             "buffer": "STREAM_OUT0_BUFFER_F32"
         }
     }
     """
     BYTES_PER_VALUE = 2
-    out_buffer_num_values = stream_out["buffer_num_bytes"] / BYTES_PER_VALUE
+    outBufferNumValues = streamOut["bufferNumBytes"] / BYTES_PER_VALUE
 
-    # The size of all the states in out_context. This must be half of the
+    # The size of all the states in outContext. This must be half of the
     # out buffer or less. (Otherwise, values in a given loop would be getting
     # overwritten during a call to updateStreamOutBuffer.)
-    state_size = out_buffer_num_values / 2
+    stateSize = outBufferNumValues / 2
 
-    target_type = convertNameToOutBufferTypeStr(stream_out["target"])
-    out_context = {
-        "current_index": 0,
+    targetType = convertNameToOutBufferTypeStr(streamOut["target"])
+    outContext = {
+        "currentIndex": 0,
         "states": [],
-        "state_size": state_size,
-        "target_type_str": target_type
+        "stateSize": stateSize,
+        "targetTypeStr": targetType
     }
-    out_context.update(stream_out)
+    outContext.update(streamOut)
 
-    out_context["names"] = createStreamOutNames(out_context)
+    outContext["names"] = createStreamOutNames(outContext)
 
-    out_context["states"].append(
+    outContext["states"].append(
         generateState(
             0.0,
             2.5,
-            state_size,
+            stateSize,
             "increase from 0.0 to 2.5"
         )
     )
-    out_context["states"].append(
+    outContext["states"].append(
         generateState(
             5.0,
             -2.5,
-            state_size,
+            stateSize,
             "decrease from 5.0 to 2.5"
         )
     )
 
-    return out_context
+    return outContext
 
 
-def createStreamOutNames(out_context):
+def createStreamOutNames(outContext):
     return {
-        "stream_out":
-            "STREAM_OUT%(stream_out_index)d" % out_context,
+        "streamOut":
+            "STREAM_OUT%(streamOutIndex)d" % outContext,
 
         "target":
-            "STREAM_OUT%(stream_out_index)d_TARGET" % out_context,
+            "STREAM_OUT%(streamOutIndex)d_TARGET" % outContext,
 
-        "buffer_size":
-            "STREAM_OUT%(stream_out_index)d_BUFFER_SIZE" % out_context,
+        "bufferSize":
+            "STREAM_OUT%(streamOutIndex)d_BUFFER_SIZE" % outContext,
 
-        "loop_size":
-            "STREAM_OUT%(stream_out_index)d_LOOP_SIZE" % out_context,
+        "loopSize":
+            "STREAM_OUT%(streamOutIndex)d_LOOP_SIZE" % outContext,
 
-        "set_loop":
-            "STREAM_OUT%(stream_out_index)d_SET_LOOP" % out_context,
+        "setLoop":
+            "STREAM_OUT%(streamOutIndex)d_SET_LOOP" % outContext,
 
-        "buffer_status":
-            "STREAM_OUT%(stream_out_index)d_BUFFER_STATUS" % out_context,
+        "bufferStatus":
+            "STREAM_OUT%(streamOutIndex)d_BUFFER_STATUS" % outContext,
 
         "enable":
-            "STREAM_OUT%(stream_out_index)d_ENABLE" % out_context,
+            "STREAM_OUT%(streamOutIndex)d_ENABLE" % outContext,
 
         "buffer":
-            "STREAM_OUT%(stream_out_index)d_BUFFER_%(target_type_str)s" % out_context
+            "STREAM_OUT%(streamOutIndex)d_BUFFER_%(targetTypeStr)s" % outContext
     }
 
 
-def updateStreamOutBuffer(handle, out_context):
+def updateStreamOutBuffer(handle, outContext):
     # Write values to the stream-out buffer. Note that once a set of values have
     # been written to the stream out buffer (STREAM_OUT0_BUFFER_F32, for
     # example) and STREAM_OUT#_SET_LOOP has been set, that set of values will
@@ -221,86 +221,86 @@ def updateStreamOutBuffer(handle, out_context):
     # entirety will the next set of values that have been set using
     # STREAM_OUT#_SET_LOOP start being used.
 
-    out_names = out_context["names"]
+    outNames = outContext["names"]
 
-    ljm.eWriteName(handle, out_names["loop_size"], out_context["state_size"])
+    ljm.eWriteName(handle, outNames["loopSize"], outContext["stateSize"])
 
-    state_index = out_context["current_index"]
-    error_address = -1
-    current_state = out_context["states"][state_index]
-    values = current_state["values"]
+    stateIndex = outContext["currentIndex"]
+    errorAddress = -1
+    currentState = outContext["states"][stateIndex]
+    values = currentState["values"]
 
     info = ljm.getHandleInfo(handle)
-    max_bytes = info[5]
+    maxBytes = info[5]
     SINGLE_ARRAY_SEND_MAX_BYTES = 520
-    if max_bytes > SINGLE_ARRAY_SEND_MAX_BYTES:
-        max_bytes = SINGLE_ARRAY_SEND_MAX_BYTES
+    if maxBytes > SINGLE_ARRAY_SEND_MAX_BYTES:
+        maxBytes = SINGLE_ARRAY_SEND_MAX_BYTES
 
     NUM_HEADER_BYTES = 12
     NUM_BYTES_PER_F32 = 4
-    max_samples = int((max_bytes - NUM_HEADER_BYTES) / NUM_BYTES_PER_F32)
+    maxSamples = int((maxBytes - NUM_HEADER_BYTES) / NUM_BYTES_PER_F32)
 
     start = 0
     while start < len(values):
-        num_samples = len(values) - start
-        if num_samples > max_samples:
-            num_samples = max_samples
-        end = start + num_samples
-        write_values = values[start:end]
+        numSamples = len(values) - start
+        if numSamples > maxSamples:
+            numSamples = maxSamples
+        end = start + numSamples
+        writeValues = values[start:end]
 
-        ljm.eWriteNameArray(handle, out_names["buffer"], num_samples, write_values)
+        ljm.eWriteNameArray(handle, outNames["buffer"], numSamples, writeValues)
 
-        start = start + num_samples
+        start = start + numSamples
 
-    ljm.eWriteName(handle, out_names["set_loop"], out_context["set_loop"])
+    ljm.eWriteName(handle, outNames["setLoop"], outContext["setLoop"])
 
     print("  Wrote " +
-          out_context["names"]["stream_out"] +
+          outContext["names"]["streamOut"] +
           " state: " +
-          current_state["state_name"]
+          currentState["stateName"]
           )
 
     # Increment the state and wrap it back to zero
-    out_context["current_index"] = (state_index + 1) % len(out_context["states"])
+    outContext["currentIndex"] = (stateIndex + 1) % len(outContext["states"])
 
 
-def initializeStreamOut(handle, out_context):
+def initializeStreamOut(handle, outContext):
     # Allocate memory on the T7 for the stream-out buffer
-    out_address = convertNameToAddress(out_context["target"])
-    names = out_context["names"]
-    ljm.eWriteName(handle, names["target"], out_address)
-    ljm.eWriteName(handle, names["buffer_size"], out_context["buffer_num_bytes"])
+    outAddress = convertNameToAddress(outContext["target"])
+    names = outContext["names"]
+    ljm.eWriteName(handle, names["target"], outAddress)
+    ljm.eWriteName(handle, names["bufferSize"], outContext["bufferNumBytes"])
     ljm.eWriteName(handle, names["enable"], 1)
 
-    updateStreamOutBuffer(handle, out_context)
+    updateStreamOutBuffer(handle, outContext)
 
 
 def processStreamResults(
     iteration,
-    stream_read,
-    in_names,
-    device_threshold=0,
-    ljm_threshold=0
+    streamRead,
+    inNames,
+    deviceThreshold=0,
+    LJMThreshold=0
 ):
     """Print ljm.eStreamRead results and count the number of skipped samples."""
-    data = stream_read[0]
-    device_num_backlog_scans = stream_read[1]
-    ljm_num_backlog_scans = stream_read[2]
-    num_addresses = len(in_names)
-    num_scans = len(data) / num_addresses
+    data = streamRead[0]
+    deviceNumBacklogScans = streamRead[1]
+    LJMNumBacklogScans = streamRead[2]
+    numAddresses = len(inNames)
+    numScans = len(data) / numAddresses
 
     # Count the skipped samples which are indicated by -9999 values. Missed
     # samples occur after a device's stream buffer overflows and are
     # reported after auto-recover mode ends.
-    num_skipped_samples = data.count(-9999.0)
+    numSkippedSamples = data.count(-9999.0)
 
     print("\neStreamRead %i" % iteration)
-    result_strs = []
-    for index in range(len(in_names)):
-        result_strs.append("%s = %0.5f" % (in_names[index], data[index]))
+    resultStrs = []
+    for index in range(len(inNames)):
+        resultStrs.append("%s = %0.5f" % (inNames[index], data[index]))
 
-    if result_strs:
-        print("  1st scan out of %i: %s" % (num_scans, ", ".join(result_strs)))
+    if resultStrs:
+        print("  1st scan out of %i: %s" % (numScans, ", ".join(resultStrs)))
 
     # This is a test to ensure that 2 in channels are synchronized
     # def print_if_not_equiv_floats(index, a, b, delta=0.01):
@@ -313,27 +313,27 @@ def processStreamResults(
     # for index in range(0, len(data), 2):
     #     print_if_not_equiv_floats(index, data[index], data[index + 1])
 
-    if num_skipped_samples:
+    if numSkippedSamples:
         print(
             "  **** Samples skipped = %i (of %i) ****" %
-            (num_skipped_samples, len(data))
+            (numSkippedSamples, len(data))
         )
 
-    status_strs = []
-    if device_num_backlog_scans > device_threshold:
-        status_strs.append("Device scan backlog = %i" % device_num_backlog_scans)
-    if ljm_num_backlog_scans > ljm_threshold:
-        status_strs.append("LJM scan backlog = %i" % ljm_num_backlog_scans)
+    statusStrs = []
+    if deviceNumBacklogScans > deviceThreshold:
+        statusStrs.append("Device scan backlog = %i" % deviceNumBacklogScans)
+    if LJMNumBacklogScans > LJMThreshold:
+        statusStrs.append("LJM scan backlog = %i" % LJMNumBacklogScans)
 
-    if status_strs:
-        status_str = "  " + ",".join(status_strs)
-        print(status_str)
+    if statusStrs:
+        statusStr = "  " + ",".join(statusStrs)
+        print(statusStr)
 
-    return num_skipped_samples
+    return numSkippedSamples
 
 
-def prepareForExit(handle, stop_stream=True):
-    if stop_stream:
+def prepareForExit(handle, stopStream=True):
+    if stopStream:
         print("\nStopping Stream")
         try:
             ljm.eStreamStop(handle)

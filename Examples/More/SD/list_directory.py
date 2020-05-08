@@ -8,20 +8,20 @@ def usage():
     exit()
 
 
-list_cwd = None
+listCwd = None
 if len(sys.argv) == 1:
-    list_cwd = True
+    listCwd = True
 elif len(sys.argv) == 2:
-    list_cwd = False
+    listCwd = False
 else:
     usage()
 
 handle = sd_util.openDevice()
 
-if list_cwd:
-    dir_to_read = sd_util.getCWD(handle)
+if listCwd:
+    dirToRead = sd_util.getCWD(handle)
 else:
-    dir_to_read = sys.argv[1]
+    dirToRead = sys.argv[1]
 
-sd_util.listDirContents(handle, dir_to_read)
+sd_util.listDirContents(handle, dirToRead)
 ljm.close(handle)
