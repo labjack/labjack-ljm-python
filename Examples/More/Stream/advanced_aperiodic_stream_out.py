@@ -7,13 +7,13 @@ Note: the LJM aperiodic stream-out functions are recommended for
 Streams in while streaming out arbitrary values. These arbitrary stream-out
 values act on DAC0 to alternate between increasing the voltage from 0 to 2.5 and
 decreasing from 5.0 to 2.5 on (approximately). Though these values are initially
-generated during the call to create_out_context, the values could be
+generated during the call to createOutContext, the values could be
 dynamically generated, read from a file, etc. To convert this example file into
 a program to suit your needs, the primary things you need to do are:
 
     1. Edit the global setup variables in this file
-    2. Define your own create_out_context function or equivalent
-    3. Define your own process_stream_results function or equivalent
+    2. Define your own createOutContext function or equivalent
+    3. Define your own processStreamResults function or equivalent
 
 You may also need to configure AIN, etc.
 
@@ -100,12 +100,12 @@ if NUM_CYCLES < NUM_CYCLES_MIN:
     NUM_CYCLES = NUM_CYCLES_MIN
 
 
-def print_register_value(handle, register_name):
+def printRegisterValue(handle, register_name):
     value = ljm.eReadName(handle, register_name)
     print("%s = %f" % (register_name, value))
 
 
-def open_ljm_device(device_type, connection_type, identifier):
+def openLJMDevice(device_type, connection_type, identifier):
     try:
         handle = ljm.open(device_type, connection_type, identifier)
     except ljm.LJMError:
@@ -120,7 +120,7 @@ def open_ljm_device(device_type, connection_type, identifier):
     return handle
 
 
-def print_device_info(handle):
+def printDeviceInfo(handle):
     info = ljm.getHandleInfo(handle)
     print(
         "Opened a LabJack with Device type: %i, Connection type: %i,\n"
@@ -136,20 +136,20 @@ def main(
     num_cycles=NUM_CYCLES
 ):
     print("Beginning...")
-    handle = open_ljm_device(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-    print_device_info(handle)
+    handle = openLJMDevice(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+    printDeviceInfo(handle)
 
     print("Initializing stream out buffers...")
     out_contexts = []
     for stream_out in stream_outs:
-        out_context = ljm_stream_util.create_out_context(stream_out)
-        ljm_stream_util.initialize_stream_out(handle, out_context)
+        out_context = ljm_stream_util.createOutContext(stream_out)
+        ljm_stream_util.initializeStreamOut(handle, out_context)
         out_contexts.append(out_context)
 
     print("")
 
     for out_context in out_contexts:
-        print_register_value(handle, out_context["names"]["buffer_status"])
+        printRegisterValue(handle, out_context["names"]["buffer_status"])
 
     for out_context in out_contexts:
         update_str = "Updating %(stream_out)s buffer whenever " \
@@ -159,7 +159,7 @@ def main(
     scans_per_read = int(min([context["state_size"] for context in out_contexts]))
     buffer_status_names = [out["names"]["buffer_status"] for out in out_contexts]
     try:
-        scan_list = ljm_stream_util.create_scan_list(
+        scan_list = ljm_stream_util.createScanList(
             in_names=in_names,
             out_contexts=out_contexts
         )
@@ -190,12 +190,12 @@ def main(
                     )
 
             for out_context in out_contexts:
-                ljm_stream_util.update_stream_out_buffer(handle, out_context)
+                ljm_stream_util.updateStreamOutBuffer(handle, out_context)
 
             # ljm.eStreamRead will sleep until data has arrived
             stream_read = ljm.eStreamRead(handle)
 
-            num_skipped_scans = ljm_stream_util.process_stream_results(
+            num_skipped_scans = ljm_stream_util.processStreamResults(
                 iteration,
                 stream_read,
                 in_names,
@@ -206,13 +206,13 @@ def main(
 
             iteration = iteration + 1
     except ljm.LJMError:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
     except Exception:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
 
-    ljm_stream_util.prepare_for_exit(handle)
+    ljm_stream_util.prepareForExit(handle)
 
     print("Total number of skipped scans: %d" % total_num_skipped_scans)
 

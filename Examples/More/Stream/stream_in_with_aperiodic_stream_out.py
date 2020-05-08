@@ -75,12 +75,12 @@ NUM_WRITES = 8
 SAMPLES_TO_WRITE = 512
 
 
-def print_register_value(handle, register_name):
+def printRegisterValue(handle, register_name):
     value = ljm.eReadName(handle, register_name)
     print("%s = %f" % (register_name, value))
 
 
-def open_ljm_device(device_type, connection_type, identifier):
+def openLJMDevice(device_type, connection_type, identifier):
     try:
         handle = ljm.open(device_type, connection_type, identifier)
     except ljm.LJMError:
@@ -94,7 +94,7 @@ def open_ljm_device(device_type, connection_type, identifier):
 
     return handle
 
-def print_device_info(handle):
+def printDeviceInfo(handle):
     info = ljm.getHandleInfo(handle)
     print(
         "Opened a LabJack with Device type: %i, Connection type: %i,\n"
@@ -102,13 +102,13 @@ def print_device_info(handle):
         (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5])
     )
 
-def make_scan_list(in_names, stream_outs):
+def makeScanList(in_names, stream_outs):
     """Creates a list of integer addresses from lists of in and out names."""
     in_addresses = []
     out_addresses = []
 
     if in_names:
-        in_addresses = ljm_stream_util.convert_names_to_addresses(in_names)
+        in_addresses = ljm_stream_util.convertNamesToAddresses(in_names)
     for stream_out in stream_outs:
         out_addresses.append(4800+stream_out["index"])
 
@@ -121,8 +121,8 @@ def main(
     num_cycles=NUM_WRITES
 ):
     print("Beginning...")
-    handle = open_ljm_device(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-    print_device_info(handle)
+    handle = openLJMDevice(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+    printDeviceInfo(handle)
 
     write_data = []
     for i in range(SAMPLES_TO_WRITE):
@@ -138,7 +138,7 @@ def main(
             ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
             ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
         print("")
-        scan_list = make_scan_list(
+        scan_list = makeScanList(
             in_names=in_names,
             stream_outs = stream_outs
         )
@@ -156,7 +156,7 @@ def main(
                 ljm.writeAperiodicStreamOut(handle, stream_out["index"], SAMPLES_TO_WRITE, write_data)
             # ljm.eStreamRead will sleep until data has arrived
             stream_read = ljm.eStreamRead(handle)
-            num_skipped_scans = ljm_stream_util.process_stream_results(
+            num_skipped_scans = ljm_stream_util.processStreamResults(
                 iteration,
                 stream_read,
                 in_names
@@ -176,13 +176,13 @@ def main(
             sleep((stream_out_ms - run_time)/1000)
 
     except ljm.LJMError:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
     except Exception:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
 
-    ljm_stream_util.prepare_for_exit(handle)
+    ljm_stream_util.prepareForExit(handle)
     print("Total number of skipped scans: %d" % total_num_skipped_scans)
 
 if __name__ == "__main__":

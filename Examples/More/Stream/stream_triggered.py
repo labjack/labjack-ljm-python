@@ -69,7 +69,7 @@ scansPerRead = int(scanRate / 2)
 TRIGGER_NAME = "DIO0"
 
 
-def configure_device_for_triggered_stream(handle, triggerName):
+def configureDeviceForTriggeredStream(handle, triggerName):
     """Configure the device to wait for a trigger before beginning stream.
 
     @para handle: The device handle
@@ -90,7 +90,7 @@ def configure_device_for_triggered_stream(handle, triggerName):
     ljm.eWriteName(handle, "%s_EF_ENABLE" % triggerName, 1);
 
 
-def configure_ljm_for_triggered_stream():
+def configureLJMForTriggeredStream():
     ljm.writeLibraryConfigS(ljm.constants.STREAM_SCANS_RETURN, ljm.constants.STREAM_SCANS_RETURN_ALL_OR_NONE)
     ljm.writeLibraryConfigS(ljm.constants.STREAM_RECEIVE_TIMEOUT_MS, 0)
     # By default, LJM will time out with an error while waiting for the stream
@@ -120,8 +120,8 @@ try:
     numFrames = len(aNames)
     ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
-    configure_device_for_triggered_stream(handle, TRIGGER_NAME)
-    configure_ljm_for_triggered_stream()
+    configureDeviceForTriggeredStream(handle, TRIGGER_NAME)
+    configureLJMForTriggeredStream()
 
     # Configure and start stream
     scanRate = ljm.eStreamStart(handle, scansPerRead, numAddresses, aScanList, scanRate)
@@ -135,7 +135,7 @@ try:
     i = 1
     ljmScanBacklog = 0
     while i <= MAX_REQUESTS:
-        ljm_stream_util.variable_stream_sleep(scansPerRead, scanRate, ljmScanBacklog)
+        ljm_stream_util.variableStreamSleep(scansPerRead, scanRate, ljmScanBacklog)
 
         try:
             ret = ljm.eStreamRead(handle)

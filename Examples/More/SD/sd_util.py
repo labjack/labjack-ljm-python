@@ -30,7 +30,7 @@ from labjack import ljm
 QUIET_OPEN = True
 
 
-def sanitize_path(path):
+def sanitizePath(path):
     """Return the path null-terminator guaranteed to be appended to the end.
     """
     if (path[-1] != '\x00'):
@@ -87,7 +87,7 @@ def getCWD(handle):
 def goToPath(handle, sdPath):
     """Changes the SD card system's current working directory to the given path.
     """
-    sdPath = sanitize_path(sdPath)
+    sdPath = sanitizePath(sdPath)
 
     sdPathLen = len(sdPath)
     sdPathBytes = bytearray(sdPath, 'ascii')
@@ -150,14 +150,14 @@ def getCurDirContents(handle):
 def readFile(handle, sdPath):
     """Return the file contents of the specified path as a string
     """
-    sdPath = sanitize_path(sdPath)
+    sdPath = sanitizePath(sdPath)
 
     path, filename = os.path.split(sdPath)
 
     if path:
         raise ValueError('cannot accept a file path that is not in the cwd')
 
-        # path = sanitize_path(path)
+        # path = sanitizePath(path)
         # goToPath(handle, path)
         # This would need to be improved by adding a try/finally so that
         # readFile returns to the cwd before readFile was called
@@ -218,7 +218,7 @@ def listDirContents(handle, sdPath="/\x00"):
     # Save starting directory to later return here.
     startingDirectory = getCWD(handle)
 
-    sdPath = sanitize_path(sdPath)
+    sdPath = sanitizePath(sdPath)
 
     # Navigate to specified/default directory
     goToPath(handle, sdPath)
@@ -256,7 +256,7 @@ def listDirContents(handle, sdPath="/\x00"):
 def deleteFile(handle, sdPath):
     """Removes the specified file from the SD card.
     """
-    sdPath = sanitize_path(sdPath)
+    sdPath = sanitizePath(sdPath)
     sdPathLen = len(sdPath)
     sdPathBytes = sdPath.encode()
 
@@ -276,7 +276,7 @@ def deleteFile(handle, sdPath):
     print("Successfully deleted file.")
 
 
-def example_program():
+def exampleProgram():
     handle = openDevice(quiet=False)
     printDiskInfo(handle)
     listDirContents(handle)
@@ -284,4 +284,4 @@ def example_program():
 
 
 if __name__ == '__main__':
-    example_program()
+    exampleProgram()

@@ -38,7 +38,7 @@ from labjack import ljm
 import ljm_stream_util
 
 
-def open_ljm_device(device_type, connection_type, identifier):
+def openLJMDevice(device_type, connection_type, identifier):
     try:
         handle = ljm.open(device_type, connection_type, identifier)
     except ljm.LJMError:
@@ -53,7 +53,7 @@ def open_ljm_device(device_type, connection_type, identifier):
     return handle
 
 
-def print_device_info(handle):
+def printDeviceInfo(handle):
     info = ljm.getHandleInfo(handle)
     print(
         "Opened a LabJack with Device type: %i, Connection type: %i,\n"
@@ -83,8 +83,8 @@ def main():
         write_data.append(sample)
 
     print("Beginning...\n")
-    handle = open_ljm_device(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
-    print_device_info(handle)
+    handle = openLJMDevice(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")
+    printDeviceInfo(handle)
 
     try :
         print("\nInitializing stream out... \n")
@@ -94,13 +94,13 @@ def main():
         sleep(run_time)
 
     except ljm.LJMError:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
     except Exception:
-        ljm_stream_util.prepare_for_exit(handle)
+        ljm_stream_util.prepareForExit(handle)
         raise
 
-    ljm_stream_util.prepare_for_exit(handle)
+    ljm_stream_util.prepareForExit(handle)
 
 
 if __name__ == "__main__":
