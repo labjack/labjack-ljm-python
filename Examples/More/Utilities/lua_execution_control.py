@@ -80,6 +80,7 @@ def main():
     try:
         luaScript = """-- Use USER_RAM0_U16 (register 46180) to determine which control loop to run
                     local ramval = 0
+                    MB.W(46180, 0, ramval)
                     local loop0 = 0
                     local loop1 = 1
                     local loop2 = 2
