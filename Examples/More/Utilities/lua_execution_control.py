@@ -56,7 +56,7 @@ def readLuaInfo(handle):
         for i in range(20):
             # The script sets the interval length with LJ.IntervalConfig.
             # Note that LJ.IntervalConfig has some jitter and that this program's
-            # interval (set by MillisecondSleep) will have some minor drift from
+            # interval (set by sleep) will have some minor drift from
             # LJ.IntervalConfig.
             sleep(1)
             print("LUA_RUN: %d" % ljm.eReadName(handle, "LUA_RUN"))
