@@ -1,5 +1,8 @@
 Version History
 ---------------
+1.21.0 (06/17/2020)
+ - Added a Lua example folder and lua_execution_control.py
+
 1.21.0 (03/27/2020)
  - Updated functions, constants and errorcodes to LJM v1.21.
  - Added stream-out function support and examples.
