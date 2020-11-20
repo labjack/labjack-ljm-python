@@ -1520,6 +1520,10 @@ def writeAperiodicStreamOut(handle, streamOutIndex, numValues, aWriteData):
     Raises:
         LJMError: An error was returned from the LJM library call.
 
+    Note:
+        The aperiodic stream-out should be initialized with
+        initializeAperiodicStreamOut prior to running this function.
+
     """
     cStreamIndex = ctypes.c_int32(streamOutIndex)
     cNumValues = ctypes.c_int32(numValues)
