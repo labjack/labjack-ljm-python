@@ -1,5 +1,5 @@
 labjack-ljm : LJM library Python wrapper for LabJack T7 and T4
-04/03/2019
+11/20/2020
 support@labjack.com
 
 
