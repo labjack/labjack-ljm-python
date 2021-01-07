@@ -51,6 +51,7 @@ else:
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -86,7 +87,7 @@ if deviceType == ljm.constants.dtT4:
     aNames = ["AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
     aValues = [0, 0]
 else:
-    # LabJack T7 and other devices configuration
+    # LabJack T7 and T8 configuration
 
     # AINO:
     #     Negative Channel = 199 (Single-ended)
@@ -112,7 +113,7 @@ ljm.startInterval(intervalHandle, 1000000)
 while True:
     try:
         # Setup and call eWriteNames to write to DAC0, and FIO5 (T4) or
-        # FIO1 (T7 and other devices).
+        # FIO1 (T7 and T8).
         # DAC0 will cycle ~0.0 to ~5.0 volts in 1.0 volt increments.
         # FIO5/FIO1 will toggle output high (1) and low (0) states.
         if deviceType == ljm.constants.dtT4:
@@ -128,7 +129,7 @@ while True:
               "".join(["%s = %f, " % (aNames[j], aValues[j]) for j in range(numFrames)]))
 
         # Setup and call eReadNames to read AIN0 and FIO6 (T4) for
-        # FIO2 (T7 and other devices).
+        # FIO2 (T7 and T8).
         if deviceType == ljm.constants.dtT4:
             aNames = ["AIN0", "FIO6"]
         else:
