@@ -25,6 +25,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -43,7 +44,7 @@ if deviceType == ljm.constants.dtT4:
     # digital input.
     name = "FIO4"
 else:
-    # Reading from FIO0 on the LabJack T7 and other devices.
+    # Reading from FIO0 on the LabJack T7 and T8.
     name = "FIO0"
 result = ljm.eReadName(handle, name)
 

@@ -45,6 +45,7 @@ else:
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -69,7 +70,7 @@ if deviceType == ljm.constants.dtT4:
     aValues = [10.0, 0, 0,
                10.0, 0, 0]
 else:
-    # LabJack T7 and other devices configuration
+    # LabJack T7 and T8 configuration
 
     # AIN0 and AIN1:
     #   Negative channel = single ended (199)
