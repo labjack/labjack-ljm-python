@@ -59,6 +59,7 @@ def eAddressesIteration(handle, numFrames, aAddresses, aTypes, aWrites,
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -107,7 +108,7 @@ if deviceType == ljm.constants.dtT4:
         dioInhibit = dioAnalogEnable
         ljm.eWriteName(handle, "DIO_INHIBIT", dioInhibit)
 else:
-    # T7 and other devices analog input configuration
+    # T7 and T8 analog input configuration
     rangeAIN = 10.0
 
 if numAIN > 0:

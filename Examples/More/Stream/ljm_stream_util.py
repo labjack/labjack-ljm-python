@@ -84,7 +84,7 @@ def createScanList(inNames=[], outContexts=[]):
     outAddresses = []
 
     if len(outContexts) > 4:
-        raise ValueError("The T7 only has 4 stream-out buffers")
+        raise ValueError("The T-Series only has 4 stream-out buffers")
 
     for outContext in outContexts:
         streamOutName = outContext["names"]["streamOut"]
@@ -265,7 +265,7 @@ def updateStreamOutBuffer(handle, outContext):
 
 
 def initializeStreamOut(handle, outContext):
-    # Allocate memory on the T7 for the stream-out buffer
+    # Allocate memory for the stream-out buffer
     outAddress = convertNameToAddress(outContext["target"])
     names = outContext["names"]
     ljm.eWriteName(handle, names["target"], outAddress)
