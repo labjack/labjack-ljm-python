@@ -40,6 +40,7 @@ NUMBER_OF_AINS = 8
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -81,7 +82,7 @@ try:
         aValues = [0, 0]  # 0 (default), 0 (default)
         ljm.eWriteNames(handle, len(aNames), aNames, aValues)
     else:
-        # T7 and other devices configuration
+        # T7 and T8 configuration
 
         # Ensure triggered stream is disabled.
         ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)

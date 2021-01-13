@@ -3,7 +3,7 @@ Demonstrates SPI communication.
 
 You can short MOSI to MISO for testing.
 
-T7:
+T7 and T8:
     MOSI    FIO2
     MISO    FIO3
     CLK     FIO0
@@ -49,6 +49,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -72,7 +73,7 @@ if deviceType == ljm.constants.dtT4:
     ljm.eWriteName(handle, "SPI_MISO_DIONUM", 7)  # MISO is FIO7
     ljm.eWriteName(handle, "SPI_MOSI_DIONUM", 6)  # MOSI is FIO6
 else:
-    # Setting CS, CLK, MISO, and MOSI lines for the T7 and other devices.
+    # Setting CS, CLK, MISO, and MOSI lines for the T7 and T8.
     ljm.eWriteName(handle, "SPI_CS_DIONUM", 1)  # CS is FIO1
     ljm.eWriteName(handle, "SPI_CLK_DIONUM", 0)  # CLK is FIO0
     ljm.eWriteName(handle, "SPI_MISO_DIONUM", 3)  # MISO is FIO3
