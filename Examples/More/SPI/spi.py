@@ -129,7 +129,6 @@ for i in range(numBytes):
 
 # Read the bytes
 dataRead = ljm.eReadNameByteArray(handle, "SPI_DATA_RX", numBytes)
-ljm.eWriteName(handle, "SPI_GO", 1)
 
 # Display the bytes read
 print("")
