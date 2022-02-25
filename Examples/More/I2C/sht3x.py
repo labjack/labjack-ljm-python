@@ -6,7 +6,7 @@ is performed, then subsequently a read only transaction is performed to read
 sensor data.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -18,7 +18,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
     Multiple Value Functions(such as eWriteNameByteArray):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

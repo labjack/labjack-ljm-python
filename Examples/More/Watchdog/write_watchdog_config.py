@@ -2,7 +2,7 @@
 Demonstrates how to configure the Watchdog on a LabJack.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -12,7 +12,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     eWriteNames:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

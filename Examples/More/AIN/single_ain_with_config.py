@@ -3,9 +3,9 @@ Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
 
   Name: single_ain_with_config.c
   Desc: Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
- 
+
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -17,7 +17,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadname
     Multiple Value Functions(such as eWriteNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -47,11 +47,10 @@ if deviceType == ljm.constants.dtT4:
     # LabJack T4 configuration
 
     # AIN0:
-    #   Range: +/-10.0 V (10.0). Only AIN0-AIN3 support the +/-10 V range.
     #   Resolution index = Default (0)
     #   Settling, in microseconds = Auto (0)
-    names = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
-    aValues = [10, 0, 0]
+    aNames = ["AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
+    aValues = [0, 0]
 else:
     # LabJack T7 and T8 configuration
 
@@ -60,14 +59,21 @@ else:
     #   Range: +/-10.0 V (10.0).
     #   Resolution index = Default (0)
     #   Settling, in microseconds = Auto (0)
-    names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
-    aValues = [199, 10, 0, 0]
-numFrames = len(names)
-ljm.eWriteNames(handle, numFrames, names, aValues)
+    aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX"]
+    aValues = [10, 0]
+
+    # Negative channel and settling configurations do not apply to the T8
+    if deviceType == ljm.constants.dtT7:
+        #     Negative Channel = 199 (Single-ended)
+        #     Settling = 0 (auto)
+        aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US"])
+        aValues.extend([199, 0])
+numFrames = len(aNames)
+ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
 print("\nSet configuration:")
 for i in range(numFrames):
-    print("    %s : %f" % (names[i], aValues[i]))
+    print("    %s : %f" % (aNames[i], aValues[i]))
 
 # Setup and call eReadName to read AIN0 from the LabJack.
 name = "AIN0"

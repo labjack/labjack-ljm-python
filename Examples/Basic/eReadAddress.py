@@ -3,7 +3,7 @@ Demonstrates how to use the labjack.ljm.eReadAddress (LJM_eReadAddress)
 function.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -13,7 +13,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     eReadAddress:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadaddress
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

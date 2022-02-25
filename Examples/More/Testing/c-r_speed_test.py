@@ -3,7 +3,7 @@ Performs LabJack operations in a loop and reports the timing statistics for the
 operations.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -15,7 +15,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Raw Byte Functions:
     https://labjack.com/support/software/api/ljm/function-reference/lowlevel-functions/raw-byte-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

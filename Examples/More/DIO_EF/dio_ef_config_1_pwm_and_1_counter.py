@@ -1,11 +1,10 @@
 """
-Enables a 10 kHz PWM output on FIO0 for the T7 and T8, or FIO6 for the T4,
-enables a high-speed counter on CIO2 (DIO18), waits 1 second, and reads the
-counter. Jumper FIO0/FIO6 to CIO2 and the read value. Value should be close to
-10000.
+Enables a 10 kHz PWM output and high-speed counter, waits 1 second, and reads
+the counter. If you jumper the counter to the PWM the value read from the
+counter should be close to 10000.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -15,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     Multiple Value Functions(such as eWriteNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -51,20 +50,29 @@ deviceType = info[0]
 # Configure the PWM output and counter.
 if deviceType == ljm.constants.dtT4:
     # For the T4, use FIO6 (DIO6) for the PWM output
+    # Use CIO2 (DIO18) for the high speed counter
     pwmDIO = 6
-
+    counterDIO = 18
     # Set FIO and EIO lines to digital I/O.
     ljm.eWriteNames(handle, 2,
                     ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
                     [0xFBF, 0x000])
-else:
-    # For the T7 and T8, use FIO0 (DIO0) for the PWM output
+elif deviceType == ljm.constants.dtT7:
+    # For the T7, use FIO0 (DIO0) for the PWM output
+    # Use CIO2 (DIO18) for the high speed counter
     pwmDIO = 0
+    counterDIO = 18
+else:
+    # For the T8, use FIO7 (DIO7) for the PWM output
+    # Use FIO6 (DIO6) for the high speed counter
+    pwmDIO = 7
+    counterDIO = 6
+
 aNames = ["DIO_EF_CLOCK0_DIVISOR", "DIO_EF_CLOCK0_ROLL_VALUE",
           "DIO_EF_CLOCK0_ENABLE", "DIO%i_EF_ENABLE" % pwmDIO,
           "DIO%i_EF_INDEX" % pwmDIO, "DIO%i_EF_CONFIG_A" % pwmDIO,
-          "DIO%i_EF_ENABLE" % pwmDIO, "DIO18_EF_ENABLE",
-          "DIO18_EF_INDEX", "DIO18_EF_ENABLE"]
+          "DIO%i_EF_ENABLE" % pwmDIO, "DIO%i_EF_ENABLE" % counterDIO,
+          "DIO%i_EF_INDEX" % counterDIO, "DIO%i_EF_ENABLE" % counterDIO]
 aValues = [1, 8000,
            1, 0,
            0, 2000,
@@ -77,13 +85,14 @@ results = ljm.eWriteNames(handle, numFrames, aNames, aValues)
 time.sleep(1.0)
 
 # Read from the counter.
-value = ljm.eReadName(handle, "DIO18_EF_READ_A")
+value = ljm.eReadName(handle, "DIO%i_EF_READ_A" %counterDIO)
 
 print("\nCounter = %f" % (value))
 
 # Turn off PWM output and counter
-aNames = ["DIO_EF_CLOCK0_ENABLE", "DIO%i_EF_ENABLE" % pwmDIO]
-aValues = [0, 0]
+aNames = ["DIO_EF_CLOCK0_ENABLE", "DIO%i_EF_ENABLE" % pwmDIO,
+          "DIO%i_EF_ENABLE" % counterDIO]
+aValues = [0, 0, 0]
 numFrames = len(aNames)
 results = ljm.eWriteNames(handle, numFrames, aNames, aValues)
 

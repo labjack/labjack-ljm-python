@@ -4,7 +4,7 @@ functions. Useful when streaming many analog inputs. AIN channel scan list is
 FIRST_AIN_CHANNEL to FIRST_AIN_CHANNEL + NUMBER_OF_AINS - 1.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,15 +14,15 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     NamesToAddresses:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
-    Stream Functions (eStreamRead, eStreamStart, etc.): 
+    Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    Stream Mode: 
+    Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
@@ -34,7 +34,7 @@ import sys
 from labjack import ljm
 
 
-MAX_REQUESTS = 25  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 10  # The number of eStreamRead calls that will be performed.
 FIRST_AIN_CHANNEL = 0  # 0 = AIN0
 NUMBER_OF_AINS = 8
 
@@ -70,32 +70,28 @@ try:
                         ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"],
                         [dioInhibit, dioAnalogEnable])
 
-        # Configure the analog input ranges.
-        rangeAINHV = 10.0  # HV channels range (AIN0-AIN3)
-        rangeAINLV = 2.5  # LV channels range (AIN4+)
-        aNames = ["AIN%i_RANGE" % i for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL + NUMBER_OF_AINS)]
-        aValues = [rangeAINHV if i < 4 else rangeAINLV for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL + NUMBER_OF_AINS)]
-        ljm.eWriteNames(handle, len(aNames), aNames, aValues)
-
         # Configure the stream settling times and stream resolution index.
         aNames = ["STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
         aValues = [0, 0]  # 0 (default), 0 (default)
         ljm.eWriteNames(handle, len(aNames), aNames, aValues)
     else:
-        # T7 and T8 configuration
+        # LabJack T7 and T8 configuration
 
         # Ensure triggered stream is disabled.
         ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
-
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # Configure the analog input negative channels, ranges, stream settling
-        # times and stream resolution index.
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 0, 0]  # single-ended, +/-10V, 0 (default), 0 (default)
-        ljm.eWriteNames(handle, len(aNames), aNames, aValues)
+        # AIN ranges are +/-10 V and stream resolution index is 0 (default).
+        aNames = ["AIN_ALL_RANGE", "STREAM_RESOLUTION_INDEX"]
+        aValues = [10.0, 0]
+
+        # Negative channel and settling configurations do not apply to the T8
+        if deviceType == ljm.constants.dtT7:
+            #     Negative Channel = GND (single ended)
+            #     Settling = 0 (auto)
+            aNames.extend(["AIN_ALL_NEGATIVE_CH", "STREAM_SETTLING_US"])
+            aValues.extend([ljm.constants.GND, 0])
 
     # Stream configuration
     aScanListNames = ["AIN%i" % i for i in range(FIRST_AIN_CHANNEL, FIRST_AIN_CHANNEL + NUMBER_OF_AINS)]  # Scan list names

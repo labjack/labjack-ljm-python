@@ -2,7 +2,7 @@
 Demonstrates how to use the streamBurst function for streaming.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -16,11 +16,11 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
     StreamBurst:
         https://labjack.com/support/software/api/ljm/function-reference/ljmstreamburst
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    Stream Mode: 
+    Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
@@ -50,8 +50,8 @@ deviceType = info[0]
 aScanListNames = ["AIN0", "AIN1"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]  # Scan list addresses for streamBurst
-scanRate = 10000  # Scans per second
-numScans = 20000  # Number of scans to perform
+scanRate = 1000  # Scans per second
+numScans = 2000  # Number of scans to perform
 
 try:
     # When streaming, negative channels and ranges can be configured for
@@ -61,26 +61,31 @@ try:
     if deviceType == ljm.constants.dtT4:
         # LabJack T4 configuration
 
-        # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
+        # Stream settling is 0 (default) and
         # stream resolution index is 0 (default).
-        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [10.0, 10.0, 0, 0]
+        aNames = ["STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+        aValues = [0, 0]
     else:
         # LabJack T7 and T8 configuration
 
         # Ensure triggered stream is disabled.
         ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
-
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # All negative channels are single-ended, AIN0 and AIN1 ranges are
-        # +/-10 V, stream settling is 0 (default) and stream resolution index
-        # is 0 (default).
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
+        # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
+        # 0 (default).
+        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_RESOLUTION_INDEX"]
+        aValues = [10.0, 10.0, 0]
+
+        # Negative channel and settling configurations do not apply to the T8
+        if deviceType == ljm.constants.dtT7:
+            #     Negative Channel = 199 (Single-ended)
+            #     Settling = 0 (auto)
+            aNames.extend(["AIN0_NEGATIVE_CH", "STREAM_SETTLING_US",
+                           "AIN1_NEGATIVE_CH"])
+            aValues.extend([199, 0, 199])
+
     # Write the analog inputs' negative channels (when applicable), ranges,
     # stream settling time and stream resolution configuration.
     numFrames = len(aNames)

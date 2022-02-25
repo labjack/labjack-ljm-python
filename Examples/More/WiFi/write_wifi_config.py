@@ -2,7 +2,7 @@
 Demonstrates how to configure the WiFi settings on a LabJack.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
     IPToNumber:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmiptonumber
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

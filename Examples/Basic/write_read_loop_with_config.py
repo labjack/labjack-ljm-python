@@ -3,7 +3,7 @@ Performs an initial call to eWriteNames to write configuration values, and then
 calls eWriteNames and eReadNames repeatedly in a loop.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -17,7 +17,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
     Timing Functions(such as StartInterval):
         https://labjack.com/support/software/api/ljm/function-reference/timing-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -90,13 +90,18 @@ else:
     # LabJack T7 and T8 configuration
 
     # AINO:
-    #     Negative Channel = 199 (Single-ended)
     #     Range = +/- 10 V
     #     Resolution index = 0 (default)
-    #     Settling = 0 (auto)
-    aNames = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX",
-              "AIN0_SETTLING_US"]
-    aValues = [199, 10, 0, 0]
+    aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX"]
+    aValues = [10, 0]
+
+    # Negative channel and settling configurations do not apply to the T8
+    if deviceType == ljm.constants.dtT7:
+        #     Negative Channel = 199 (Single-ended)
+        #     Settling = 0 (auto)
+        aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US"])
+        aValues.extend([199, 0])
+
 numFrames = len(aNames)
 ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
@@ -145,7 +150,7 @@ while True:
             print("\nSkippedIntervals: %s" % skippedIntervals)
 
         i += 1
-        if loopAmount is not "infinite":
+        if loopAmount != "infinite":
             if i >= loopAmount:
                 break
     except KeyboardInterrupt:

@@ -2,7 +2,7 @@
 Demonstrates how to read the device name string from a LabJack.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -12,7 +12,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     eReadNameString:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadnamestring
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

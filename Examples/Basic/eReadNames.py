@@ -2,7 +2,7 @@
 Demonstrates how to use the labjack.ljm.eReadNames (LJM_eReadNames) function.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -12,7 +12,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     eReadNames:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadnames
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

@@ -4,7 +4,7 @@ LabJack devices and returns information describing the found devices. This will
 only find LabJack devices supported by the LJM library.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm

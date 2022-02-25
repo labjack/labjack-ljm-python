@@ -2,7 +2,7 @@
 Demonstrates how to read the ethernet configuration settings from a LabJack.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadnames
     NumberToIP:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map

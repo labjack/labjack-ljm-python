@@ -2,7 +2,7 @@
 Demonstrates how to use the labjack.ljm.eWriteNames (LJM_eWriteNames) function.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
     Constants:
         https://labjack.com/support/software/api/ljm/constants
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
