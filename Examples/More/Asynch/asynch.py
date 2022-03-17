@@ -1,5 +1,5 @@
 """
-Simple asynch example uses the first found device and 9600/8/N/1.
+Simple asynch example using the first found device and 9600/8/N/1.
 Does a write, waits 1 second, then returns whatever was read in that
 time. If you short RX to TX, then you will read back the same bytes that you
 write.
