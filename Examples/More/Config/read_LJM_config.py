@@ -20,9 +20,9 @@ from labjack import ljm
 configString = "LJM_ERROR_CONSTANTS_FILE"
 print("%s: %s" % (configString, ljm.readLibraryConfigStringS(configString)))
 
-# Read the communication send/receive timeout being used by LJM
+# Write the communication send/recieve timeout for LJM
 configString = "LJM_SEND_RECEIVE_TIMEOUT_MS"
-print("%s: %d" % (configString, ljm.readLibraryConfigS(configString)))
+ljm.writeLibraryConfigS(configString, 5000)
 
-# Close handle
-ljm.close(handle)
+# Read the communication send/receive timeout for LJM
+print("%s: %d" % (configString, ljm.readLibraryConfigS(configString)))
