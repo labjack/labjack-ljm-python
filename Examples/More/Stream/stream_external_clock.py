@@ -98,7 +98,7 @@ def EnableFIO0PulseOut(handle, pulseRate, numPulses):
     ljm.eWriteName(handle, "DIO0_EF_INDEX", 2)
     ljm.eWriteName(handle, "DIO0_EF_OPTIONS", 0)
     ljm.eWriteName(handle, "DIO0", 0)
-    ljm.eWriteName(handle, "DIO0_EF_CONFIG_A", 0)
+    ljm.eWriteName(handle, "DIO0_EF_CONFIG_A", int(rollValue/2))
     ljm.eWriteName(handle, "DIO0_EF_CONFIG_B", 0)
     ljm.eWriteName(handle, "DIO0_EF_CONFIG_C", int(numPulses))
     ljm.eWriteName(handle, "DIO0_EF_ENABLE", 1)
