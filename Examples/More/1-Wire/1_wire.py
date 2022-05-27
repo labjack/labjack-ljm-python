@@ -6,7 +6,7 @@ demonstration:
   - Reads temperature from a DS1822 sensor.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer
         https://labjack.com/support/software/installers/ljm
@@ -16,7 +16,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     Multiple Value Functions(such as eReadNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     1-Wire:
         https://labjack.com/support/datasheets/t-series/digital-io/1-wire
@@ -49,7 +49,7 @@ if deviceType == ljm.constants.dtT4:
 
 
 # Configure 1-Wire pins and options.
-dqPin = 8  # EIO8
+dqPin = 8  # EIO0
 dpuPin = 0  # Not used
 options = 0  # bit 2 = 0 (DPU disabled), bit 3 = 0 (DPU polarity low, ignored)
 aNames = ["ONEWIRE_DQ_DIONUM",
