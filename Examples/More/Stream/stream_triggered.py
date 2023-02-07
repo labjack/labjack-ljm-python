@@ -2,7 +2,7 @@
 Demonstrates triggered stream on DIO0 / FIO0.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -12,17 +12,17 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     NamesToAddresses:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
-    Stream Functions (eStreamRead, eStreamStart, etc.): 
+    Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
     Single Value Functions (such as eReadName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Library Configuration Functions:
         https://labjack.com/support/software/api/ljm/function-reference/library-configuration-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    Stream Mode: 
+    Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Stream Mode (triggered):
         https://labjack.com/support/datasheets/t-series/communication/stream-mode#triggered
@@ -31,6 +31,15 @@ T-Series and I/O:
     Digital I/O:
         https://labjack.com/support/datasheets/t-series/digital-io
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 from datetime import datetime
 import sys
