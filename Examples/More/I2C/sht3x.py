@@ -6,7 +6,7 @@ is performed, then subsequently a read only transaction is performed to read
 sensor data.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -18,7 +18,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
     Multiple Value Functions(such as eWriteNameByteArray):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -27,6 +27,15 @@ T-Series and I/O:
     I2C:
         https://labjack.com/support/datasheets/t-series/digital-io/i2c
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 from time import sleep
 
@@ -88,7 +97,7 @@ numBytes = 2
 aBytes = [0x24, 0x00]
 ljm.eWriteNameByteArray(handle, "I2C_DATA_TX", numBytes, aBytes)
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
- 
+
 # The sensor needs at least 15ms for the measurement. Wait 20ms
 sleep(0.02)
 
@@ -97,7 +106,7 @@ ljm.eWriteName(handle, "I2C_NUM_BYTES_TX", 0)  # Set the number of bytes to tran
 ljm.eWriteName(handle, "I2C_NUM_BYTES_RX", 6)  # Set the number of bytes to receive
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
 
-# SHT3x sensors should always return 6 bytes for single shot acquisition: 
+# SHT3x sensors should always return 6 bytes for single shot acquisition:
 # [temp MSB, temp LSB, CRC, RH MSB, RH LSB, CRC]
 numBytes = 6
 aBytes = [0]*6

@@ -4,7 +4,7 @@ high-speed counter on CIO2 (DIO18), waits 1 second and reads the counter. Jumper
 FIO0/FIO6 to CIO2 and the read value. Value should be close to 10000.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     Multiple Value Functions(such as eWriteNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -27,6 +27,15 @@ T-Series and I/O:
     High-Speed Counter:
         https://labjack.com/support/datasheets/t-series/digital-io/extended-features/high-speed-counter
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 import time
 

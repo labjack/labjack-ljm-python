@@ -3,9 +3,9 @@ Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
 
   Name: single_ain_with_config.c
   Desc: Demonstrates configuring and reading a single analog input (AIN) with a LabJack.
- 
+
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -17,13 +17,22 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadname
     Multiple Value Functions(such as eWriteNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 from labjack import ljm
 

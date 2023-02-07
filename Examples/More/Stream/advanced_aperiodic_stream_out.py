@@ -26,7 +26,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    LJM Single Value Functions (like eReadName, eReadAddress): 
+    LJM Single Value Functions (like eReadName, eReadAddress):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
@@ -45,6 +45,15 @@ T-Series and I/O:
     DAC:
         https://labjack.com/support/datasheets/t-series/dac
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 import sys
 

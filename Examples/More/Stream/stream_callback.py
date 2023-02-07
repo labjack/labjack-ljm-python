@@ -3,7 +3,7 @@ Demonstrates how to stream using a callback to read stream, which is useful
 for streaming in external clock stream mode.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -15,15 +15,15 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/utility
     Stream Functions:
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    Stream Mode: 
+    Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
-    Stream-Out: 
+    Stream-Out:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
     Digital I/O:
         https://labjack.com/support/datasheets/t-series/digital-io
@@ -32,6 +32,15 @@ T-Series and I/O:
     Stream Mode (externally clocked):
         https://labjack.com/support/datasheets/t-series/communication/stream-mode#externally-clocked
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 from datetime import datetime
 import sys
@@ -54,7 +63,7 @@ class StreamInfo:
         self.numAddresses = 0
         self.aScanList = 0
         self.aScanListNames = 0
-        
+
         self.aDataSize = 0
         self.aData = None
 

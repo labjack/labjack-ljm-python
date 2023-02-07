@@ -7,7 +7,7 @@ Though these values are generated before the stream starts, the values could
 be dynamically generated, read from a file, etc.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -15,11 +15,11 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    LJM Single Value Functions (like eReadName, eReadAddress): 
+    LJM Single Value Functions (like eReadName, eReadAddress):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -34,6 +34,15 @@ T-Series and I/O:
     DAC:
         https://labjack.com/support/datasheets/t-series/dac
 
+Note:
+    Our Python interfaces throw exceptions when there are any issues with
+    device communications that need addressed. Many of our examples will
+    terminate immediately when an exception is thrown. The onus is on the API
+    user to address the cause of any exceptions thrown, and add exception
+    handling when appropriate. We create our own exception classes that are
+    derived from the built-in Python Exception class and can be caught as such.
+    For more information, see the implementation in our source code and the
+    Python standard documentation.
 """
 import sys
 
@@ -165,7 +174,7 @@ def main(
             iteration = iteration + 1
         # Since scan rate determines how quickly data can be written from the device
         # large chunks of data written at low scan rates can take longer to write
-        # out than it takes to call LJM_WriteAperiodicStreamOut and 
+        # out than it takes to call LJM_WriteAperiodicStreamOut and
         # LJM_eStreamRead. some delay may be necessary if it is desired to write out
         # all data then immediately close the stream
         runTime = (ljm.getHostTick() - start_time)/1000;
