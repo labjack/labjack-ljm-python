@@ -113,7 +113,7 @@ def main():
                         end
 
                       end
-                    end"""
+                    end\0"""
         # Open first found LabJack
         handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
         #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
