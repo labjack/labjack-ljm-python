@@ -35,6 +35,11 @@ and go to its unzipped directory. To install, run the the following command
 
     $ python setup.py install
 
+If using Conda, we suggest creating a skeleton package from our PyPi package,
+then install with Conda:
+conda skeleton pypi labjack-ljm
+conda-build labjack-ljm
+
 
 Distribution Name Change:
 
