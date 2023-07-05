@@ -72,7 +72,7 @@ filePath = os.path.join(cwd, fileName)
 
 # Open the file and write a header line
 f = open(filePath, 'w')
-f.write("Time Stamp, Duration/Jitter (ms), %s\n" % (name))
+f.write("Timestamp, Duration/Jitter (ms), %s\n" % (name))
 
 # Print some program initialization information
 print("The time is: %s" % (startTimeStr))
