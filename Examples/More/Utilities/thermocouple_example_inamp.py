@@ -24,8 +24,6 @@ T-Series and I/O:
         https:#labjack.com/support/software/api/modbus/modbus-map
     Analog Inputs:
         https:#labjack.com/support/datasheets/t-series/ain
-    Thermocouple AIN_EF (T7/T8 only):
-        https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple
 """
 from labjack import ljm
 import sys
@@ -46,6 +44,7 @@ if __name__ == "__main__":
     # Read 10 times
     numIterations = 10
     # Take a measurement of a thermocouple connected to AIN0
+    # That would be INA of an InAmp connected to the VS/GND/AIN0/AIN1 terminals
     channelName = "AIN0"
     # Gain setting on the InAmp
     gain = 51
@@ -67,6 +66,8 @@ if __name__ == "__main__":
     resIndexRegister = "%s_RESOLUTION_INDEX" % channelName
     ljm.eWriteName(handle, resIndexRegister, 0)
 
+    # This section is for range and negative channel settings. The T4 does not
+    # support these configurations
     if deviceType == ljm.constants.dtT7:
         # ±10 V range setting
         rangeRegister = "%s_RANGE" % channelName
@@ -76,7 +77,7 @@ if __name__ == "__main__":
         negChannelRegister = "%s_NEGATIVE_CH" % channelName
         ljm.eWriteName(handle, negChannelRegister, negChannelValue)
     elif deviceType == ljm.constants.dtT8:
-        print("\nThe T8 is not compatible with the InAmp, see our other thermocouple example")
+        print("\nThe T8 is not compatible with the InAmp, see our AIN_EF example")
         exit(0)
 
     print("\nReading thermocouple temperature %d times...\n" % numIterations)
@@ -87,12 +88,11 @@ if __name__ == "__main__":
 
     while i < numIterations:
         try:
-            # Read the voltage of the InAmp output
-            voltage = ljm.eReadName(handle, channelName)
-            # Convert back to the raw thermocouple voltage
+            # Read the InAmp output voltage and internal temp sensor at once
+            aNames = [channelName, "TEMPERATURE_DEVICE_K"]
+            [voltage, cjTempK] = ljm.eReadNames(handle, len(aNames), aNames)
+            # Convert the InAmp output to the raw thermocouple voltage
             tcVolts = (voltage - offset) / gain
-            # Read the internal temp sensor for CJC
-            cjTempK = ljm.eReadName(handle, "TEMPERATURE_DEVICE_K")
             # Convert voltage to thermocouple temperature (K).
             tcTempK = ljm.tcVoltsToTemp(tcType, tcVolts, cjTempK)
             # Print the temperature read
