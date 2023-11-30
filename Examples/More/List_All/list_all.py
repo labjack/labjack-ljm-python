@@ -30,7 +30,8 @@ Note:
 from labjack import ljm
 
 
-DEVICE_TYPES = {ljm.constants.dtT7: "T7",
+DEVICE_TYPES = {ljm.constants.dtT8: "T8",
+                ljm.constants.dtT7: "T7",
                 ljm.constants.dtT4: "T4",
                 ljm.constants.dtDIGIT: "Digit"}
 CONN_TYPES = {ljm.constants.ctUSB: "USB",

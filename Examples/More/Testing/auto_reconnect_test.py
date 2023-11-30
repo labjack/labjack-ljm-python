@@ -55,6 +55,7 @@ ljm.writeLibraryConfigS(ljm.constants.SEND_RECEIVE_TIMEOUT_MS, 500)
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier

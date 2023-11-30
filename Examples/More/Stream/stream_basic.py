@@ -39,10 +39,11 @@ import sys
 from labjack import ljm
 
 
-MAX_REQUESTS = 25  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 10  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -69,26 +70,31 @@ try:
     if deviceType == ljm.constants.dtT4:
         # LabJack T4 configuration
 
-        # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
+        # Stream settling is 0 (default) and
         # stream resolution index is 0 (default).
-        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [10.0, 10.0, 0, 0]
+        aNames = ["STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+        aValues = [0, 0]
     else:
-        # LabJack T7 and other devices configuration
+        # LabJack T7 and T8 configuration
 
         # Ensure triggered stream is disabled.
         ljm.eWriteName(handle, "STREAM_TRIGGER_INDEX", 0)
-
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # All negative channels are single-ended, AIN0 and AIN1 ranges are
-        # +/-10 V, stream settling is 0 (default) and stream resolution index
-        # is 0 (default).
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
+        # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
+        # 0 (default).
+        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_RESOLUTION_INDEX"]
+        aValues = [10.0, 10.0, 0]
+
+        # Negative channel and settling configurations do not apply to the T8
+        if deviceType == ljm.constants.dtT7:
+            #     Negative Channel = 199 (Single-ended)
+            #     Settling = 0 (auto)
+            aNames.extend(["AIN0_NEGATIVE_CH", "STREAM_SETTLING_US",
+                           "AIN1_NEGATIVE_CH"])
+            aValues.extend([199, 0, 199])
+
     # Write the analog inputs' negative channels (when applicable), ranges,
     # stream settling time and stream resolution configuration.
     numFrames = len(aNames)

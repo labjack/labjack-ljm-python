@@ -2,7 +2,7 @@
 Demonstrates reading 2 analog inputs (AINs) in a loop from a LabJack.
 
 Relevant Documentation:
- 
+
 LJM Library:
     LJM Library Installer:
         https://labjack.com/support/software/installers/ljm
@@ -14,7 +14,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
     Timing Functions(such as StartInterval):
         https://labjack.com/support/software/api/ljm/function-reference/timing-functions
- 
+
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -54,6 +54,7 @@ else:
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -70,35 +71,39 @@ if deviceType == ljm.constants.dtT4:
     # LabJack T4 configuration
 
     # AIN0 and AIN1:
-    #   Range: +/-10.0 V (10.0). Only AIN0-AIN3 support the +/-10 V range.
     #   Resolution index = Default (0)
     #   Settling, in microseconds = Auto (0)
-    names = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
-             "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
-    aValues = [10.0, 0, 0,
-               10.0, 0, 0]
+    aNames = ["AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
+             "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
+    aValues = [0, 0, 0, 0]
 else:
-    # LabJack T7 and other devices configuration
+    # LabJack T7 and T8 configuration
 
     # AIN0 and AIN1:
-    #   Negative channel = single ended (199)
     #   Range: +/-10.0 V (10.0)
     #   Resolution index = Default (0)
-    #   Settling, in microseconds = Auto (0)
-    names = ["AIN0_NEGATIVE_CH", "AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
-             "AIN1_NEGATIVE_CH", "AIN1_RANGE", "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
-    aValues = [199, 10.0, 0, 0,
-               199, 10.0, 0, 0]
-numFrames = len(names)
-ljm.eWriteNames(handle, numFrames, names, aValues)
+    aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX",
+             "AIN1_RANGE", "AIN1_RESOLUTION_INDEX"]
+    aValues = [10.0, 0, 10.0, 0]
+
+    # Negative channel and settling configurations do not apply to the T8
+    if deviceType == ljm.constants.dtT7:
+        #     Negative Channel = 199 (Single-ended)
+        #     Settling = 0 (auto)
+        aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US",
+                       "AIN1_NEGATIVE_CH", "AIN1_SETTLING_US"])
+        aValues.extend([199, 0, 199, 0])
+
+numFrames = len(aNames)
+ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
 print("\nSet configuration:")
 for i in range(numFrames):
-    print("    %s : %f" % (names[i], aValues[i]))
+    print("    %s : %f" % (aNames[i], aValues[i]))
 
 # Read AIN0 and AIN1 from the LabJack with eReadNames in a loop.
 numFrames = 2
-names = ["AIN0", "AIN1"]
+aNames = ["AIN0", "AIN1"]
 
 print("\nStarting %s read loops.%s\n" % (str(loopAmount), loopMessage))
 intervalHandle = 1
@@ -106,10 +111,10 @@ ljm.startInterval(intervalHandle, 1000000)  # Delay between readings (in microse
 i = 0
 while True:
     try:
-        results = ljm.eReadNames(handle, numFrames, names)
+        results = ljm.eReadNames(handle, numFrames, aNames)
         print("AIN0 : %f V, AIN1 : %f V" % (results[0], results[1]))
         ljm.waitForNextInterval(intervalHandle)
-        if loopAmount is not "infinite":
+        if loopAmount != "infinite":
             i = i + 1
             if i >= loopAmount:
                 break

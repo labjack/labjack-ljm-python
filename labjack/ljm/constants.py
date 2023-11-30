@@ -34,6 +34,7 @@ BYTES_PER_REGISTER = 2
 dtANY = 0
 dtT4 = 4
 dtT7 = 7
+dtT8 = 8
 dtDIGIT = 200
 dtTSERIES = 84
 

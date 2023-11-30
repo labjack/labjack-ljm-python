@@ -1,8 +1,8 @@
 """
 Demonstrates I2C communication using a LabJack. The demonstration uses a
-LJTick-DAC connected to FIO0/FIO1 for the T7 or FIO4/FIO5 for the T4, and
-configures the I2C settings. Then a read, write and again a read are performed
-on the LJTick-DAC EEPROM.
+LJTick-DAC connected to FIO0/FIO1 for the T7 and T8, or FIO4/FIO5 for the T4,
+and configures the I2C settings. Then a read, write and again a read are
+performed on the LJTick-DAC EEPROM.
 
 Relevant Documentation:
 
@@ -45,6 +45,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -67,8 +68,7 @@ if deviceType == ljm.constants.dtT4:
     ljm.eWriteName(handle, "I2C_SDA_DIONUM", 5)  # SDA pin number = 5 (FIO5)
     ljm.eWriteName(handle, "I2C_SCL_DIONUM", 4)  # SCL pin number = 4 (FIO4)
 else:
-    # For the T7 and other devices, using FIO0 and FIO1 for the SCL and SDA
-    # pins.
+    # For the T7 and T8, using FIO0 and FIO1 for the SCL and SDA pins.
     ljm.eWriteName(handle, "I2C_SDA_DIONUM", 1)  # SDA pin number = 1 (FIO1)
     ljm.eWriteName(handle, "I2C_SCL_DIONUM", 0)  # SCL pin number = 0 (FIO0)
 

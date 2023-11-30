@@ -1,5 +1,6 @@
 """
 Demonstrates triggered stream on DIO0 / FIO0.
+Note: The T4 is not supported for this example
 
 Relevant Documentation:
 
@@ -53,8 +54,8 @@ MAX_REQUESTS = 10  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
-#handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
 
 info = ljm.getHandleInfo(handle)
@@ -117,12 +118,18 @@ try:
     # Enabling internally-clocked stream.
     ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-    # All negative channels are single-ended, AIN0 and AIN1 ranges are
-    # +/-10 V, stream settling is 0 (default) and stream resolution index
-    # is 0 (default).
-    aNames = ["AIN_ALL_NEGATIVE_CH", "AIN0_RANGE", "AIN1_RANGE",
-              "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-    aValues = [ljm.constants.GND, 10.0, 10.0, 0, 0]
+    # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
+    # 0 (default).
+    aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_RESOLUTION_INDEX"]
+    aValues = [10.0, 10.0, 0]
+
+    # Negative channel and settling configurations do not apply to the T8
+    if deviceType == ljm.constants.dtT7:
+        #     Negative Channel = 199 (Single-ended)
+        #     Settling = 0 (auto)
+        aNames.extend(["AIN0_NEGATIVE_CH", "STREAM_SETTLING_US",
+                       "AIN1_NEGATIVE_CH"])
+        aValues.extend([199, 0, 199])
 
     # Write the analog inputs' negative channels, ranges, stream settling time
     # and stream resolution configuration.

@@ -34,6 +34,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -52,7 +53,7 @@ if deviceType == ljm.constants.dtT4:
              "BOOTLOADER_VERSION", "SERIAL_NUMBER", "POWER_ETHERNET_DEFAULT",
              "POWER_AIN_DEFAULT", "POWER_LED_DEFAULT"]
 else:
-    # LabJack T7 and other devices configuration to read
+    # LabJack T7 and T8 configuration to read
     names = ["PRODUCT_ID", "HARDWARE_VERSION", "FIRMWARE_VERSION",
              "BOOTLOADER_VERSION", "WIFI_VERSION", "SERIAL_NUMBER",
              "POWER_ETHERNET_DEFAULT", "POWER_WIFI_DEFAULT",
