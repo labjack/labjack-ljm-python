@@ -310,7 +310,7 @@ def openS(deviceType="ANY", connectionType="ANY", identifier="ANY"):
     Args:
         deviceType: A string containing the type of the device to be
             connected, optionally prepended by "LJM_dt". Possible values
-            include "ANY", "T4", "T7", and "DIGIT".
+            include "ANY", "T4", "T7", and "T8".
         connectionType: A string containing the type of the connection
             desired, optionally prepended by "LJM_ct". Possible values
             include "ANY", "USB", "TCP", "ETHERNET", and "WIFI".
@@ -350,8 +350,8 @@ def open(deviceType=constants.ctANY, connectionType=constants.ctANY, identifier=
     Args:
         deviceType: An integer containing the type of the device to be
             connected (labjack.ljm.constants.dtT4,
-            labjack.ljm.constants.dtT7, labjack.ljm.constants.dtANY,
-            etc.).
+            labjack.ljm.constants.dtT7, labjack.ljm.constants.dtT8,
+            labjack.ljm.constants.dtANY, etc.).
         connectionType: An integer containing the type of connection
             desired (labjack.ljm.constants.ctUSB,
             labjack.ljm.constants.ctTCP, labjack.ljm.constants.ctANY,

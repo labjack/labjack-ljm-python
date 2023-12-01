@@ -26,8 +26,8 @@ CLASSIFIERS = [
     ]
 
 setup(name="labjack-ljm",
-      version='1.21.0',
-      description='LJM library Python wrapper for LabJack T7 and T4.',
+      version='1.23.0',
+      description='LJM library Python wrapper for LabJack T4, T7 and T8.',
       url='https://labjack.com/support/software/examples/ljm/python',
       author='LabJack Corporation',
       author_email="support@labjack.com",

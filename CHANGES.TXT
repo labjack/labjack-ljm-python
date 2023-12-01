@@ -1,5 +1,13 @@
 Version History
 ---------------
+1.23.0 (12/01/2023)
+ - Updated functions, constants and errorcodes to LJM v1.23.
+ - Updates to examples (exception note, T8 updates, clean up and fixes).
+ - Added asynch.py, read_LJM_config.py, simple_log.py, 
+   stream_external_clock.py, thermocouple_example_ain_ef.py,
+   thermocouple_example_inamp.py examples.
+ - Added Conda information to the README.TXT.
+
 1.21.0 (06/17/2020)
  - Added a Lua example folder and lua_execution_control.py
 

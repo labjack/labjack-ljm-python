@@ -1,10 +1,10 @@
-labjack-ljm : LJM library Python wrapper for LabJack T8, T7 and T4
-11/20/2020
+labjack-ljm : LJM library Python wrapper for LabJack T4, T7 and T8
+12/01/2023
 support@labjack.com
 
 
 The Python wrapper package, modules and examples for the cross-platform LJM
-library, which supports the LabJack T8, T7 and T4.
+library, which supports the LabJack T4, T7 and T8.
 
 
 Installation Requirements:
@@ -107,7 +107,7 @@ LJM library documentation can be found here:
 
     https://labjack.com/support/software/api/ljm
 
-T7 and T4 documentation can be found here:
+T4, T7 and T8 documentation can be found here:
 
     https://labjack.com/support/datasheets/t-series
 
