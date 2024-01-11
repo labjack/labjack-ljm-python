@@ -99,14 +99,14 @@ else:
     # LabJack T7 and T8 configuration
 
     # AINO:
-    #     Range = +/- 10 V
+    #     Range = 10 (T7 = +/-10 V, T8 = +/-11 V)
     #     Resolution index = 0 (default)
     aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX"]
     aValues = [10, 0]
 
     # Negative channel and settling configurations do not apply to the T8
     if deviceType == ljm.constants.dtT7:
-        #     Negative Channel = 199 (Single-ended)
+        #     Negative Channel = 199 (single-ended)
         #     Settling = 0 (auto)
         aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US"])
         aValues.extend([199, 0])
@@ -134,7 +134,7 @@ while True:
             aNames = ["DAC0", "FIO5"]
         else:
             aNames = ["DAC0", "FIO1"]
-        dacVolt = i % 6.0  # 0-5
+        dacVolt = i % 6.0  # 0 to 5
         fioState = i % 2  # 0 or 1
         aValues = [dacVolt, fioState]
         numFrames = len(aNames)
@@ -142,7 +142,7 @@ while True:
         print("\neWriteNames : " +
               "".join(["%s = %f, " % (aNames[j], aValues[j]) for j in range(numFrames)]))
 
-        # Setup and call eReadNames to read AIN0 and FIO6 (T4) for
+        # Setup and call eReadNames to read AIN0, and FIO6 (T4) or
         # FIO2 (T7 and T8).
         if deviceType == ljm.constants.dtT4:
             aNames = ["AIN0", "FIO6"]
@@ -165,7 +165,6 @@ while True:
     except KeyboardInterrupt:
         break
     except Exception:
-        import sys
         print(sys.exc_info()[1])
         break
 
