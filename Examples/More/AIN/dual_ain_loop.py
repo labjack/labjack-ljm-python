@@ -80,7 +80,7 @@ else:
     # LabJack T7 and T8 configuration
 
     # AIN0 and AIN1:
-    #   Range: +/-10.0 V (10.0)
+    #   Range = +/-10.0 V for T7, or +/-11 V for T8 (10.0)
     #   Resolution index = Default (0)
     aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX",
              "AIN1_RANGE", "AIN1_RESOLUTION_INDEX"]
@@ -88,8 +88,8 @@ else:
 
     # Negative channel and settling configurations do not apply to the T8
     if deviceType == ljm.constants.dtT7:
-        #     Negative Channel = 199 (Single-ended)
-        #     Settling = 0 (auto)
+        #   Negative Channel = Single-ended (199)
+        #   Settling, in microseconds = Auto (0)
         aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US",
                        "AIN1_NEGATIVE_CH", "AIN1_SETTLING_US"])
         aValues.extend([199, 0, 199, 0])
