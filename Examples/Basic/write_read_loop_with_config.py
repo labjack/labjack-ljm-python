@@ -39,6 +39,7 @@ Note:
     Python standard documentation.
 """
 import sys
+from time import sleep
 
 from labjack import ljm
 
@@ -74,14 +75,23 @@ deviceType = info[0]
 
 # Setup and call eWriteNames for AIN0 (all devices) and digital I/O (T4 only)
 # configuration.
-if deviceType == ljm.constants.dtT4:
+if deviceType == ljm.constants.dtT8:
+    # LabJack T8 configuration
+
+    # AIN0:
+    #   Range = +/-11.0 V (11)
+    # AIN all resolution index = Default (0)
+    # AIN sampling rate, in Hz = Auto (0)
+    aNames = ["AIN0_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_SAMPLING_RATE_HZ"]
+    aValues = [11, 0, 0]
+elif deviceType == ljm.constants.dtT4:
     # LabJack T4 configuration
 
     # Set FIO5 (DIO5) and FIO6 (DIO6) lines to digital I/O.
-    #     DIO_INHIBIT = 0xF9F, b111110011111.
-    #                   Update only DIO5 and DIO6.
-    #     DIO_ANALOG_ENABLE = 0x000, b000000000000.
-    #                         Set DIO5 and DIO6 to digital I/O (b0).
+    #   DIO_INHIBIT = 0xF9F, b111110011111.
+    #                 Update only DIO5 and DIO6.
+    #   DIO_ANALOG_ENABLE = 0x000, b000000000000.
+    #                       Set DIO5 and DIO6 to digital I/O (b0).
     aNames = ["DIO_INHIBIT", "DIO_ANALOG_ENABLE"]
     aValues = [0xF9F, 0x000]
     numFrames = len(aNames)
@@ -91,25 +101,22 @@ if deviceType == ljm.constants.dtT4:
     #     The T4 only has single-ended analog inputs.
     #     The range of AIN0-AIN3 is +/-10 V.
     #     The range of AIN4-AIN11 is 0-2.5 V.
-    #     Resolution index = 0 (default)
-    #     Settling = 0 (auto)
+    #     Resolution index = Default (0)
+    #     Settling = Auto (0)
     aNames = ["AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US"]
     aValues = [0, 0]
 else:
-    # LabJack T7 and T8 configuration
+    # LabJack T7 configuration
 
     # AINO:
-    #     Range = 10 (T7 = +/-10 V, T8 = +/-11 V)
-    #     Resolution index = 0 (default)
-    aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX"]
-    aValues = [10, 0]
-
-    # Negative channel and settling configurations do not apply to the T8
-    if deviceType == ljm.constants.dtT7:
-        #     Negative Channel = 199 (single-ended)
-        #     Settling = 0 (auto)
-        aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US"])
-        aValues.extend([199, 0])
+    #     Range = +/-10.0 V (10)
+    #     Resolution index = Default (0)
+    #     Negative Channel = Single-ended (199)
+    #     Settling = Auto (0)
+    aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX", "AIN0_NEGATIVE_CH",
+              "AIN0_SETTLING_US"]
+    aValues = [10, 0, 199,
+               0]
 
 numFrames = len(aNames)
 ljm.eWriteNames(handle, numFrames, aNames, aValues)
@@ -117,6 +124,10 @@ ljm.eWriteNames(handle, numFrames, aNames, aValues)
 print("\nSet configuration:")
 for i in range(numFrames):
     print("    %s : %f" % (aNames[i], aValues[i]))
+
+if deviceType == ljm.constants.dtT8:
+    # Delay for updated settings to take effect on the T8.
+    sleep(0.050)
 
 print("\nStarting %s read loops.%s\n" % (str(loopAmount), loopMessage))
 i = 0

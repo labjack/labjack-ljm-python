@@ -67,32 +67,43 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Setup and call eWriteNames to configure AIN0 and AIN1 on the LabJack.
-if deviceType == ljm.constants.dtT4:
+if deviceType == ljm.constants.dtT8:
+    # LabJack T8 configuration
+    
+    # AIN0 and AIN1:
+    #   Range = +/-11 V (11)
+    # AIN all resolution index = Default (0)
+    # AIN sampling rate, in Hz = Auto (0)
+    aNames = ["AIN0_RANGE", "AIN1_RANGE",
+              "AIN_ALL_RESOLUTION_INDEX", "AIN_SAMPLING_RATE_HZ"]
+    aValues = [11, 11,
+               0, 0]
+elif deviceType == ljm.constants.dtT4:
     # LabJack T4 configuration
 
     # AIN0 and AIN1:
     #   Resolution index = Default (0)
     #   Settling, in microseconds = Auto (0)
     aNames = ["AIN0_RESOLUTION_INDEX", "AIN0_SETTLING_US",
-             "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
-    aValues = [0, 0, 0, 0]
+              "AIN1_RESOLUTION_INDEX", "AIN1_SETTLING_US"]
+    aValues = [0, 0,
+               0, 0]
 else:
-    # LabJack T7 and T8 configuration
+    # LabJack T7 configuration
 
     # AIN0 and AIN1:
-    #   Range = +/-10.0 V for T7, or +/-11 V for T8 (10.0)
+    #   Range = +/-10.0 V (10)
     #   Resolution index = Default (0)
+    #   Negative Channel = Single-ended (199)
+    #   Settling, in microseconds = Auto (0)
     aNames = ["AIN0_RANGE", "AIN0_RESOLUTION_INDEX",
-             "AIN1_RANGE", "AIN1_RESOLUTION_INDEX"]
-    aValues = [10.0, 0, 10.0, 0]
-
-    # Negative channel and settling configurations do not apply to the T8
-    if deviceType == ljm.constants.dtT7:
-        #   Negative Channel = Single-ended (199)
-        #   Settling, in microseconds = Auto (0)
-        aNames.extend(["AIN0_NEGATIVE_CH", "AIN0_SETTLING_US",
-                       "AIN1_NEGATIVE_CH", "AIN1_SETTLING_US"])
-        aValues.extend([199, 0, 199, 0])
+              "AIN0_NEGATIVE_CH", "AIN0_SETTLING_US",
+              "AIN1_RANGE", "AIN1_RESOLUTION_INDEX",
+              "AIN1_NEGATIVE_CH", "AIN1_SETTLING_US"]
+    aValues = [10, 0,
+               199, 0,
+               10, 0,
+               199, 0]
 
 numFrames = len(aNames)
 ljm.eWriteNames(handle, numFrames, aNames, aValues)
@@ -100,6 +111,10 @@ ljm.eWriteNames(handle, numFrames, aNames, aValues)
 print("\nSet configuration:")
 for i in range(numFrames):
     print("    %s : %f" % (aNames[i], aValues[i]))
+
+if deviceType == ljm.constants.dtT8:
+    # Delay for updated settings to take effect on the T8.
+    time.sleep(0.050)
 
 # Read AIN0 and AIN1 from the LabJack with eReadNames in a loop.
 numFrames = 2
