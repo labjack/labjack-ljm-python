@@ -103,7 +103,7 @@ aNames = ["DIO_EF_CLOCK0_ENABLE",
           "DIO%i_EF_ENABLE" % pwmDIO, "DIO%i_EF_ENABLE" % counterDIO,
           "DIO%i_EF_INDEX" % counterDIO, "DIO%i_EF_ENABLE" % counterDIO]
 aValues = [0, # Disable the DIO_EF clock
-           clockDivisor, rollValue, # Set PWM clock divisor and roll
+           clockDivisor, rollValue, # Set DIO_EF clock divisor and roll for PWM
            1, 0, # Enable the clock and disable any features on the PWM DIO
            0, configA, # Set the PWM feature index and duty cycle (configA)
            1, 0, # Enable the PWM and disable any features on the counter DIO
