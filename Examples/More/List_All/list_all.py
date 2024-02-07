@@ -66,8 +66,7 @@ def displayDeviceInfo(functionName, info):
 info = ljm.listAllS("ANY", "ANY")
 displayDeviceInfo("listAllS", info)
 
-"""
+
 # Find and display LabJack devices with listAll.
-info = ljm.listAll(ljm.constants.ctANY, ljm.constants.ctANY)
-displayDeviceInfo("listAll", info)
-"""
+#info = ljm.listAll(ljm.constants.ctANY, ljm.constants.ctANY)
+#displayDeviceInfo("listAll", info)
