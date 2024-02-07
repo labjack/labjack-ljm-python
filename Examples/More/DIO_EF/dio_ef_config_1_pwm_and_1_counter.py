@@ -88,12 +88,21 @@ elif deviceType == ljm.constants.dtT8:
     coreFreq = 100000000
 
 pwmFreq = 10000 # output frequency (also the number of pulses per second)
+print("Desired output frequency: %f Hz" % (pwmFreq))
 dutyCycle = 25 # % duty cycle
+print("Desired output duty cycle: %f %%" % (dutyCycle))
 clockDivisor = 1 # DIO_EF_CLOCK#_DIVISOR
 
 clockFreq = coreFreq / clockDivisor # DIO_EF_CLOCK frequency
-rollValue = clockFreq / pwmFreq # DIO_EF_CLOCK#_ROLL_VALUE
-configA = dutyCycle * rollValue / 100 # DIO#_EF_CONFIG_A
+# Note: the roll value and config A are integer values. Both represent a number
+# of clock ticks, and you cannot have a fractional number of clock ticks. If
+# your PWM frequency and duty cycle do not divide into an integer value for
+# these settings, your desired settings are not possible and the values will be
+# interpreted as the nearest integer value on the device.
+rollValue = float(clockFreq // pwmFreq) # DIO_EF_CLOCK#_ROLL_VALUE
+print("Actual output frequency: %f Hz" % (clockFreq/rollValue))
+configA = float(dutyCycle * rollValue // 100) # DIO#_EF_CONFIG_A
+print("Actual output duty cycle: %f %%" % (configA*100/rollValue))
 
 
 aNames = ["DIO_EF_CLOCK0_ENABLE",
