@@ -79,13 +79,15 @@ ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_SIZE", 512)
 ljm.eWriteName(handle, "STREAM_OUT0_ENABLE", 1)
 
 # Write values to the stream-out buffer
-ljm.eWriteName(handle, "STREAM_OUT0_LOOP_SIZE", 6)
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 0.0)  # 0.0 V
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 1.0)  # 1.0 V
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 2.0)  # 2.0 V
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 3.0)  # 3.0 V
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 4.0)  # 4.0 V
-ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", 5.0)  # 5.0 V
+
+# 0.0 to 5.0 V with 1.0 V increments. Repeating each voltage 8 times to slow
+# the output frequency, so buffering 48 values.
+outVolts = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+numVoltRepeats = 8
+ljm.eWriteName(handle, "STREAM_OUT0_LOOP_SIZE", len(outVolts)*numVoltRepeats)
+for volt in outVolts:
+    for i in range(numVoltRepeats):
+        ljm.eWriteName(handle, "STREAM_OUT0_BUFFER_F32", volt)
 
 ljm.eWriteName(handle, "STREAM_OUT0_SET_LOOP", 1)
 
@@ -130,12 +132,12 @@ try:
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
-        # 0 (default).
+        # AIN0 and AIN1 ranges are +/-10 V (T7) or +/-11 V (T8).
+        # Stream resolution index is 0 (default).
         aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_RESOLUTION_INDEX"]
         aValues = [10.0, 10.0, 0]
 
-        # Negative channel and settling configurations do not apply to the T8
+        # Negative channel and settling configurations do not apply to the T8.
         if deviceType == ljm.constants.dtT7:
             #     Negative Channel = 199 (Single-ended)
             #     Settling = 0 (auto)
