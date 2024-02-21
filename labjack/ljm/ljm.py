@@ -81,41 +81,36 @@ class LJMError(Exception):
 
 def _loadLibrary():
     """Returns a ctypes pointer to the LJM library."""
+    libraryName = None
     try:
-        libraryName = None
-        try:
-            if(sys.platform.startswith("win32") or sys.platform.startswith("cygwin")):
-                # Windows
-                libraryName = "LabJackM.dll"
-            if(sys.platform.startswith("linux")):
-                # Linux
-                libraryName = "libLabJackM.so"
-            if(sys.platform.startswith("darwin")):
-                # Mac OS X
-                libraryName = "libLabJackM.dylib"
+        if(sys.platform.startswith("win32") or sys.platform.startswith("cygwin")):
+            # Windows
+            libraryName = "LabJackM.dll"
+        if(sys.platform.startswith("linux")):
+            # Linux
+            libraryName = "libLabJackM.so"
+        if(sys.platform.startswith("darwin")):
+            # Mac OS X
+            libraryName = "libLabJackM.dylib"
 
-            if libraryName is not None:
-                if libraryName == "LabJackM.dll" and sys.platform.startswith("win32"):
-                    return ctypes.WinDLL(libraryName)
-                else:
-                    return ctypes.CDLL(libraryName)
-        except Exception:
-            if(sys.platform.startswith("darwin")):
-                # Mac OS X load failed. Try with absolute path.
-                try:
-                    libraryName = "/usr/local/lib/libLabJackM.dylib"
-                    return ctypes.CDLL(libraryName)
-                except Exception:
-                    pass
-            e = sys.exc_info()[1]
-            raise LJMError(errorString="Cannot load the LJM library "+str(libraryName)+". "+str(e))
+        if libraryName is not None:
+            if libraryName == "LabJackM.dll" and sys.platform.startswith("win32"):
+                return ctypes.WinDLL(libraryName)
+            else:
+                return ctypes.CDLL(libraryName)
+    except Exception:
+        if(sys.platform.startswith("darwin")):
+            # Mac OS X load failed. Try with absolute path.
+            try:
+                libraryName = "/usr/local/lib/libLabJackM.dylib"
+                return ctypes.CDLL(libraryName)
+            except Exception:
+                pass
+        e = sys.exc_info()[1]
+        raise LJMError(errorString="Cannot load the LJM library "+str(libraryName)+". "+str(e))
 
-        # Unsupported operating system
-        raise LJMError(errorString="Cannot load the LJM library. Unsupported platform "+sys.platform+".")
-    except LJMError:
-        ljme = sys.exc_info()[1]
-        print(str(type(ljme)) + ": " + str(ljme))
-        return None
+    # Unsupported operating system
+    raise LJMError(errorString="Cannot load the LJM library. Unsupported platform "+sys.platform+".")
 
 
 _staticLib = _loadLibrary()
