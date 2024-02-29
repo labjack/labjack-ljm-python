@@ -1,6 +1,6 @@
 """
-Demonstrates thermocouple configuration and  measurement using our LJTick-InAmp
-(commonly used with the T4)
+Demonstrates thermocouple configuration and measurement using our LJTick-InAmp
+(commonly used with the T4).
 
 Relevant Documentation:
 
@@ -9,24 +9,26 @@ Thermocouple App-Note:
 
 LJM Library:
     LJM Library Installer:
-        https:#labjack.com/support/software/installers/ljm
+        https://labjack.com/support/software/installers/ljm
     LJM Users Guide:
-        https:#labjack.com/support/software/api/ljm
+        https://labjack.com/support/software/api/ljm
     Opening and Closing:
-        https:#labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     Single Value Functions(such as eReadName):
-        https:#labjack.com/support/software/api/ljm/function-reference/single-value-functions
+        https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     TCVoltsToTemp:
-        https:#labjack.com/support/software/api/ud/function-reference/tcvoltstotemp
+        https://labjack.com/support/software/api/ud/function-reference/tcvoltstotemp
 
 T-Series and I/O:
     Modbus Map:
-        https:#labjack.com/support/software/api/modbus/modbus-map
+        https://labjack.com/support/software/api/modbus/modbus-map
     Analog Inputs:
-        https:#labjack.com/support/datasheets/t-series/ain
+        https://labjack.com/support/datasheets/t-series/ain
 """
-from labjack import ljm
 import sys
+
+from labjack import ljm
+
 
 if __name__ == "__main__":
     # Open first found LabJack
