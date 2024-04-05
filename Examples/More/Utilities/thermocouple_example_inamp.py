@@ -51,19 +51,19 @@ if __name__ == "__main__":
     channelName = "AIN0"
 
     # Gain setting on the InAmp
-    gain = 51
+    gain = 201
 
     # Offset setting (V) on the InAmp
     offset = 1.25
     tcType = ljm.constants.ttK  # Type K thermocouple
-    #tcType = ljm.constants.ttB # Type B thermocouple
-    #tcType = ljm.constants.ttE # Type E thermocouple
-    #tcType = ljm.constants.ttJ # Type J thermocouple
-    #tcType = ljm.constants.ttN # Type N thermocouple
-    #tcType = ljm.constants.ttR # Type R thermocouple
-    #tcType = ljm.constants.ttS # Type S thermocouple
-    #tcType = ljm.constants.ttT # Type T thermocouple
-    #tcType = ljm.constants.ttC # Type C thermocouple
+    #tcType = ljm.constants.ttB  # Type B thermocouple
+    #tcType = ljm.constants.ttE  # Type E thermocouple
+    #tcType = ljm.constants.ttJ  # Type J thermocouple
+    #tcType = ljm.constants.ttN  # Type N thermocouple
+    #tcType = ljm.constants.ttR  # Type R thermocouple
+    #tcType = ljm.constants.ttS  # Type S thermocouple
+    #tcType = ljm.constants.ttT  # Type T thermocouple
+    #tcType = ljm.constants.ttC  # Type C thermocouple
 
     # Set the resolution index to the default setting.
     # Default setting has different meanings depending on the device.
@@ -93,11 +93,11 @@ if __name__ == "__main__":
 
     for i in range(numIterations):
         try:
-            # Read the InAmp output voltage and internal temp sensor at once
+            # Read the InAmp output voltage and internal temp sensor at once.
             aNames = [channelName, "TEMPERATURE_DEVICE_K"]
             [voltage, cjTempK] = ljm.eReadNames(handle, len(aNames), aNames)
 
-            # Convert the InAmp output to the raw thermocouple voltage
+            # Convert the InAmp output to the raw thermocouple voltage.
             tcVolts = (voltage - offset) / gain
 
             # Convert voltage to thermocouple temperature (K).
