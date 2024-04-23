@@ -10,16 +10,17 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions (like eReadName):
+    Single Value Functions (such as eWriteName and eReadName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-    Multiple Value Functions(such as eReadNameByteArray):
+    Multiple Value Functions (such as eWriteNameByteArray and
+    eReadNameByteArray):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
 
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
     User-RAM:
-        https://labjack.com/support/datasheets/t-series/lua-scripting#user-ram
+        https://labjack.com/support/datasheets/t-series/lua-scripting
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with

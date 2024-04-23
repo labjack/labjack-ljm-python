@@ -10,9 +10,9 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Multiple Value Functions(such as eWriteNames):
+    Multiple Value Functions (such as eWriteNames and eReadNames):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
-    Timing Functions(such as StartInterval):
+    Timing Functions (such as StartInterval, WaitForNextInterval and CleanInterval):
         https://labjack.com/support/software/api/ljm/function-reference/timing-functions
 
 T-Series and I/O:

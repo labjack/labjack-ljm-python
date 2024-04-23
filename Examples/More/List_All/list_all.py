@@ -12,6 +12,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     ListAll:
         https://labjack.com/support/software/api/ljm/function-reference/ljmlistall
+    ListAllS:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmlistalls
     NumberToIP:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
     Constants:

@@ -11,10 +11,10 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions(such as eReadName):
+    Single Value Functions (such as eWriteName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-    Raw Byte Functions:
-        https://labjack.com/support/software/api/ljm/function-reference/lowlevel-functions/raw-byte-functions
+    Multiple Value Functions (such as eWriteNames, eNames and eAddresses):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
 
 T-Series and I/O:
     Modbus Map:

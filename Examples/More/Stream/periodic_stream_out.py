@@ -2,7 +2,9 @@
 Demonstrates usage of the periodic stream-out functions.
 
 Streams out arbitrary values. These arbitrary values act on DAC0 to cyclically
-increase the voltage from 0 to 2.5.
+increase the voltage from 0 to 2.5 V.
+
+Note: This example requires LJM 1.21 or higher.
 
 Relevant Documentation:
 
@@ -13,7 +15,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    LJM Single Value Functions (like eReadName, eReadAddress):
+    LJM Single Value Functions (such as eReadName and eReadAddress):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
     Stream Functions (eStreamRead, eStreamStart, etc.):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
