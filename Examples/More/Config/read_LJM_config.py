@@ -1,5 +1,6 @@
 """
-Demonstrates ReadLibraryConfigS and ReadLibraryConfigStringS
+Demonstrates ReadLibraryConfigS, ReadLibraryConfigStringS and
+WriteLibraryConfigS usage.
 
 Relevant Documentation:
 
