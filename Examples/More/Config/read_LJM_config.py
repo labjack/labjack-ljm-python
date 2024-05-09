@@ -11,7 +11,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Constants:
         https://labjack.com/support/software/api/ljm/constants
-    Library configuration functions:
+    Library Configuration Functions:
         https://labjack.com/support/software/api/ljm/function-reference/library-configuration-functions
 
 Note:
