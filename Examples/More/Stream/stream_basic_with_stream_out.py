@@ -18,7 +18,11 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
-    Stream Functions (eStreamRead, eStreamStart, etc.):
+    eReadName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmereadname
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    Stream Functions (such as eStreamRead, eStreamStart and eStreamStop):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
 
 T-Series and I/O:
@@ -26,12 +30,10 @@ T-Series and I/O:
         https://labjack.com/support/software/api/modbus/modbus-map
     Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Stream-Out:
+        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
-    Stream-Out:
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
-    Digital I/O:
-        https://labjack.com/support/datasheets/t-series/digital-io
     DAC:
         https://labjack.com/support/datasheets/t-series/dac
 

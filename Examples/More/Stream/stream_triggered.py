@@ -1,6 +1,6 @@
 """
 Demonstrates triggered stream on DIO0 / FIO0.
-Note: The T4 is not supported for this example
+Note: The T4 is not supported for this example.
 
 Relevant Documentation:
 
@@ -13,24 +13,30 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     NamesToAddresses:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
-    Stream Functions (eStreamRead, eStreamStart, etc.):
-        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
-    Single Value Functions (such as eReadName):
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    Single Value Functions (such as eWriteName and eReadName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-    Library Configuration Functions:
+    Library Configuration Functions (such as WriteLibraryConfigS):
         https://labjack.com/support/software/api/ljm/function-reference/library-configuration-functions
+    Stream Functions (such as eStreamRead, eStreamStart and eStreamStop):
+        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
 
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
     Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
-    Stream Mode (triggered):
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode#triggered
+    Special Stream Modes (such as triggered):
+        https://support.labjack.com/docs/3-2-2-special-stream-modes-t-series-datasheet
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
     Digital I/O:
         https://labjack.com/support/datasheets/t-series/digital-io
+    Extended DIO Features:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features
+    Pulse Width In:
+        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pulse-width
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with

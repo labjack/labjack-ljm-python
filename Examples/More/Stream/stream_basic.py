@@ -12,7 +12,13 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     Constants:
         https://labjack.com/support/software/api/ljm/constants
-    Stream Functions:
+    NamesToAddresses:
+        https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    Stream Functions (such as eStreamStart, eStreamRead and eStreamStop):
         https://labjack.com/support/software/api/ljm/function-reference/stream-functions
 
 T-Series and I/O:

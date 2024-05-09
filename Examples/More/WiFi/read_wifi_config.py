@@ -14,6 +14,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/ljmereadnames
     NumberToIP:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
+    eReadNameString:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmereadnamestring
 
 T-Series and I/O:
     Modbus Map:

@@ -14,6 +14,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
     StreamBurst:
         https://labjack.com/support/software/api/ljm/function-reference/ljmstreamburst
 
@@ -22,6 +24,8 @@ T-Series and I/O:
         https://labjack.com/support/software/api/modbus/modbus-map
     Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Special Stream Modes (such as burst):
+        https://support.labjack.com/docs/3-2-2-special-stream-modes-t-series-datasheet
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
 

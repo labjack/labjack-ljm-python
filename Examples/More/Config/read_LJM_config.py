@@ -1,5 +1,5 @@
 """
-Demonstrates ReadLibraryConfigS and ReadLibraryConfigStringS
+Demonstrates ReadLibraryConfigS and ReadLibraryConfigStringS.
 
 Relevant Documentation:
 
@@ -10,7 +10,7 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Constants:
         https://labjack.com/support/software/api/ljm/constants
-    Library configuration functions:
+    Library Configuration Functions:
         https://labjack.com/support/software/api/ljm/function-reference/library-configuration-functions
 
 """
