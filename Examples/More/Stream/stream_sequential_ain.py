@@ -95,7 +95,8 @@ try:
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # AIN ranges are +/-10 V and stream resolution index is 0 (default).
+        # AIN ranges are +/-10 V (T7) or +/-11 V (T8).
+        # Stream resolution index is 0 (default).
         aNames = ["AIN_ALL_RANGE", "STREAM_RESOLUTION_INDEX"]
         aValues = [10.0, 0]
 
