@@ -61,7 +61,7 @@ aValues = [0, 0,
            0, 0,
            0, 0,
            0, 0,
-           0, 0]  # Set the last WATCHDOG_ENABLE_DEFAULT to 1 to enable
+           0, 0]  # Change the last WATCHDOG_ENABLE_DEFAULT to 1 to enable
 numFrames = len(aNames)
 ljm.eWriteNames(handle, numFrames, aNames, aValues)
 

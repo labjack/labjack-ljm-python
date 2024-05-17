@@ -16,7 +16,7 @@ LJM Library:
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    Hardware Overview(Device Information Registers):
+    Hardware Overview (Device Information Registers):
         https://labjack.com/support/datasheets/t-series/hardware-overview
 
 Note:

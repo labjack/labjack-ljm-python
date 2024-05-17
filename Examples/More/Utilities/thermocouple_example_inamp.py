@@ -14,10 +14,15 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions(such as eReadName):
+    Single Value Functions (such as eWriteName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+    Multiple Value Functions (such as eReadNames):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
     TCVoltsToTemp:
         https://labjack.com/support/software/api/ud/function-reference/tcvoltstotemp
+    Timing Functions (such as StartInterval, WaitForNextInterval and
+    CleanInterval):
+        https://labjack.com/support/software/api/ljm/function-reference/timing-functions
 
 T-Series and I/O:
     Modbus Map:

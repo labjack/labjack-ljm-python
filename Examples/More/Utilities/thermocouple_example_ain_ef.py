@@ -14,8 +14,13 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions (such as eReadName):
+    Single Value Functions (such as eWriteName and eReadName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+    Multiple Value Functions (such as eReadNames):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
+    Timing Functions (such as StartInterval, WaitForNextInterval and
+    CleanInterval):
+        https://labjack.com/support/software/api/ljm/function-reference/timing-functions
 
 T-Series and I/O:
     Modbus Map:
@@ -35,7 +40,6 @@ if __name__ == "__main__":
     handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
     #handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
     #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
-    #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
     #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
 
     info = ljm.getHandleInfo(handle)

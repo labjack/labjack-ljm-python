@@ -10,10 +10,14 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
     eWriteNames:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
     IPToNumber:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmiptonumber
+    NumberToIP:
+        https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
 
 T-Series and I/O:
     Modbus Map:
