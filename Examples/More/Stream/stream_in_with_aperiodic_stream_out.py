@@ -1,5 +1,5 @@
 """
-Demonstrates usage of aperiodic stream-out functions with stream-in
+Demonstrates usage of aperiodic stream-out functions with stream-in.
 
 Streams in while streaming out arbitrary values. These arbitrary stream-out
 values act on DAC0 to cyclically increase the voltage from 0 to 2.5.
