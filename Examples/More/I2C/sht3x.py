@@ -5,6 +5,18 @@ and T8, or FIO4/FIO5/FIO6 for the T4. A write command to set up single shot
 acquisition is performed, then subsequently a read only transaction is
 performed to read sensor data.
 
+Note about the SHT3X sensor:
+
+LabJack firmware has been updated to support SHT3X through SBUS registers. SBUS
+is much easier to use and is the recommended way to interface with the SHT3X
+sensor. Support was added in these firmware versions:
+    T4 v1.0029+
+    T7 v1.0305+
+    T8 v1.0017+
+
+SBUS is documented here:
+    https://support.labjack.com/docs/13-5-sbus-t-series-datasheet
+
 Relevant Documentation:
 
 LJM Library:
