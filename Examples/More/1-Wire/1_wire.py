@@ -1,8 +1,8 @@
 """
 Demonstrates 1-Wire communication with a DS1822 sensor and a LabJack. This
 demonstration:
-  - Searches for and displays the ROM ID and path of the connected 1-Wire device
-    on EIO0.
+  - Searches for and displays the ROM ID and path of the connected 1-Wire
+    device on EIO0.
   - Reads temperature from a DS1822 sensor.
 
 Relevant Documentation:
@@ -14,7 +14,10 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Multiple Value Functions(such as eReadNames):
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    Multiple Value Functions (such as eWriteNames, eReadNames,
+    eWriteNameByteArray and eReadNameByteArray):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
 
 T-Series and I/O:
@@ -91,12 +94,13 @@ aNames = ["ONEWIRE_SEARCH_RESULT_H",
           "ONEWIRE_ROM_BRANCHS_FOUND_H",
           "ONEWIRE_ROM_BRANCHS_FOUND_L"]
 aValues = ljm.eReadNames(handle, len(aNames), aNames)
-romH = aValues[0]
-romL = aValues[1]
-rom = (int(romH)<<8) + int(romL)
-pathH = aValues[2]
-pathL = aValues[3]
-path = (int(pathH)<<8) + int(pathL)
+
+romH = int(aValues[0])
+romL = int(aValues[1])
+rom = (romH<<32) + romL
+pathH = int(aValues[2])
+pathL = int(aValues[3])
+path = (pathH<<32) + pathL
 print("  ROM ID = %d" % rom)
 print("  Path = %d" % path)
 
