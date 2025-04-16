@@ -23,14 +23,10 @@ T-Series and I/O:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
-    Stream-Out:
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
     Digital I/O:
         https://labjack.com/support/datasheets/t-series/digital-io
-    Pulse Out:
-        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pulse-out
-    Stream Mode (externally clocked):
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode#externally-clocked
+    Hardware Overview (such as register SYSTEM_TIMER_20HZ):
+        https://labjack.com/support/datasheets/t-series/hardware-overview
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with
