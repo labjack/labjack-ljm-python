@@ -1,9 +1,21 @@
 """
 Demonstrates I2C communication using a LabJack. The demonstration uses an
-SHT3X temperature and humidity sensor connected to FIO0/FIO1/FIO2 for the T7,
-or FIO4/FIO5/FIO6 for the T4. A write command to set up single shot acquisition
-is performed, then subsequently a read only transaction is performed to read
-sensor data.
+SHT3X temperature and humidity sensor connected to FIO0/FIO1/FIO2 for the T7
+and T8, or FIO4/FIO5/FIO6 for the T4. A write command to set up single shot
+acquisition is performed, then subsequently a read only transaction is
+performed to read sensor data.
+
+Note about the SHT3X sensor:
+
+LabJack firmware has been updated to support SHT3X through SBUS registers. SBUS
+is much easier to use and is the recommended way to interface with the SHT3X
+sensor. Support was added in these firmware versions:
+    T4 v1.0029+
+    T7 v1.0305+
+    T8 v1.0017+
+
+SBUS is documented here:
+    https://support.labjack.com/docs/13-5-sbus-t-series-datasheet
 
 Relevant Documentation:
 
@@ -44,6 +56,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -67,8 +80,7 @@ if deviceType == ljm.constants.dtT4:
     # Use FIO6 for power by setting it to output high
     ljm.eWriteName(handle, "FIO6", 1)
 else:
-    # For the T7 and other devices, using FIO0 and FIO1 for the SCL and SDA
-    # pins.
+    # For the T7 and T8, using FIO0 and FIO1 for the SCL and SDA pins.
     ljm.eWriteName(handle, "I2C_SDA_DIONUM", 1)  # SDA pin number = 1 (FIO1)
     ljm.eWriteName(handle, "I2C_SCL_DIONUM", 0)  # SCL pin number = 0 (FIO0)
     # Use FIO2 for power by setting it to output high
@@ -79,12 +91,12 @@ ljm.eWriteName(handle, "I2C_SPEED_THROTTLE", 65000)  # Speed throttle = 65516 (~
 
 # Options bits:
 #     bit0: Reset the I2C bus.
-#     bit1: Restart w/o stop
+#     bit1: Restart w/o stop.
 #     bit2: Disable clock stretching.
 ljm.eWriteName(handle, "I2C_OPTIONS", 0)  # Options = 0
 
-# The SHT3x address could be 0x44 or 0x45 depending on the address pin voltage
-# A slave address of 0x44 indicates the ADDR pin is connected to a logic low
+# The SHT3x address could be 0x44 or 0x45 depending on the address pin voltage.
+# A slave address of 0x44 indicates the ADDR pin is connected to a logic low.
 ljm.eWriteName(handle, "I2C_SLAVE_ADDRESS", 0x44)
 
 # Start with a single shot write command to the SHT3x sensor.
@@ -98,7 +110,7 @@ aBytes = [0x24, 0x00]
 ljm.eWriteNameByteArray(handle, "I2C_DATA_TX", numBytes, aBytes)
 ljm.eWriteName(handle, "I2C_GO", 1)  # Do the I2C communications.
 
-# The sensor needs at least 15ms for the measurement. Wait 20ms
+# The sensor needs at least 15ms for the measurement. Wait 20ms.
 sleep(0.02)
 
 # Do a read only transaction to obtain the readings

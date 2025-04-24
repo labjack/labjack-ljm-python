@@ -65,8 +65,8 @@ def openDevice(quiet=QUIET_OPEN):
               "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
               (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-    if info[0] == ljm.constants.dtT4:
-        print("The T4 does not support an SD card.")
+    if info[0] == ljm.constants.dtT4 or info[0] == ljm.constants.dtT8:
+        print("The T%d does not support an SD card." % info[0])
         print("Exiting now.")
         exit()
 

@@ -23,14 +23,10 @@ T-Series and I/O:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
-    Stream-Out:
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode/stream-out/stream-out-description
     Digital I/O:
         https://labjack.com/support/datasheets/t-series/digital-io
-    Pulse Out:
-        https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pulse-out
-    Stream Mode (externally clocked):
-        https://labjack.com/support/datasheets/t-series/communication/stream-mode#externally-clocked
+    Hardware Overview (such as register SYSTEM_TIMER_20HZ):
+        https://labjack.com/support/datasheets/t-series/hardware-overview
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with
@@ -179,12 +175,13 @@ if __name__ == "__main__":
             # Enabling internally-clocked stream.
             ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-            # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
-            # 0 (default).
+            # AIN0 range is +/-10 V (T7) or +/-11 V (T8). Stream resolution index
+            # is 0 (default).
             aNames = ["AIN0_RANGE", "STREAM_RESOLUTION_INDEX"]
             aValues = [10.0, 0]
 
-            # Negative channel and settling configurations do not apply to the T8
+            # Negative channel and settling configurations do not apply to the
+            # T8.
             if deviceType == ljm.constants.dtT7:
                 #     Negative Channel = 199 (Single-ended)
                 #     Settling = 0 (auto)
@@ -192,13 +189,14 @@ if __name__ == "__main__":
                 aValues.extend([199, 0])
 
         # Write the analog inputs' negative channels (when applicable), ranges,
-        # stream settling time and stream resolution configuration.
+        # stream settling time (when applicable) and stream resolution
+        # configuration.
         numFrames = len(aNames)
         ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
         t0 = datetime.now()
 
-        # Configure and start stream
+        # Configure and start stream.
         si.scanRate = ljm.eStreamStart(handle, si.scansPerRead, si.numAddresses, si.aScanList, si.scanRate)
         print("\nStream started with a scan rate of %0.0f Hz." % si.scanRate)
 

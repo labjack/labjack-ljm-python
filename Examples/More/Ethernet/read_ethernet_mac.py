@@ -10,6 +10,10 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    eReadAddressByteArray:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmereadaddressbytearray
+    NumberToMAC:
+        https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertomac
 
 T-Series and I/O:
     Modbus Map:

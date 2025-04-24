@@ -1,6 +1,5 @@
 """
-Demonstrates how to configure default power settings on a LabJack.
-Note: The T8 is not supported for this example.
+Demonstrates setting a single DAC on a LabJack.
 
 Relevant Documentation:
 
@@ -11,16 +10,16 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    eWriteNames:
-        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    eWriteName:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    Constants:
+        https://labjack.com/support/software/api/ljm/constants
 
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
-    WiFi:
-        https://labjack.com/support/datasheets/t-series/wifi
-    Ethernet:
-        https://labjack.com/support/datasheets/t-series/ethernet
+    DAC:
+        https://labjack.com/support/datasheets/t-series/dac
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with
@@ -37,6 +36,7 @@ from labjack import ljm
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
+#handle = ljm.openS("T8", "ANY", "ANY")  # T8 device, Any connection, Any identifier
 #handle = ljm.openS("T7", "ANY", "ANY")  # T7 device, Any connection, Any identifier
 #handle = ljm.openS("T4", "ANY", "ANY")  # T4 device, Any connection, Any identifier
 #handle = ljm.open(ljm.constants.dtANY, ljm.constants.ctANY, "ANY")  # Any device, Any connection, Any identifier
@@ -46,17 +46,12 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
       "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
       (info[0], info[1], info[2], ljm.numberToIP(info[3]), info[4], info[5]))
 
-# Setup and call eWriteNames to write config. values to the LabJack.
-numFrames = 4
-names = ["POWER_ETHERNET_DEFAULT", "POWER_WIFI_DEFAULT", "POWER_AIN_DEFAULT",
-         "POWER_LED_DEFAULT"]
-aValues = [1, 0, 1,
-           1]
-ljm.eWriteNames(handle, numFrames, names, aValues)
+# Setup and call eWriteName to set DAC0's voltage.
+name = "DAC0"
+value = 3.5  # 3.5 V
+ljm.eWriteName(handle, name, value)
 
-print("\nSet configuration settings:")
-for i in range(numFrames):
-    print("    %s : %f" % (names[i], aValues[i]))
+print("\n%s set to %0.3f V." % (name, value))
 
 # Close handle
 ljm.close(handle)

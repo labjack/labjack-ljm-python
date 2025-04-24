@@ -15,7 +15,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
-    Multiple Value Functions(such as eWriteNameByteArray):
+    Multiple Value Functions (such as eWriteNameByteArray and
+    eReadNameByteArray):
         https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
 
 T-Series and I/O:

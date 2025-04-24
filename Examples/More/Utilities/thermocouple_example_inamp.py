@@ -1,6 +1,6 @@
 """
-Demonstrates thermocouple configuration and  measurement using our LJTick-InAmp
-(commonly used with the T4)
+Demonstrates thermocouple configuration and measurement using our LJTick-InAmp
+(commonly used with the T4).
 
 Relevant Documentation:
 
@@ -9,24 +9,31 @@ Thermocouple App-Note:
 
 LJM Library:
     LJM Library Installer:
-        https:#labjack.com/support/software/installers/ljm
+        https://labjack.com/support/software/installers/ljm
     LJM Users Guide:
-        https:#labjack.com/support/software/api/ljm
+        https://labjack.com/support/software/api/ljm
     Opening and Closing:
-        https:#labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions(such as eReadName):
-        https:#labjack.com/support/software/api/ljm/function-reference/single-value-functions
+        https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
+    Single Value Functions (such as eWriteName):
+        https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
+    Multiple Value Functions (such as eReadNames):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
     TCVoltsToTemp:
-        https:#labjack.com/support/software/api/ud/function-reference/tcvoltstotemp
+        https://labjack.com/support/software/api/ud/function-reference/tcvoltstotemp
+    Timing Functions (such as StartInterval, WaitForNextInterval and
+    CleanInterval):
+        https://labjack.com/support/software/api/ljm/function-reference/timing-functions
 
 T-Series and I/O:
     Modbus Map:
-        https:#labjack.com/support/software/api/modbus/modbus-map
+        https://labjack.com/support/software/api/modbus/modbus-map
     Analog Inputs:
-        https:#labjack.com/support/datasheets/t-series/ain
+        https://labjack.com/support/datasheets/t-series/ain
 """
-from labjack import ljm
 import sys
+
+from labjack import ljm
+
 
 if __name__ == "__main__":
     # Open first found LabJack
@@ -43,61 +50,68 @@ if __name__ == "__main__":
 
     # Read 10 times
     numIterations = 10
+
     # Take a measurement of a thermocouple connected to AIN0
     # That would be INA of an InAmp connected to the VS/GND/AIN0/AIN1 terminals
     channelName = "AIN0"
+
     # Gain setting on the InAmp
-    gain = 51
+    gain = 201
+
     # Offset setting (V) on the InAmp
     offset = 1.25
-    tcType = ljm.constants.ttK # Type K thermocouple
-    # thermocoupleType = ljm.constants.ttB # Type B thermocouple
-    # thermocoupleType = ljm.constants.ttE # Type E thermocouple
-    # thermocoupleType = ljm.constants.ttJ # Type J thermocouple
-    # thermocoupleType = ljm.constants.ttN # Type N thermocouple
-    # thermocoupleType = ljm.constants.ttR # Type R thermocouple
-    # thermocoupleType = ljm.constants.ttS # Type S thermocouple
-    # thermocoupleType = ljm.constants.ttT # Type T thermocouple
-    # thermocoupleType = ljm.constants.ttC # Type C thermocouple
+    tcType = ljm.constants.ttK  # Type K thermocouple
+    #tcType = ljm.constants.ttB  # Type B thermocouple
+    #tcType = ljm.constants.ttE  # Type E thermocouple
+    #tcType = ljm.constants.ttJ  # Type J thermocouple
+    #tcType = ljm.constants.ttN  # Type N thermocouple
+    #tcType = ljm.constants.ttR  # Type R thermocouple
+    #tcType = ljm.constants.ttS  # Type S thermocouple
+    #tcType = ljm.constants.ttT  # Type T thermocouple
+    #tcType = ljm.constants.ttC  # Type C thermocouple
 
-    # Set the resolution index to the default setting
+    # Set the resolution index to the default setting.
     # Default setting has different meanings depending on the device.
-    # See our AIN documentation (linked above) for more information
+    # See our AIN documentation (linked above) for more information.
     resIndexRegister = "%s_RESOLUTION_INDEX" % channelName
     ljm.eWriteName(handle, resIndexRegister, 0)
 
     # This section is for range and negative channel settings. The T4 does not
-    # support these configurations
+    # support these configurations.
     if deviceType == ljm.constants.dtT7:
         # ±10 V range setting
         rangeRegister = "%s_RANGE" % channelName
         ljm.eWriteName(handle, rangeRegister, 10)
+
         # Set up a single ended measurement
         negChannelValue = ljm.constants.GND
         negChannelRegister = "%s_NEGATIVE_CH" % channelName
         ljm.eWriteName(handle, negChannelRegister, negChannelValue)
     elif deviceType == ljm.constants.dtT8:
-        print("\nThe T8 is not compatible with the InAmp, see our AIN_EF example")
+        print("\nThe T8 is not compatible with the InAmp. See our AIN_EF example.")
         exit(0)
 
     print("\nReading thermocouple temperature %d times...\n" % numIterations)
-    i = 0
     intervalHandle = 1
     # Delay between readings (in microseconds)
     ljm.startInterval(intervalHandle, 1000000)
 
-    while i < numIterations:
+    for i in range(numIterations):
         try:
-            # Read the InAmp output voltage and internal temp sensor at once
+            # Read the InAmp output voltage and internal temp sensor at once.
             aNames = [channelName, "TEMPERATURE_DEVICE_K"]
             [voltage, cjTempK] = ljm.eReadNames(handle, len(aNames), aNames)
-            # Convert the InAmp output to the raw thermocouple voltage
+
+            # Convert the InAmp output to the raw thermocouple voltage.
             tcVolts = (voltage - offset) / gain
+
             # Convert voltage to thermocouple temperature (K).
             tcTempK = ljm.tcVoltsToTemp(tcType, tcVolts, cjTempK)
+
             # Print the temperature read
-            print("%0.3f degrees Kelvin\n" % tcTempK)
-            i = i + 1
+            print("TCTemp = %0.3f K, TCVolts = %0.6f V, CJTemp = %0.3f K\n" %
+                    (tcTempK, tcVolts, cjTempK))
+
             ljm.waitForNextInterval(intervalHandle)
         except Exception:
             print(sys.exc_info()[1])

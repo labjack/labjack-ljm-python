@@ -1,7 +1,7 @@
 """
-Demonstrates how to stream a range of sequential analog inputs using the eStream
-functions. Useful when streaming many analog inputs. AIN channel scan list is
-FIRST_AIN_CHANNEL to FIRST_AIN_CHANNEL + NUMBER_OF_AINS - 1.
+Demonstrates how to stream a range of sequential analog inputs using the
+eStream functions. Useful when streaming many analog inputs. AIN channel scan
+list is FIRST_AIN_CHANNEL to FIRST_AIN_CHANNEL + NUMBER_OF_AINS - 1.
 
 Relevant Documentation:
 
@@ -14,11 +14,13 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
     NamesToAddresses:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
-    Stream Functions (eStreamRead, eStreamStart, etc.):
-        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
-
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
+    Stream Functions (such as eStreamRead, eStreamStart and eStreamStop):
+        https://labjack.com/support/software/api/ljm/function-reference/stream-functions
+   
 T-Series and I/O:
     Modbus Map:
         https://labjack.com/support/software/api/modbus/modbus-map
@@ -26,6 +28,8 @@ T-Series and I/O:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
+    Digital I/O:
+        https://labjack.com/support/datasheets/t-series/digital-io
 
 Note:
     Our Python interfaces throw exceptions when there are any issues with
@@ -91,7 +95,8 @@ try:
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # AIN ranges are +/-10 V and stream resolution index is 0 (default).
+        # AIN ranges are +/-10 V (T7) or +/-11 V (T8).
+        # Stream resolution index is 0 (default).
         aNames = ["AIN_ALL_RANGE", "STREAM_RESOLUTION_INDEX"]
         aValues = [10.0, 0]
 

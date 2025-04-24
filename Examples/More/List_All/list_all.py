@@ -12,6 +12,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     ListAll:
         https://labjack.com/support/software/api/ljm/function-reference/ljmlistall
+    ListAllS:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmlistalls
     NumberToIP:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnumbertoip
     Constants:
@@ -66,8 +68,7 @@ def displayDeviceInfo(functionName, info):
 info = ljm.listAllS("ANY", "ANY")
 displayDeviceInfo("listAllS", info)
 
-"""
+
 # Find and display LabJack devices with listAll.
-info = ljm.listAll(ljm.constants.ctANY, ljm.constants.ctANY)
-displayDeviceInfo("listAll", info)
-"""
+#info = ljm.listAll(ljm.constants.ctANY, ljm.constants.ctANY)
+#displayDeviceInfo("listAll", info)

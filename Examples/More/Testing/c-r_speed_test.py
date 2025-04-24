@@ -11,10 +11,10 @@ LJM Library:
         https://labjack.com/support/software/api/ljm
     Opening and Closing:
         https://labjack.com/support/software/api/ljm/function-reference/opening-and-closing
-    Single Value Functions(such as eReadName):
+    Single Value Functions (such as eWriteName):
         https://labjack.com/support/software/api/ljm/function-reference/single-value-functions
-    Raw Byte Functions:
-    https://labjack.com/support/software/api/ljm/function-reference/lowlevel-functions/raw-byte-functions
+    Multiple Value Functions (such as eWriteNames, eNames and eAddresses):
+        https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions
 
 T-Series and I/O:
     Modbus Map:
@@ -84,7 +84,9 @@ numIterations = 1000  # Number of iterations to perform in the loop
 
 # Analog input settings
 numAIN = 1  # Number of analog inputs to read
+rangeAIN = 10.0  # T7/T8 AIN range. 10 = 10.0 V (T7) or 11.0 V (T8).
 resolutionAIN = 1
+samplingRateAIN = 40000  # Analog input sampling rate in Hz. T8 only.
 
 # Digital settings
 readDigital = False
@@ -100,8 +102,6 @@ useAddresses = True
 # Device specific configuration
 if deviceType == ljm.constants.dtT4:
     # T4 analog input configuration
-    rangeAINHV = 10.0  # HV channels range
-    rangeAINLV = 2.5  # LV channels range
 
     # Configure the channels to analog input or digital I/O
     # Update all digital I/O channels. b1 = Ignored. b0 = Affected.
@@ -116,29 +116,46 @@ if deviceType == ljm.constants.dtT4:
         # b1 = Ignored. b0 = Affected.
         dioInhibit = dioAnalogEnable
         ljm.eWriteName(handle, "DIO_INHIBIT", dioInhibit)
-else:
-    # T7 and T8 analog input configuration
-    rangeAIN = 10.0
 
 if numAIN > 0:
     # Configure analog input settings
     numFrames = 0
     aNames = []
     aValues = []
-    for i in range(numAIN):
-        numFrames += 2
-        aNames.append("AIN%i_RANGE" % i)
-        if deviceType == ljm.constants.dtT4:
-            if i < 4:
-                # Set the HV range
-                aValues.append(rangeAINHV)
-            else:
-                # Set the LV range
-                aValues.append(rangeAINLV)
-        else:
-            aValues.append(rangeAIN)
-        aNames.append("AIN%i_RESOLUTION_INDEX" % i)
+
+    if deviceType == ljm.constants.dtT8:
+        # Configure the T8 analog input resolution index, sampling rate and
+        # range settings.
+        numFrames = 2 + max(0, numAIN)
+
+        # The T8 can only set the global resolution index.
+        aNames.append("AIN_ALL_RESOLUTION_INDEX")
         aValues.append(resolutionAIN)
+
+        # When setting a resolution index other than 0 (auto), set a valid
+        # sample rate for the resolution.
+        aNames.append("AIN_SAMPLING_RATE_HZ")
+        aValues.append(samplingRateAIN)
+
+        for i in range(numAIN):
+            aNames.append("AIN%i_RANGE" % i)
+            aValues.append(rangeAIN)
+    elif deviceType == ljm.constants.dtT4:
+        # Configure T4 analog input input resolution index.
+        # Range is not applicable.
+        numFrames = max(0, numAIN)
+        for i in range(numAIN):
+            aNames.append("AIN%d_RESOLUTION_INDEX" % i)
+            aValues.append(resolutionAIN)
+    else:
+        # Configure T7 analog input resolution index and range settings.
+        numFrames = max(0, numAIN * 2)
+        for i in range(numAIN):
+            aNames.append("AIN%d_RESOLUTION_INDEX" % i)
+            aValues.append(resolutionAIN)
+            aNames.append("AIN%d_RANGE" % i)
+            aValues.append(rangeAIN)
+
     ljm.eWriteNames(handle, numFrames, aNames, aValues)
 
 # Initialize and configure eNames parameters for loop's eNames call
@@ -151,7 +168,14 @@ aValues = []
 # Add analog input reads (AIN 0 to numAIN-1)
 for i in range(numAIN):
     numFrames += 1
-    aNames.append("AIN%i" % i)
+    if deviceType != ljm.constants.dtT8 or i == 0:
+        # For the T7 and T4 analog inputs, and the first T8 analog input,
+        # use the the AIN# registers.
+        aNames.append("AIN%i" % i)
+    else:
+        # For the T8 and its remaining analog inputs, use the AIN#_CAPTURE
+        # registers for simultaneous readings.
+        aNames.append("AIN%i_CAPTURE" % i)
     aWrites.append(ljm.constants.READ)
     aNumValues.append(1)
     aValues.append(0)

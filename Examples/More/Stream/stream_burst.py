@@ -14,6 +14,8 @@ LJM Library:
         https://labjack.com/support/software/api/ljm/function-reference/utility/ljmnamestoaddresses
     eWriteName:
         https://labjack.com/support/software/api/ljm/function-reference/ljmewritename
+    eWriteNames:
+        https://labjack.com/support/software/api/ljm/function-reference/ljmewritenames
     StreamBurst:
         https://labjack.com/support/software/api/ljm/function-reference/ljmstreamburst
 
@@ -22,6 +24,8 @@ T-Series and I/O:
         https://labjack.com/support/software/api/modbus/modbus-map
     Stream Mode:
         https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    Special Stream Modes (such as burst):
+        https://support.labjack.com/docs/3-2-2-special-stream-modes-t-series-datasheet
     Analog Inputs:
         https://labjack.com/support/datasheets/t-series/ain
 
@@ -82,12 +86,12 @@ try:
         # Enabling internally-clocked stream.
         ljm.eWriteName(handle, "STREAM_CLOCK_SOURCE", 0)
 
-        # AIN0 and AIN1 ranges are +/-10 V and stream resolution index is
-        # 0 (default).
+        # AIN0 and AIN1 ranges are +/-10 V (T7) or +/-11 V (T8).
+        # Stream resolution index is 0 (default).
         aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_RESOLUTION_INDEX"]
         aValues = [10.0, 10.0, 0]
 
-        # Negative channel and settling configurations do not apply to the T8
+        # Negative channel and settling configurations do not apply to the T8.
         if deviceType == ljm.constants.dtT7:
             #     Negative Channel = 199 (Single-ended)
             #     Settling = 0 (auto)
