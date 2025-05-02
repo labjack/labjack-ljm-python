@@ -1,5 +1,8 @@
 Version History
 ---------------
+1.23.0 (04/24/2025)
+ - Updated examples. T8 added to all examples.
+
 1.23.0 (12/01/2023)
  - Updated functions, constants and errorcodes to LJM v1.23.
  - Updates to examples (exception note, T8 updates, clean up and fixes).
