@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Demonstrates thermocouple configuration and measurement using our LJTick-InAmp
 (commonly used with the T4).
@@ -51,14 +52,14 @@ if __name__ == "__main__":
     # Read 10 times
     numIterations = 10
 
-    # Take a measurement of a thermocouple connected to AIN0
-    # That would be INA of an InAmp connected to the VS/GND/AIN0/AIN1 terminals
-    channelName = "AIN0"
+    # Take a measurement of a thermocouple connected to AIN6
+    # That would be INA of an InAmp connected to the VS/GND/AIN6/AIN7 terminals
+    channelName = "AIN6"
 
-    # Gain setting on the InAmp
+    # Gain of the InAmp
     gain = 201
 
-    # Offset setting (V) on the InAmp
+    # Offset (V) of the InAmp
     offset = 1.25
     tcType = ljm.constants.ttK  # Type K thermocouple
     #tcType = ljm.constants.ttB  # Type B thermocouple

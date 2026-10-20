@@ -1,5 +1,8 @@
 Version History
 ---------------
+1.23.05 (10/20/2026)
+ - Updated thermocouple examples.
+
 1.23.0 (04/24/2025)
  - Updated examples. T8 added to all examples.
 
