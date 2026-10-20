@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Demonstrates thermocouple configuration and measurement using the thermocouple
 AIN_EF (T7/T8 only).

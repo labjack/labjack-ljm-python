@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Demonstrates thermocouple configuration and measurement using our LJTick-InAmp
 (commonly used with the T4).
